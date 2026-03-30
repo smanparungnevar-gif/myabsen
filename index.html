@@ -942,7 +942,7 @@
                         <div class="admin-header">
                             <div class="admin-welcome">
                                 <h2>Dashboard Admin</h2>
-                                <p>Ringkasan statistik seluruh karyawan</p>
+                                <p>Ringkasan statistik seluruh Siswa/karyawan</p>
                             </div>
                             <div class="admin-date-filter"><select class="select-filter">
                                     <option>Hari Ini</option>
@@ -954,7 +954,7 @@
                             <div class="admin-stat-card">
                                 <div class="stat-icon employees"><i class="fas fa-users"></i></div>
                                 <div class="stat-details"><span class="stat-number" id="total-employees">0</span><span
-                                        class="stat-label">Total Karyawan</span></div>
+                                        class="stat-label">Total Siswa/Karyawan</span></div>
                             </div>
                             <div class="admin-stat-card">
                                 <div class="stat-icon present"><i class="fas fa-user-check"></i></div>
@@ -1013,7 +1013,7 @@
                             </div>
                             <div class="admin-info-card">
                                 <div class="card-header">
-                                    <h3>Karyawan Online</h3><span class="online-count"><span id="online-count">0</span>
+                                    <h3>Siswa/Karyawan Online</h3><span class="online-count"><span id="online-count">0</span>
                                         online</span>
                                 </div>
                                 <div class="online-users-list" id="admin-online-users"></div>
@@ -1027,16 +1027,16 @@
                     <div class="employees-container">
                         <div class="employees-header">
                             <div class="employees-title">
-                                <h2>Data Karyawan</h2>
-                                <p>Kelola data dan informasi karyawan</p>
+                                <h2>Data Siswa/Karyawan</h2>
+                                <p>Kelola data dan informasi Siswa/karyawan</p>
                             </div>
                             <div class="employees-actions"><button class="btn-primary" id="btn-add-employee"><i
-                                        class="fas fa-plus"></i><span>Tambah Karyawan</span></button></div>
+                                        class="fas fa-plus"></i><span>Tambah Siswa/Karyawan</span></button></div>
                         </div>
                         <div class="employees-filters-card">
                             <div class="employees-filters">
                                 <div class="filter-group"><i class="fas fa-search"></i><input type="text"
-                                        id="employee-search" placeholder="Cari nama karyawan..."></div>
+                                        id="employee-search" placeholder="Cari nama siswa/karyawan..."></div>
                                 <div class="filter-group">
                                     <select id="dept-filter">
                                         <option value="">Semua Departemen</option>
@@ -1062,7 +1062,7 @@
                                 <table class="employees-table" id="employees-table">
                                     <thead>
                                         <tr>
-                                            <th>Karyawan</th>
+                                            <th>Siswa/Karyawan</th>
                                             <th>ID</th>
                                             <th>Departemen</th>
                                             <th>Jabatan</th>
@@ -1093,7 +1093,7 @@
                         <div class="reports-header">
                             <div class="reports-title">
                                 <h2>Rekap Absensi</h2>
-                                <p>Rekap kehadiran seluruh karyawan</p>
+                                <p>Rekap kehadiran seluruh siswa/karyawan</p>
                             </div>
                             <div class="reports-actions"><button class="btn-secondary" id="btn-export-attendance"><i
                                         class="fas fa-download"></i><span>Export Excel</span></button><button
@@ -1304,10 +1304,10 @@
                                     </select>
                                 </div>
                                 <div class="filter-group search-group">
-                                    <label>Cari Karyawan</label>
+                                    <label>Cari Siswa/Karyawan</label>
                                     <div class="search-input-wrapper">
                                         <i class="fas fa-search"></i>
-                                        <input type="text" id="schedule-employee-search" placeholder="Nama karyawan...">
+                                        <input type="text" id="schedule-employee-search" placeholder="Nama siswa/karyawan...">
                                     </div>
                                 </div>
                             </div>
@@ -1327,7 +1327,7 @@
                                 <table class="shift-schedule-table" id="shift-schedule-table">
                                     <thead>
                                         <tr class="header-row">
-                                            <th class="employee-header sticky-col">Karyawan</th>
+                                            <th class="employee-header sticky-col">Siswa/Karyawan</th>
                                             <!-- Dates will be generated by JS -->
                                         </tr>
                                     </thead>
@@ -1343,7 +1343,7 @@
                                 <h4>Ringkasan Bulan Ini</h4>
                                 <div class="summary-stats" id="schedule-summary">
                                     <div class="summary-item">
-                                        <span class="summary-label">Total Karyawan</span>
+                                        <span class="summary-label">Total Siswa/Karyawan</span>
                                         <span class="summary-value" id="summary-total-employees">0</span>
                                     </div>
                                     <div class="summary-item">
@@ -1470,18 +1470,18 @@
         </nav>
     </div>
 
-    <!-- Modal Tambah Karyawan -->
+    <!-- Modal Tambah Siswa/Karyawan -->
     <div class="modal-overlay" id="modal-add-employee" style="display: none;">
         <div class="modal-container">
             <div class="modal-header">
-                <h3>Tambah Karyawan Baru</h3>
+                <h3>Tambah Siswa/Karyawan Baru</h3>
                 <button class="btn-close-modal" id="btn-close-modal"><i class="fas fa-times"></i></button>
             </div>
             <form id="form-add-employee" class="modal-form">
                 <div class="form-row two-col">
                     <div class="form-group">
                         <label for="emp-name">Nama Lengkap</label>
-                        <input type="text" id="emp-name" placeholder="Nama karyawan" required>
+                        <input type="text" id="emp-name" placeholder="Nama Siswa/karyawan" required>
                     </div>
                     <div class="form-group">
                         <label for="emp-email">Email</label>
