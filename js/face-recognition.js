@@ -1,5 +1,5 @@
 /**
- * Portal Karyawan - Face Recognition & Location
+ * SMAN 1 PARUNG - Face Recognition & Location
  * Face detection and geolocation functionality
  */
 
