@@ -1,5 +1,5 @@
 /**
- * Portal Karyawan - Authentication
+ * SMAN 1 PARUNG - Authentication
  * Handle login/logout and session management
  */
 
@@ -213,7 +213,7 @@ const auth = {
         document.getElementById('profile-avatar').src = getAvatarUrl(user);
         document.getElementById('profile-name').textContent = user.name || '-';
         document.getElementById('profile-email').textContent = user.email || '-';
-        document.getElementById('profile-role').textContent = user.role === 'admin' ? 'Administrator' : 'Karyawan';
+        document.getElementById('profile-role').textContent = user.role === 'admin' ? 'Administrator' : 'Siswa/Karyawan';
 
         // Employee-specific fields
         const empFields = document.getElementById('profile-employee-fields');
