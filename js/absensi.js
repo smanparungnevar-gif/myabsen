@@ -1,5 +1,5 @@
 /**
- * Portal Karyawan - Absensi
+ * SMAN 1 PARUNG - Absensi
  * Attendance/Clock In-Out functionality
  */
 
