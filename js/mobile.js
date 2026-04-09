@@ -1,5 +1,5 @@
 /**
- * Portal Karyawan - Mobile Responsive
+ * SMAN 1 PARUNG - Mobile Responsive
  * Mobile-specific functionality
  */
 
