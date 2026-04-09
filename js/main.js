@@ -1,5 +1,5 @@
 /**
- * Portal Karyawan - Main JavaScript
+ * SMAN 1 PARUNG - Main JavaScript
  * Utility functions and shared functionality
  */
 
