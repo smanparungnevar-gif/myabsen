@@ -1,5 +1,5 @@
 /**
- * Portal Karyawan - Settings
+ * SMAN 1 PARUNG - Settings
  * Admin settings functionality
  */
 
