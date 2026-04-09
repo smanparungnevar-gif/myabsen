@@ -1,5 +1,5 @@
 /**
- * Portal Karyawan - API Layer
+ * SMAN 1 PARUNG - API Layer
  * Abstraction layer for backend communication
  * 
  * Mode:
