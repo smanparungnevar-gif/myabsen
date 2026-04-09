@@ -1,5 +1,5 @@
 /**
- * Portal Karyawan - Router
+ * SMAN 1 PARUNG - Router
  * Simple SPA Router for vanilla JS
  */
 
