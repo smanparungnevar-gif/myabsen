@@ -1,5 +1,5 @@
 /**
- * Portal Karyawan - Admin Dashboard
+ * SMAN 1 PARUNG - Admin Dashboard
  * Admin dashboard with employee statistics
  */
 
