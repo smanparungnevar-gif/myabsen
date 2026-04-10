@@ -1,5 +1,5 @@
 /**
- * Portal Karyawan - Izin/Sakit
+ * Portal Sekolah - Izin/Sakit
  * Leave permission functionality with face recognition
  */
 
