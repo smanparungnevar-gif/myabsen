@@ -1,5 +1,5 @@
 /**
- * Portal Karyawan - Admin Employees
+ * Portal Sekolah - Admin Employees
  * Employee management for admin
  */
 
