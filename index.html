@@ -1042,17 +1042,17 @@
         const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxVbkDUXcDsfy58-NYGO6EZrpfflT8O-_hg7d8o7hYsXncaj2s8XjW83hl3VAMyKyeW/exec";
         
         // Konfigurasi Geofencing SMAN 1 Parung
-        const SCHOOL_LAT = -6.4258; 
-        const SCHOOL_LNG = 106.7322;
-        const ABSENCE_RADIUS_METERS = 100;
+        const SCHOOL_LAT = -6.436911864115213; 
+        const SCHOOL_LNG = 106.71110596376253;
+        const ABSENCE_RADIUS_METERS = 150;
 
         // ================================================================
         // KONFIGURASI JADWAL PRESENSI PER JENJANG KELAS (X, XI, XII)
         // Kelas XII TIDAK diubah - tetap memakai nilai/aturan asli aplikasi.
         // ================================================================
         const JADWAL_PRESENSI = {
-            'X':   { masukBuka: 5 * 60,  masukBatas: 6 * 60 + 15,  pulangBuka: 12 * 60 },
-            'XI':  { masukBuka: 11 * 60, masukBatas: 12 * 60 + 15, pulangBuka: 17 * 60 }
+            'X':   { masukBuka: 5 * 60,  masukBatas: 6 * 60 + 30,  pulangBuka: 12 * 60 },
+            'XI':  { masukBuka: 10 * 60, masukBatas: 12 * 60 + 30, pulangBuka: 17 * 60 }
         };
 
         function getJenjangKelas(kelasStr) {
@@ -1096,7 +1096,7 @@
             if (!currentSiswa || currentSiswa.role === 'walikelas') return;
             const labelMasuk = document.getElementById('label-batas-masuk-jam');
             const labelPulang = document.getElementById('label-batas-pulang-jam');
-            if (labelMasuk) labelMasuk.innerText = `${formatMenitKeJam(getBatasMasukMenit(currentSiswa.kelas, 6 * 60 + 15))} WIB`;
+            if (labelMasuk) labelMasuk.innerText = `${formatMenitKeJam(getBatasMasukMenit(currentSiswa.kelas, 6 * 60 + 30))} WIB`;
             if (labelPulang) labelPulang.innerText = `${formatMenitKeJam(getPulangBukaMenit(currentSiswa.kelas, 15 * 60))} WIB`;
         }
 
@@ -2818,7 +2818,7 @@
             const bln = document.getElementById('rekap-bulan').value;
             const tgl = document.getElementById('rekap-tanggal').value;
             const userAbsens = localDb.presensi.filter(p => p.nis === currentSiswa.nis);
-            const batasMasukSiswaIni = getBatasMasukMenit(currentSiswa.kelas, 6 * 60 + 15);
+            const batasMasukSiswaIni = getBatasMasukMenit(currentSiswa.kelas, 6 * 60 + 30);
 
             const filtered = userAbsens.filter(p => {
                 const parts = p.tanggal.split('-');
