@@ -493,7 +493,17 @@
                     <h4 class="text-xs font-bold text-slate-555 uppercase tracking-wider flex items-center gap-1.5">
                         <i class="fa-solid fa-envelope-open-text text-teal-600"></i> Persetujuan Dispensasi & Izin
                     </h4>
-                    <span class="text-[9px] bg-amber-500 text-white px-2.5 py-0.5 rounded-full font-bold uppercase tracking-wider">Verifikasi</span>
+                    <div class="flex items-center gap-2">
+                        <button type="button" onclick="fetchDatabaseState(true)" title="Tarik Data Terbaru" class="w-7 h-7 rounded-full bg-teal-50 hover:bg-teal-100 text-teal-650 flex items-center justify-center transition-all">
+                            <i class="fa-solid fa-rotate sync-icon-spin text-[10px]"></i>
+                        </button>
+                        <span class="text-[9px] bg-amber-500 text-white px-2.5 py-0.5 rounded-full font-bold uppercase tracking-wider">Verifikasi</span>
+                    </div>
+                </div>
+                <div class="flex gap-1 bg-slate-100 p-1 rounded-2xl text-[10px] font-bold">
+                    <button type="button" onclick="setWaliApprovalKategoriFilter('Semua')" id="wali-approval-f-semua" class="flex-1 py-1.5 text-center bg-white rounded-xl shadow-sm text-slate-800">Semua</button>
+                    <button type="button" onclick="setWaliApprovalKategoriFilter('Tidak Hadir')" id="wali-approval-f-tidakhadir" class="flex-1 py-1.5 text-center rounded-xl text-indigo-600">Sakit/Izin/Dispen</button>
+                    <button type="button" onclick="setWaliApprovalKategoriFilter('Kondisional')" id="wali-approval-f-kondisional" class="flex-1 py-1.5 text-center rounded-xl text-sky-600">Terlambat/Pulang</button>
                 </div>
                 <div id="wali-izin-list-container" class="space-y-3 divide-y divide-slate-50">
                     <div class="text-center py-8 text-slate-400 text-xs">Tidak ada pengajuan izin tertunda.</div>
@@ -986,18 +996,15 @@
                 </div>
             </div>
 
-            <div id="profil-card-tautan-link" class="bg-white p-4 rounded-3xl border border-slate-100 shadow-sm space-y-3">
-                <h5 class="text-xs font-bold text-slate-400 uppercase tracking-wider">Tautan Link</h5>
-                <div class="space-y-2">
-                    <div class="relative">
-                        <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center text-slate-400">
-                            <i class="fa-solid fa-link"></i>
-                        </span>
-                        <input type="url" id="profil-tautan-link" placeholder="https://contoh-tautan-anda.com" class="w-full pl-11 pr-4 py-3.5 bg-white border border-slate-200 rounded-2xl focus:ring-2 focus:ring-emerald-500 focus:border-transparent outline-none transition text-xs">
-                    </div>
-                    <button onclick="saveTautanLink()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 rounded-2xl transition-all text-xs flex items-center justify-center gap-2">
-                        <i class="fa-solid fa-floppy-disk"></i> Simpan Tautan
-                    </button>
+            <div id="profil-card-tautan-link" class="bg-white p-4 rounded-3xl border border-slate-100 shadow-sm space-y-3 hidden">
+                <h5 class="text-xs font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
+                    <i class="fa-solid fa-link"></i> Tautan Dari Administrator
+                </h5>
+                <div id="profil-tautan-link-display" class="space-y-2">
+                    <p id="profil-tautan-link-judul" class="text-sm font-extrabold text-slate-800">-</p>
+                    <a id="profil-tautan-link-btn" href="#" target="_blank" rel="noopener noreferrer" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 rounded-2xl transition-all text-xs flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-arrow-up-right-from-square"></i> Buka Tautan
+                    </a>
                 </div>
             </div>
 
@@ -1197,6 +1204,32 @@
 
             <div class="bg-white p-4 rounded-3xl border border-slate-100 shadow-sm space-y-3">
                 <h4 class="text-xs font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
+                    <i class="fa-solid fa-link text-indigo-600"></i> Tautan Link untuk Siswa
+                </h4>
+                <p class="text-[11px] text-slate-500">Tautan ini akan tampil di menu Profil setiap siswa. Aktifkan untuk menampilkannya, nonaktifkan agar tautan hilang dari tampilan siswa.</p>
+                <div class="space-y-2">
+                    <div>
+                        <label class="block text-[10px] font-bold text-slate-400 uppercase ml-1 mb-1">Judul Tautan</label>
+                        <input type="text" id="admin-setting-link-judul" placeholder="Contoh: Formulir Pendaftaran Ekstrakurikuler" class="w-full p-3 border border-slate-200 rounded-2xl text-sm outline-none focus:ring-2 focus:ring-indigo-500 font-semibold">
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-bold text-slate-400 uppercase ml-1 mb-1">URL Tautan</label>
+                        <input type="url" id="admin-setting-link-url" placeholder="https://contoh-tautan-anda.com" class="w-full p-3 border border-slate-200 rounded-2xl text-sm outline-none focus:ring-2 focus:ring-indigo-500">
+                    </div>
+                </div>
+                <div class="flex justify-between items-center bg-slate-50 rounded-2xl px-3.5 py-3 border border-slate-100">
+                    <span class="text-xs font-bold text-slate-600">Status Tautan untuk Siswa</span>
+                    <button type="button" id="admin-setting-link-toggle" onclick="toggleAdminLinkAktif()" class="text-[10px] font-extrabold px-3 py-1.5 rounded-full transition-all bg-slate-200 text-slate-500">
+                        Nonaktif
+                    </button>
+                </div>
+                <button onclick="saveAdminLinkSetting()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 rounded-2xl transition-all text-xs flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-floppy-disk"></i> Simpan Tautan Link
+                </button>
+            </div>
+
+            <div class="bg-white p-4 rounded-3xl border border-slate-100 shadow-sm space-y-3">
+                <h4 class="text-xs font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
                     <i class="fa-solid fa-key text-indigo-600"></i> Ubah Password Administrator
                 </h4>
                 <div class="space-y-2">
@@ -1205,6 +1238,46 @@
                 </div>
                 <button onclick="saveAdminPasswordSetting()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 rounded-2xl transition-all text-xs flex items-center justify-center gap-2">
                     <i class="fa-solid fa-shield-halved"></i> Simpan Password Baru
+                </button>
+            </div>
+
+            <!-- Pengaturan Jadwal Masuk & Pulang -->
+            <div class="bg-white p-4 rounded-3xl border border-slate-100 shadow-sm space-y-3">
+                <h4 class="text-xs font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
+                    <i class="fa-solid fa-clock text-indigo-600"></i> Pengaturan Jadwal Masuk & Pulang
+                </h4>
+                
+                <div class="space-y-4">
+                    <!-- Pilih Jenjang -->
+                    <div>
+                        <label class="block text-[10px] font-bold text-slate-500 uppercase ml-1 mb-2">Pilih Jenjang</label>
+                        <div class="flex gap-2">
+                            <button type="button" onclick="switchJadwalJenjang('X')" id="btn-jadwal-x" class="flex-1 py-2.5 px-3 bg-emerald-50 text-emerald-700 rounded-xl font-bold transition-all border border-emerald-200 text-xs">Kelas X</button>
+                            <button type="button" onclick="switchJadwalJenjang('XI')" id="btn-jadwal-xi" class="flex-1 py-2.5 px-3 bg-slate-50 text-slate-500 rounded-xl font-bold transition-all border border-slate-200 text-xs">Kelas XI</button>
+                            <button type="button" onclick="switchJadwalJenjang('XII')" id="btn-jadwal-xii" class="flex-1 py-2.5 px-3 bg-slate-50 text-slate-500 rounded-xl font-bold transition-all border border-slate-200 text-xs">Kelas XII</button>
+                        </div>
+                    </div>
+
+                    <!-- Tabel Jadwal Per Hari -->
+                    <div id="jadwal-table-container" class="overflow-x-auto rounded-2xl border border-slate-200">
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr class="bg-slate-100 text-slate-600 text-[10px] font-bold uppercase tracking-wider border-b border-slate-200">
+                                    <th class="py-2.5 px-3">Hari</th>
+                                    <th class="py-2.5 px-3 text-center">Jam Buka Masuk</th>
+                                    <th class="py-2.5 px-3 text-center">Jam Batas Masuk</th>
+                                    <th class="py-2.5 px-3 text-center">Jam Buka Pulang</th>
+                                </tr>
+                            </thead>
+                            <tbody id="jadwal-table-body" class="text-xs divide-y divide-slate-100">
+                                <!-- Generated by JavaScript -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <button onclick="saveJadwalPengaturan()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 rounded-2xl transition-all text-xs flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-floppy-disk"></i> Simpan Jadwal Presensi
                 </button>
             </div>
 
@@ -1405,44 +1478,96 @@
         let ABSENCE_RADIUS_METERS = 150;
 
         // ================================================================
-        // KONFIGURASI JADWAL PRESENSI PER JENJANG KELAS (X, XI, XII)
-        // Kelas XII TIDAK diubah - tetap memakai nilai/aturan asli aplikasi.
+        // PENGATURAN TAUTAN LINK GLOBAL (dikontrol Administrator)
+        // Tautan ini dikirim oleh administrator dan hanya tampil di menu
+        // Profil siswa apabila status "aktif" bernilai true. Siswa tidak
+        // dapat mengubah nilai ini — hanya melihat/mengklik.
         // ================================================================
-        const JADWAL_PRESENSI = {
-            'X':   { masukBuka: 5 * 60,  masukBatas: 6 * 60 + 30,  pulangBuka: 11 * 60 + 45 },
-            'XI':  { masukBuka: 10 * 60, masukBatas: 12 * 60 + 30, pulangBuka: 17 * 60 }
+        let linkPengaturan = { judul: '', url: '', aktif: false };
+
+        // ================================================================
+        // KONFIGURASI JADWAL PRESENSI PER HARI PER JENJANG KELAS (X, XI, XII)
+        // Format: { jenjang: { hari: { masukBuka, masukBatas, pulangBuka } } }
+        // ================================================================
+        const HARI_KERJA = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat'];
+        let JADWAL_PRESENSI = {
+            'X': {
+                'Senin':   { masukBuka: 5 * 60,  masukBatas: 6 * 60 + 30,  pulangBuka: 11 * 60 + 45 },
+                'Selasa':  { masukBuka: 5 * 60,  masukBatas: 6 * 60 + 30,  pulangBuka: 11 * 60 + 45 },
+                'Rabu':    { masukBuka: 5 * 60,  masukBatas: 6 * 60 + 30,  pulangBuka: 11 * 60 + 45 },
+                'Kamis':   { masukBuka: 5 * 60,  masukBatas: 6 * 60 + 30,  pulangBuka: 11 * 60 + 45 },
+                'Jumat':   { masukBuka: 5 * 60,  masukBatas: 6 * 60 + 30,  pulangBuka: 11 * 60 + 45 }
+            },
+            'XI': {
+                'Senin':   { masukBuka: 10 * 60, masukBatas: 12 * 60 + 30, pulangBuka: 17 * 60 },
+                'Selasa':  { masukBuka: 10 * 60, masukBatas: 12 * 60 + 30, pulangBuka: 17 * 60 },
+                'Rabu':    { masukBuka: 10 * 60, masukBatas: 12 * 60 + 30, pulangBuka: 17 * 60 },
+                'Kamis':   { masukBuka: 10 * 60, masukBatas: 12 * 60 + 30, pulangBuka: 17 * 60 },
+                'Jumat':   { masukBuka: 10 * 60, masukBatas: 12 * 60 + 30, pulangBuka: 17 * 60 }
+            },
+            'XII': {
+                'Senin':   { masukBuka: 0,       masukBatas: 6 * 60 + 30,  pulangBuka: 15 * 60 },
+                'Selasa':  { masukBuka: 0,       masukBatas: 6 * 60 + 30,  pulangBuka: 15 * 60 },
+                'Rabu':    { masukBuka: 0,       masukBatas: 6 * 60 + 30,  pulangBuka: 15 * 60 },
+                'Kamis':   { masukBuka: 0,       masukBatas: 6 * 60 + 30,  pulangBuka: 15 * 60 },
+                'Jumat':   { masukBuka: 0,       masukBatas: 6 * 60 + 30,  pulangBuka: 15 * 60 }
+            }
         };
 
         function getJenjangKelas(kelasStr) {
-            if (!kelasStr) return 'XII';
-            const k = kelasStr.toString().trim().toUpperCase();
-            if (k.startsWith('XII')) return 'XII';
-            if (k.startsWith('XI')) return 'XI';
-            if (k.startsWith('X')) return 'X';
-            return 'XII';
-        }
+    if (!kelasStr) return 'XII';
+    const k = kelasStr.toString().trim().toUpperCase();
+    if (k.startsWith('XII')) return 'XII';
+    if (k.startsWith('XI')) return 'XI';
+    if (k.startsWith('X')) return 'X';
+    return 'XII';
+}
+ 
+ function getNamaHari(dateObj) {
+    const hariIdx = dateObj.getDay();
+    const namaHari = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
+    return namaHari[hariIdx];
+}
+
+function getJadwalHariIni(kelasStr) {
+    const jenjang = getJenjangKelas(kelasStr);
+    const namaHari = getNamaHari(new Date());
+    const jadwalJenjang = JADWAL_PRESENSI[jenjang] || JADWAL_PRESENSI['XII'];
+    return jadwalJenjang[namaHari] || jadwalJenjang['Senin'];
+}
 
         // Jam buka presensi masuk. Kelas XII tidak dibatasi (sesuai aturan lama / tidak diubah).
         function getMasukBukaMenit(kelasStr) {
-            const jenjang = getJenjangKelas(kelasStr);
-            if (jenjang === 'XII') return null;
-            return JADWAL_PRESENSI[jenjang].masukBuka;
-        }
+    const jadwal = getJadwalHariIni(kelasStr);
+    return jadwal.masukBuka === 0 ? null : jadwal.masukBuka;
+}
 
         // Batas jam masuk (lewat dari ini dianggap terlambat). Kelas XII memakai nilai default lama.
         function getBatasMasukMenit(kelasStr, defaultXII) {
-            const jenjang = getJenjangKelas(kelasStr);
-            if (jenjang === 'XII') return defaultXII;
-            return JADWAL_PRESENSI[jenjang].masukBatas;
-        }
+    const jadwal = getJadwalHariIni(kelasStr);
+    return jadwal.masukBatas || defaultXII;
+}
 
         // Jam mulai dibukanya presensi pulang. Kelas XII memakai nilai default lama.
         function getPulangBukaMenit(kelasStr, defaultXII) {
-            const jenjang = getJenjangKelas(kelasStr);
-            if (jenjang === 'XII') return defaultXII;
-            return JADWAL_PRESENSI[jenjang].pulangBuka;
-        }
+    const jadwal = getJadwalHariIni(kelasStr);
+    return jadwal.pulangBuka || defaultXII;
+} 
 
+        function loadJadwalFromStorage() {
+    const stored = localStorage.getItem('sigesit_jadwal_presensi');
+    if (stored) {
+        try {
+            JADWAL_PRESENSI = JSON.parse(stored);
+        } catch (e) {
+            console.log("Gagal load jadwal, gunakan default.");
+        }
+    }
+}
+
+function saveJadwalToStorage() {
+    localStorage.setItem('sigesit_jadwal_presensi', JSON.stringify(JADWAL_PRESENSI));
+}
         function formatMenitKeJam(menit) {
             if (menit === null || menit === undefined) return "-";
             const h = Math.floor(menit / 60).toString().padStart(2, '0');
@@ -1456,6 +1581,99 @@
             const labelPulang = document.getElementById('label-batas-pulang-jam');
             if (labelMasuk) labelMasuk.innerText = `${formatMenitKeJam(getBatasMasukMenit(currentSiswa.kelas, 6 * 60 + 30))} WIB`;
             if (labelPulang) labelPulang.innerText = `${formatMenitKeJam(getPulangBukaMenit(currentSiswa.kelas, 15 * 60))} WIB`;
+        }
+
+        // ====== PENGATURAN JADWAL PRESENSI (Panel Admin) ======
+        let currentJadwalJenjang = 'X';
+
+        function switchJadwalJenjang(jenjang) {
+            currentJadwalJenjang = jenjang;
+
+            const buttons = ['X', 'XI', 'XII'];
+            buttons.forEach(j => {
+                const btn = document.getElementById(`btn-jadwal-${j.toLowerCase()}`);
+                if (btn) {
+                    if (j === jenjang) {
+                        btn.className = "flex-1 py-2.5 px-3 bg-emerald-50 text-emerald-700 rounded-xl font-bold transition-all border border-emerald-200 text-xs";
+                    } else {
+                        btn.className = "flex-1 py-2.5 px-3 bg-slate-50 text-slate-500 rounded-xl font-bold transition-all border border-slate-200 text-xs";
+                    }
+                }
+            });
+
+            renderJadwalTable();
+        }
+
+        function renderJadwalTable() {
+            const tbody = document.getElementById('jadwal-table-body');
+            if (!tbody) return;
+
+            const jadwalJenjang = JADWAL_PRESENSI[currentJadwalJenjang] || {};
+
+            tbody.innerHTML = HARI_KERJA.map(hari => {
+                const jadwalHari = jadwalJenjang[hari] || { masukBuka: 0, masukBatas: 360, pulangBuka: 900 };
+
+                return `
+                    <tr class="border-slate-50 hover:bg-slate-50/50">
+                        <td class="py-3 px-3 font-bold text-slate-700 text-sm">${hari}</td>
+                        <td class="py-3 px-3">
+                            <input type="time" class="jadwal-input w-full px-2 py-1.5 border border-slate-200 rounded-lg text-xs font-semibold outline-none focus:ring-2 focus:ring-emerald-500" data-hari="${hari}" data-tipe="masukBuka" value="${formatMenitToTime(jadwalHari.masukBuka)}">
+                        </td>
+                        <td class="py-3 px-3">
+                            <input type="time" class="jadwal-input w-full px-2 py-1.5 border border-slate-200 rounded-lg text-xs font-semibold outline-none focus:ring-2 focus:ring-emerald-500" data-hari="${hari}" data-tipe="masukBatas" value="${formatMenitToTime(jadwalHari.masukBatas)}">
+                        </td>
+                        <td class="py-3 px-3">
+                            <input type="time" class="jadwal-input w-full px-2 py-1.5 border border-slate-200 rounded-lg text-xs font-semibold outline-none focus:ring-2 focus:ring-emerald-500" data-hari="${hari}" data-tipe="pulangBuka" value="${formatMenitToTime(jadwalHari.pulangBuka)}">
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        function formatMenitToTime(menit) {
+            if (!menit && menit !== 0) return "00:00";
+            const jam = Math.floor(menit / 60).toString().padStart(2, '0');
+            const menitVal = (menit % 60).toString().padStart(2, '0');
+            return `${jam}:${menitVal}`;
+        }
+
+        function timeToMenit(timeStr) {
+            if (!timeStr) return 0;
+            const parts = timeStr.split(':');
+            if (parts.length !== 2) return 0;
+            return parseInt(parts[0]) * 60 + parseInt(parts[1]);
+        }
+
+        function saveJadwalPengaturan() {
+            const inputs = document.querySelectorAll('.jadwal-input');
+            inputs.forEach(input => {
+                const hari = input.getAttribute('data-hari');
+                const tipe = input.getAttribute('data-tipe');
+                const timeValue = input.value;
+                const menitValue = timeToMenit(timeValue);
+
+                if (!JADWAL_PRESENSI[currentJadwalJenjang]) {
+                    JADWAL_PRESENSI[currentJadwalJenjang] = {};
+                }
+                if (!JADWAL_PRESENSI[currentJadwalJenjang][hari]) {
+                    JADWAL_PRESENSI[currentJadwalJenjang][hari] = { masukBuka: 0, masukBatas: 360, pulangBuka: 900 };
+                }
+
+                JADWAL_PRESENSI[currentJadwalJenjang][hari][tipe] = menitValue;
+            });
+
+            saveJadwalToStorage();
+            showToast("Jadwal presensi berhasil disimpan!");
+
+            if (!isMockUrl() && scriptUrl) {
+                fetch(`${scriptUrl}`, {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        action: "updateJadwalPresensi",
+                        jadwal_presensi: JADWAL_PRESENSI
+                    })
+                }).catch(() => console.log("Gagal sync jadwal ke server."));
+            }
         }
 
         // STATE UTAMA
@@ -1511,6 +1729,8 @@
         }
 
         window.onload = function() {
+            loadJadwalFromStorage();
+
             // scriptUrl selalu memakai SCRIPT_URL yang sudah di-hardcode di atas.
             const storedLocal = localStorage.getItem('local_offline_db');
             if (!storedLocal) {
@@ -1526,6 +1746,20 @@
             const storedRadius = localStorage.getItem('sigesit_radius_setting');
             if (storedRadius) {
                 ABSENCE_RADIUS_METERS = parseInt(storedRadius) || ABSENCE_RADIUS_METERS;
+            }
+
+            const storedLinkPengaturan = localStorage.getItem('sigesit_link_pengaturan');
+            if (storedLinkPengaturan) {
+                try {
+                    const parsedLink = JSON.parse(storedLinkPengaturan);
+                    linkPengaturan = {
+                        judul: parsedLink.judul || '',
+                        url: parsedLink.url || '',
+                        aktif: !!parsedLink.aktif
+                    };
+                } catch (e) {
+                    linkPengaturan = { judul: '', url: '', aktif: false };
+                }
             }
 
             startClock();
@@ -1797,6 +2031,11 @@
             document.getElementById('view-login').classList.remove('hidden');
         }
 
+        // Login administrator: mengikuti pola yang sama dengan handleLogin() untuk
+        // siswa/wali kelas — kalau server (scriptUrl) aktif, validasi dilakukan ke
+        // sheet 'Administrator' via action 'loginAdmin'. Kalau scriptUrl belum
+        // dikonfigurasi (isMockUrl() true), tetap fallback ke localDb.admin (mode
+        // demo/offline) supaya app tetap bisa dicoba tanpa koneksi server.
         function handleAdminLogin() {
             const idInput = document.getElementById('admin-login-identifier').value.trim();
             const passInput = document.getElementById('admin-login-password').value.trim();
@@ -1806,16 +2045,41 @@
                 return;
             }
 
-            if (!localDb.admin) localDb.admin = [];
-            const adminData = localDb.admin.find(a => a.username === idInput && a.password === passInput);
-            if (adminData) {
-                currentAdmin = { ...adminData };
-                localStorage.setItem('sigesit_active_admin', JSON.stringify(currentAdmin));
-                doPostAdminLoginActions();
-                showToast("Masuk Panel Administrator!");
-            } else {
-                showToast("Username atau Password Administrator salah!");
+            if (isMockUrl()) {
+                if (!localDb.admin) localDb.admin = [];
+                const adminData = localDb.admin.find(a => a.username === idInput && a.password === passInput);
+                if (adminData) {
+                    currentAdmin = { ...adminData };
+                    localStorage.setItem('sigesit_active_admin', JSON.stringify(currentAdmin));
+                    doPostAdminLoginActions();
+                    showToast("Masuk Sesi Lokal Administrator!");
+                } else {
+                    showToast("Username atau Password Administrator salah untuk data demo!");
+                }
+                return;
             }
+
+            showToast("Memvalidasi akun administrator...");
+            const params = `action=loginAdmin&identifier=${encodeURIComponent(idInput)}&password=${encodeURIComponent(passInput)}`;
+
+            fetch(`${scriptUrl}?${params}`)
+                .then(res => res.json())
+                .then(data => {
+                    if (data && data.success) {
+                        // Password sengaja tidak disimpan di sisi client — cukup
+                        // dipakai server untuk validasi saat ganti password nanti.
+                        currentAdmin = data.user;
+                        delete currentAdmin.password;
+                        localStorage.setItem('sigesit_active_admin', JSON.stringify(currentAdmin));
+                        doPostAdminLoginActions();
+                        showToast("Login administrator berhasil terverifikasi!");
+                    } else {
+                        showToast(data.message || "Login gagal! Periksa kembali kredensial Anda.");
+                    }
+                })
+                .catch(() => {
+                    showToast("Gagal terhubung ke Google Apps Script.");
+                });
         }
 
         function doPostAdminLoginActions() {
@@ -1875,8 +2139,79 @@
             } else if (target === 'pengaturan') {
                 const radiusInput = document.getElementById('admin-setting-radius');
                 if (radiusInput) radiusInput.value = ABSENCE_RADIUS_METERS;
+                renderAdminLinkSettingUI();
                 updateIntegrationStatus();
+                renderJadwalTable();
+                switchJadwalJenjang(currentJadwalJenjang);
             }
+        }
+
+        // Merender ulang tampilan form Tautan Link di panel Pengaturan Admin
+        // berdasarkan state linkPengaturan yang tersimpan saat ini.
+        function renderAdminLinkSettingUI() {
+            const judulInput = document.getElementById('admin-setting-link-judul');
+            const urlInput = document.getElementById('admin-setting-link-url');
+            if (judulInput) judulInput.value = linkPengaturan.judul || '';
+            if (urlInput) urlInput.value = linkPengaturan.url || '';
+            updateAdminLinkToggleUI();
+        }
+
+        function updateAdminLinkToggleUI() {
+            const toggleBtn = document.getElementById('admin-setting-link-toggle');
+            if (!toggleBtn) return;
+            if (linkPengaturan.aktif) {
+                toggleBtn.innerText = "Aktif";
+                toggleBtn.className = "text-[10px] font-extrabold px-3 py-1.5 rounded-full transition-all bg-emerald-100 text-emerald-700";
+            } else {
+                toggleBtn.innerText = "Nonaktif";
+                toggleBtn.className = "text-[10px] font-extrabold px-3 py-1.5 rounded-full transition-all bg-slate-200 text-slate-500";
+            }
+        }
+
+        function toggleAdminLinkAktif() {
+            linkPengaturan.aktif = !linkPengaturan.aktif;
+            updateAdminLinkToggleUI();
+        }
+
+        // Menyimpan pengaturan Tautan Link (judul, url, status aktif) secara
+        // lokal dan (jika terhubung) ke server, lalu memperbarui tampilan
+        // Profil siswa yang sedang aktif jika ada.
+        function saveAdminLinkSetting() {
+            const judulVal = document.getElementById('admin-setting-link-judul').value.trim();
+            const urlVal = document.getElementById('admin-setting-link-url').value.trim();
+
+            if (linkPengaturan.aktif) {
+                if (!judulVal || !urlVal) {
+                    showToast("Judul dan URL tautan wajib diisi sebelum diaktifkan!");
+                    return;
+                }
+                if (!/^https?:\/\//i.test(urlVal)) {
+                    showToast("Format URL harus diawali http:// atau https://");
+                    return;
+                }
+            }
+
+            linkPengaturan = {
+                judul: judulVal,
+                url: urlVal,
+                aktif: linkPengaturan.aktif
+            };
+            localStorage.setItem('sigesit_link_pengaturan', JSON.stringify(linkPengaturan));
+            showToast("Tautan link berhasil disimpan.");
+
+            if (!isMockUrl() && scriptUrl) {
+                fetch(`${scriptUrl}`, {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        action: "updateLinkPengaturan",
+                        judul: linkPengaturan.judul,
+                        url: linkPengaturan.url,
+                        aktif: linkPengaturan.aktif
+                    })
+                }).catch(() => console.log("Gagal sync tautan link ke server."));
+            }
+
+            renderProfilTautanLink();
         }
 
         function populateAdminKelasFilter() {
@@ -2080,6 +2415,10 @@
             calculateDistance();
         }
 
+        // Ganti password administrator: kalau server (scriptUrl) aktif, validasi
+        // password lama & penyimpanan password baru dilakukan di sheet
+        // 'Administrator' lewat action 'updateAdminPassword'. Kalau isMockUrl()
+        // true (mode demo/offline), tetap pakai localDb.admin seperti sebelumnya.
         function saveAdminPasswordSetting() {
             const passLama = document.getElementById('admin-setting-pass-lama').value.trim();
             const passBaru = document.getElementById('admin-setting-pass-baru').value.trim();
@@ -2087,24 +2426,54 @@
                 showToast("Password lama dan baru wajib diisi!");
                 return;
             }
-            if (!currentAdmin || currentAdmin.password !== passLama) {
-                showToast("Password saat ini tidak sesuai!");
-                return;
-            }
             if (passBaru.length < 4) {
                 showToast("Password baru minimal 4 karakter!");
                 return;
             }
-            const adminMatch = localDb.admin.find(a => a.username === currentAdmin.username);
-            if (adminMatch) {
+            if (!currentAdmin || !currentAdmin.username) {
+                showToast("Sesi administrator tidak valid.");
+                return;
+            }
+
+            if (isMockUrl()) {
+                if (!localDb.admin) localDb.admin = [];
+                const adminMatch = localDb.admin.find(a => a.username === currentAdmin.username && a.password === passLama);
+                if (!adminMatch) {
+                    showToast("Password saat ini tidak sesuai!");
+                    return;
+                }
                 adminMatch.password = passBaru;
                 localStorage.setItem('local_offline_db', JSON.stringify(localDb));
+                currentAdmin.password = passBaru;
+                localStorage.setItem('sigesit_active_admin', JSON.stringify(currentAdmin));
+                document.getElementById('admin-setting-pass-lama').value = "";
+                document.getElementById('admin-setting-pass-baru').value = "";
+                showToast("Password administrator (lokal) berhasil diperbarui!");
+                return;
             }
-            currentAdmin.password = passBaru;
-            localStorage.setItem('sigesit_active_admin', JSON.stringify(currentAdmin));
-            document.getElementById('admin-setting-pass-lama').value = "";
-            document.getElementById('admin-setting-pass-baru').value = "";
-            showToast("Password administrator berhasil diperbarui!");
+
+            fetch(`${scriptUrl}`, {
+                method: 'POST',
+                body: JSON.stringify({
+                    action: "updateAdminPassword",
+                    username: currentAdmin.username,
+                    oldPassword: passLama,
+                    newPassword: passBaru
+                })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    document.getElementById('admin-setting-pass-lama').value = "";
+                    document.getElementById('admin-setting-pass-baru').value = "";
+                    showToast("Password administrator berhasil diperbarui!");
+                } else {
+                    showToast(data.message || "Gagal memperbarui password administrator.");
+                }
+            })
+            .catch(() => {
+                showToast("Gagal terhubung ke server untuk mengganti password.");
+            });
         }
 
         function doPostLoginActions() {
@@ -2183,7 +2552,6 @@
                 if (rowWali1) rowWali1.classList.remove('hidden');
                 if (rowWali2) rowWali2.classList.remove('hidden');
                 if (mapCard) mapCard.classList.remove('hidden');
-                if (tautanCard) tautanCard.classList.remove('hidden');
                 if (profileFotoSiswa) profileFotoSiswa.classList.remove('hidden');
                 if (profileFotoWali) profileFotoWali.classList.add('hidden');
                 if (badgeIdentitas) {
@@ -2197,12 +2565,28 @@
                 if (currentSiswa.alamat_teks) {
                     document.getElementById('profil-alamat-text').value = currentSiswa.alamat_teks;
                 }
-                if (currentSiswa.tautan_link) {
-                    document.getElementById('profil-tautan-link').value = currentSiswa.tautan_link;
-                }
+                renderProfilTautanLink();
             }
 
             fetchDatabaseState();
+        }
+
+        // Merender kartu "Tautan Dari Administrator" di menu Profil siswa.
+        // Kartu hanya ditampilkan apabila administrator mengaktifkan tautan
+        // (linkPengaturan.aktif === true); jika nonaktif, kartu disembunyikan
+        // sepenuhnya sehingga tautan "menghilang" dari sisi siswa.
+        function renderProfilTautanLink() {
+            const tautanCard = document.getElementById('profil-card-tautan-link');
+            if (!tautanCard || !currentSiswa || currentSiswa.role === 'walikelas') return;
+
+            if (linkPengaturan.aktif && linkPengaturan.url) {
+                document.getElementById('profil-tautan-link-judul').innerText = linkPengaturan.judul || 'Tautan Informasi';
+                const btn = document.getElementById('profil-tautan-link-btn');
+                if (btn) btn.href = linkPengaturan.url;
+                tautanCard.classList.remove('hidden');
+            } else {
+                tautanCard.classList.add('hidden');
+            }
         }
 
         function switchView(target) {
@@ -2236,6 +2620,7 @@
                     renderWaliIzinApprovalList();
                     updateWaliRekapKehadiranCounters();
                     renderWaliRekapIzinList();
+                    fetchDatabaseState(); // tarik data terbaru otomatis setiap kali tab dibuka
                 } else {
                     document.getElementById('view-izin').classList.remove('hidden');
                     renderRiwayatIzin();
@@ -2271,6 +2656,7 @@
                 document.getElementById('view-profil').classList.remove('hidden');
                 document.getElementById('nav-profil').className = "flex flex-col items-center gap-1 text-emerald-600";
                 if (!isWali) {
+                    renderProfilTautanLink();
                     setTimeout(() => { initLeafletMap(); }, 200);
                 }
             }
@@ -3190,21 +3576,41 @@
             }
         }
 
+        let waliApprovalKategoriFilter = 'Semua';
+        const JENIS_KONDISIONAL = ['Izin Terlambat Masuk', 'Izin Pulang Cepat'];
+
+        function setWaliApprovalKategoriFilter(kategori) {
+            waliApprovalKategoriFilter = kategori;
+            const btnSemua = document.getElementById('wali-approval-f-semua');
+            const btnTidakHadir = document.getElementById('wali-approval-f-tidakhadir');
+            const btnKondisional = document.getElementById('wali-approval-f-kondisional');
+            if (btnSemua) btnSemua.className = "flex-1 py-1.5 text-center rounded-xl " + (kategori === 'Semua' ? 'bg-white text-slate-800 shadow-sm' : 'text-slate-550 hover:text-slate-800');
+            if (btnTidakHadir) btnTidakHadir.className = "flex-1 py-1.5 text-center rounded-xl " + (kategori === 'Tidak Hadir' ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-550 hover:text-slate-800');
+            if (btnKondisional) btnKondisional.className = "flex-1 py-1.5 text-center rounded-xl " + (kategori === 'Kondisional' ? 'bg-white text-sky-600 shadow-sm' : 'text-slate-550 hover:text-slate-800');
+            renderWaliIzinApprovalList();
+        }
+
         function renderWaliIzinApprovalList() {
             const container = document.getElementById('wali-izin-list-container');
             if (!container || !currentSiswa) return;
-            const targetKelas = currentSiswa.kelas;
-            
+            // Perbandingan kelas dibuat toleran (trim + tanpa memandang huruf besar/kecil)
+            // supaya selisih spasi/kapitalisasi data tidak membuat pengajuan "hilang".
+            const targetKelas = (currentSiswa.kelas || '').toString().trim().toLowerCase();
+
             const waitingIzin = [];
             localDb.izin.forEach((item, index) => {
                 const murid = localDb.siswa.find(s => s.nis === item.nis);
-                if (murid && murid.kelas === targetKelas && item.status === 'Menunggu') {
+                const muridKelas = murid ? (murid.kelas || '').toString().trim().toLowerCase() : '';
+                if (murid && muridKelas === targetKelas && item.status === 'Menunggu') {
+                    const isKondisional = JENIS_KONDISIONAL.includes(item.jenis);
+                    if (waliApprovalKategoriFilter === 'Kondisional' && !isKondisional) return;
+                    if (waliApprovalKategoriFilter === 'Tidak Hadir' && isKondisional) return;
                     waitingIzin.push({ item, index });
                 }
             });
 
             if (waitingIzin.length === 0) {
-                container.innerHTML = `<div class="text-center py-6 text-slate-400">Tidak ada pengajuan izin tertunda.</div>`;
+                container.innerHTML = `<div class="text-center py-6 text-slate-400">Tidak ada pengajuan izin tertunda${waliApprovalKategoriFilter !== 'Semua' ? ' pada kategori ini' : ''}.</div>`;
                 return;
             }
 
@@ -3444,6 +3850,10 @@
             const fileInput = document.getElementById('th-file');
             const rangeTanggal = tglMulai === tglSelesai ? tglMulai : `${tglMulai} s/d ${tglSelesai}`;
 
+            // Sakit & Izin Tidak Masuk tidak memerlukan approval wali kelas —
+            // langsung berstatus "Disetujui". Hanya "Dispen" yang tetap "Menunggu".
+            const statusAwal = (jenis === 'Sakit' || jenis === 'Izin') ? "Disetujui" : "Menunggu";
+
             const record = {
                 nis: currentSiswa.nis,
                 nama: currentSiswa.nama,
@@ -3453,7 +3863,7 @@
                 waktu: "-",
                 keterangan: ket,
                 file: "", 
-                status: "Menunggu",
+                status: statusAwal,
                 created_at: new Date().toISOString(),
                 dispen_alamat: jenis === 'Dispen' ? document.getElementById('dispen-alamat-text').value.trim() : "",
                 dispen_koordinat: jenis === 'Dispen' ? dispenCoords : ""
@@ -3553,7 +3963,11 @@
         function saveIzinToState(record) {
             localDb.izin.push(record);
             localStorage.setItem('local_offline_db', JSON.stringify(localDb));
-            showToast("Pengajuan izin berhasil terkirim!");
+            if (record.status === 'Disetujui') {
+                showToast("Pengajuan izin berhasil terkirim dan otomatis disetujui!");
+            } else {
+                showToast("Pengajuan izin berhasil terkirim, menunggu persetujuan wali kelas!");
+            }
             document.getElementById('form-izin-tidak-hadir').reset();
             document.getElementById('form-izin-kondisional').reset();
             document.getElementById('th-file-label').innerText = "Pilih berkas PDF, JPG, atau PNG";
@@ -3929,6 +4343,7 @@
                 renderSiswaNilai();
                 populateWaliNilaiJudulFilter();
                 renderWaliNilaiSiswa();
+                renderProfilTautanLink();
                 if (currentSiswa && currentSiswa.role === 'walikelas') {
                     updateWaliRekapKehadiranCounters();
                     renderWaliRekapIzinList();
@@ -3955,6 +4370,8 @@
                     syncIcons.forEach(icon => icon.classList.remove('animate-spin'));
                     if (data.success) {
                         localDb.siswa = data.siswa_all || [];
+                        localDb.walikelas = data.walikelas || [];
+                        localDb.admin = data.admin || [];
 
                         const serverPresensi = data.presensi || [];
                         const localOnlyPresensi = localDb.presensi.filter(lp =>
@@ -3965,6 +4382,14 @@
                         localDb.izin = data.izin || [];
                         localDb.poin = data.poin || [];
                         localDb.nilai = data.nilai || []; 
+                        if (data.link_pengaturan) {
+                            linkPengaturan = {
+                                judul: data.link_pengaturan.judul || '',
+                                url: data.link_pengaturan.url || '',
+                                aktif: !!data.link_pengaturan.aktif
+                            };
+                            localStorage.setItem('sigesit_link_pengaturan', JSON.stringify(linkPengaturan));
+                        }
                         localStorage.setItem('local_offline_db', JSON.stringify(localDb));
                         
                         refreshAllViews();
@@ -4086,39 +4511,6 @@
                         alamat_teks: alamatTeks
                     })
                 }).catch(() => console.log("Gagal sync alamat ke server."));
-            }
-        }
-
-        function saveTautanLink() {
-            const linkVal = document.getElementById('profil-tautan-link').value.trim();
-            if (!linkVal) {
-                showToast("Tautan link tidak boleh kosong!");
-                return;
-            }
-            if (!/^https?:\/\//i.test(linkVal)) {
-                showToast("Format tautan harus diawali http:// atau https://");
-                return;
-            }
-
-            currentSiswa.tautan_link = linkVal;
-
-            const match = localDb.siswa.find(s => s.nis === currentSiswa.nis);
-            if (match) {
-                match.tautan_link = linkVal;
-                localStorage.setItem('local_offline_db', JSON.stringify(localDb));
-            }
-            localStorage.setItem('sigesit_active_user', JSON.stringify(currentSiswa));
-            showToast("Tautan link berhasil disimpan.");
-
-            if (!isMockUrl() && scriptUrl) {
-                fetch(`${scriptUrl}`, {
-                    method: 'POST',
-                    body: JSON.stringify({
-                        action: "updateTautanLink",
-                        nis: currentSiswa.nis,
-                        tautan_link: linkVal
-                    })
-                }).catch(() => console.log("Gagal sync tautan link ke server."));
             }
         }
 
