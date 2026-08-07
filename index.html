@@ -1007,12 +1007,7 @@
                 <h5 class="text-xs font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
                     <i class="fa-solid fa-link"></i> Tautan Dari Administrator
                 </h5>
-                <div id="profil-tautan-link-display" class="space-y-2">
-                    <p id="profil-tautan-link-judul" class="text-sm font-extrabold text-slate-800">-</p>
-                    <a id="profil-tautan-link-btn" href="#" target="_blank" rel="noopener noreferrer" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 rounded-2xl transition-all text-xs flex items-center justify-center gap-2">
-                        <i class="fa-solid fa-arrow-up-right-from-square"></i> Buka Tautan
-                    </a>
-                </div>
+                <div id="profil-tautan-link-list" class="space-y-2"></div>
             </div>
 
             <div id="profil-card-alamat-tinggal" class="bg-white p-4 rounded-3xl border border-slate-100 shadow-sm space-y-3">
@@ -1215,29 +1210,119 @@
                 </button>
             </div>
 
+            <!-- ============================================================ -->
+            <!-- TAUTAN LINK 1 UNTUK SISWA -->
+            <!-- ============================================================ -->
             <div class="bg-white p-4 rounded-3xl border border-slate-100 shadow-sm space-y-3">
                 <h4 class="text-xs font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
-                    <i class="fa-solid fa-link text-indigo-600"></i> Tautan Link untuk Siswa
+                    <i class="fa-solid fa-link text-indigo-600"></i> Tautan Link 1 untuk Siswa
                 </h4>
                 <p class="text-[11px] text-slate-500">Tautan ini akan tampil di menu Profil setiap siswa. Aktifkan untuk menampilkannya, nonaktifkan agar tautan hilang dari tampilan siswa.</p>
                 <div class="space-y-2">
                     <div>
                         <label class="block text-[10px] font-bold text-slate-400 uppercase ml-1 mb-1">Judul Tautan</label>
-                        <input type="text" id="admin-setting-link-judul" placeholder="Contoh: Formulir Pendaftaran Ekstrakurikuler" class="w-full p-3 border border-slate-200 rounded-2xl text-sm outline-none focus:ring-2 focus:ring-indigo-500 font-semibold">
+                        <input type="text" id="admin-setting-link-judul-1" placeholder="Contoh: Formulir Pendaftaran Ekstrakurikuler" class="w-full p-3 border border-slate-200 rounded-2xl text-sm outline-none focus:ring-2 focus:ring-indigo-500 font-semibold">
                     </div>
                     <div>
                         <label class="block text-[10px] font-bold text-slate-400 uppercase ml-1 mb-1">URL Tautan</label>
-                        <input type="url" id="admin-setting-link-url" placeholder="https://contoh-tautan-anda.com" class="w-full p-3 border border-slate-200 rounded-2xl text-sm outline-none focus:ring-2 focus:ring-indigo-500">
+                        <input type="url" id="admin-setting-link-url-1" placeholder="https://contoh-tautan-anda.com" class="w-full p-3 border border-slate-200 rounded-2xl text-sm outline-none focus:ring-2 focus:ring-indigo-500">
                     </div>
                 </div>
                 <div class="flex justify-between items-center bg-slate-50 rounded-2xl px-3.5 py-3 border border-slate-100">
                     <span class="text-xs font-bold text-slate-600">Status Tautan untuk Siswa</span>
-                    <button type="button" id="admin-setting-link-toggle" onclick="toggleAdminLinkAktif()" class="text-[10px] font-extrabold px-3 py-1.5 rounded-full transition-all bg-slate-200 text-slate-500">
+                    <button type="button" id="admin-setting-link-toggle-1" onclick="toggleAdminLinkAktif(1)" class="text-[10px] font-extrabold px-3 py-1.5 rounded-full transition-all bg-slate-200 text-slate-500">
                         Nonaktif
                     </button>
                 </div>
-                <button onclick="saveAdminLinkSetting()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 rounded-2xl transition-all text-xs flex items-center justify-center gap-2">
-                    <i class="fa-solid fa-floppy-disk"></i> Simpan Tautan Link
+                <button onclick="saveAdminLinkSetting(1)" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 rounded-2xl transition-all text-xs flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-floppy-disk"></i> Simpan Tautan Link 1
+                </button>
+            </div>
+
+            <!-- ============================================================ -->
+            <!-- TAUTAN LINK 2 UNTUK SISWA -->
+            <!-- ============================================================ -->
+            <div class="bg-white p-4 rounded-3xl border border-slate-100 shadow-sm space-y-3">
+                <h4 class="text-xs font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
+                    <i class="fa-solid fa-link text-indigo-600"></i> Tautan Link 2 untuk Siswa
+                </h4>
+                <p class="text-[11px] text-slate-500">Tautan ini akan tampil di menu Profil setiap siswa. Aktifkan untuk menampilkannya, nonaktifkan agar tautan hilang dari tampilan siswa.</p>
+                <div class="space-y-2">
+                    <div>
+                        <label class="block text-[10px] font-bold text-slate-400 uppercase ml-1 mb-1">Judul Tautan</label>
+                        <input type="text" id="admin-setting-link-judul-2" placeholder="Contoh: Jadwal Ujian Sekolah" class="w-full p-3 border border-slate-200 rounded-2xl text-sm outline-none focus:ring-2 focus:ring-indigo-500 font-semibold">
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-bold text-slate-400 uppercase ml-1 mb-1">URL Tautan</label>
+                        <input type="url" id="admin-setting-link-url-2" placeholder="https://contoh-tautan-anda.com" class="w-full p-3 border border-slate-200 rounded-2xl text-sm outline-none focus:ring-2 focus:ring-indigo-500">
+                    </div>
+                </div>
+                <div class="flex justify-between items-center bg-slate-50 rounded-2xl px-3.5 py-3 border border-slate-100">
+                    <span class="text-xs font-bold text-slate-600">Status Tautan untuk Siswa</span>
+                    <button type="button" id="admin-setting-link-toggle-2" onclick="toggleAdminLinkAktif(2)" class="text-[10px] font-extrabold px-3 py-1.5 rounded-full transition-all bg-slate-200 text-slate-500">
+                        Nonaktif
+                    </button>
+                </div>
+                <button onclick="saveAdminLinkSetting(2)" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 rounded-2xl transition-all text-xs flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-floppy-disk"></i> Simpan Tautan Link 2
+                </button>
+            </div>
+
+            <!-- ============================================================ -->
+            <!-- TAUTAN LINK 3 UNTUK SISWA -->
+            <!-- ============================================================ -->
+            <div class="bg-white p-4 rounded-3xl border border-slate-100 shadow-sm space-y-3">
+                <h4 class="text-xs font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
+                    <i class="fa-solid fa-link text-indigo-600"></i> Tautan Link 3 untuk Siswa
+                </h4>
+                <p class="text-[11px] text-slate-500">Tautan ini akan tampil di menu Profil setiap siswa. Aktifkan untuk menampilkannya, nonaktifkan agar tautan hilang dari tampilan siswa.</p>
+                <div class="space-y-2">
+                    <div>
+                        <label class="block text-[10px] font-bold text-slate-400 uppercase ml-1 mb-1">Judul Tautan</label>
+                        <input type="text" id="admin-setting-link-judul-3" placeholder="Contoh: Grup WhatsApp Angkatan" class="w-full p-3 border border-slate-200 rounded-2xl text-sm outline-none focus:ring-2 focus:ring-indigo-500 font-semibold">
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-bold text-slate-400 uppercase ml-1 mb-1">URL Tautan</label>
+                        <input type="url" id="admin-setting-link-url-3" placeholder="https://contoh-tautan-anda.com" class="w-full p-3 border border-slate-200 rounded-2xl text-sm outline-none focus:ring-2 focus:ring-indigo-500">
+                    </div>
+                </div>
+                <div class="flex justify-between items-center bg-slate-50 rounded-2xl px-3.5 py-3 border border-slate-100">
+                    <span class="text-xs font-bold text-slate-600">Status Tautan untuk Siswa</span>
+                    <button type="button" id="admin-setting-link-toggle-3" onclick="toggleAdminLinkAktif(3)" class="text-[10px] font-extrabold px-3 py-1.5 rounded-full transition-all bg-slate-200 text-slate-500">
+                        Nonaktif
+                    </button>
+                </div>
+                <button onclick="saveAdminLinkSetting(3)" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 rounded-2xl transition-all text-xs flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-floppy-disk"></i> Simpan Tautan Link 3
+                </button>
+            </div>
+
+            <!-- ============================================================ -->
+            <!-- TAUTAN LINK 4 UNTUK SISWA -->
+            <!-- ============================================================ -->
+            <div class="bg-white p-4 rounded-3xl border border-slate-100 shadow-sm space-y-3">
+                <h4 class="text-xs font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
+                    <i class="fa-solid fa-link text-indigo-600"></i> Tautan Link 4 untuk Siswa
+                </h4>
+                <p class="text-[11px] text-slate-500">Tautan ini akan tampil di menu Profil setiap siswa. Aktifkan untuk menampilkannya, nonaktifkan agar tautan hilang dari tampilan siswa.</p>
+                <div class="space-y-2">
+                    <div>
+                        <label class="block text-[10px] font-bold text-slate-400 uppercase ml-1 mb-1">Judul Tautan</label>
+                        <input type="text" id="admin-setting-link-judul-4" placeholder="Contoh: Informasi Beasiswa" class="w-full p-3 border border-slate-200 rounded-2xl text-sm outline-none focus:ring-2 focus:ring-indigo-500 font-semibold">
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-bold text-slate-400 uppercase ml-1 mb-1">URL Tautan</label>
+                        <input type="url" id="admin-setting-link-url-4" placeholder="https://contoh-tautan-anda.com" class="w-full p-3 border border-slate-200 rounded-2xl text-sm outline-none focus:ring-2 focus:ring-indigo-500">
+                    </div>
+                </div>
+                <div class="flex justify-between items-center bg-slate-50 rounded-2xl px-3.5 py-3 border border-slate-100">
+                    <span class="text-xs font-bold text-slate-600">Status Tautan untuk Siswa</span>
+                    <button type="button" id="admin-setting-link-toggle-4" onclick="toggleAdminLinkAktif(4)" class="text-[10px] font-extrabold px-3 py-1.5 rounded-full transition-all bg-slate-200 text-slate-500">
+                        Nonaktif
+                    </button>
+                </div>
+                <button onclick="saveAdminLinkSetting(4)" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 rounded-2xl transition-all text-xs flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-floppy-disk"></i> Simpan Tautan Link 4
                 </button>
             </div>
 
@@ -1525,7 +1610,7 @@
 
     <script>
         // URL Google Apps Script (hardcoded — tidak perlu diinput manual oleh siswa/wali kelas)
-        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwEhnZszudeK7AgEG7PVHW5bNUYfWJggke_C1LuqHFaQ3kFFdsIQOy9zdYMM2u_k9tW8g/exec";
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwfhISKXzK3rnmYpid1CGH5MuS3grYv89FX0evRlHQnNDaZNOJmLC7ijgotyeIGm0cNCA/exec";
         
         // Konfigurasi Geofencing SMAN 1 Parung
         const SCHOOL_LAT = -6.436954848531352; 
@@ -1534,11 +1619,41 @@
 
         // ================================================================
         // PENGATURAN TAUTAN LINK GLOBAL (dikontrol Administrator)
-        // Tautan ini dikirim oleh administrator dan hanya tampil di menu
-        // Profil siswa apabila status "aktif" bernilai true. Siswa tidak
-        // dapat mengubah nilai ini — hanya melihat/mengklik.
+        // Sekarang mendukung SAMPAI 4 TAUTAN sekaligus (linkPengaturanList[0..3]),
+        // masing-masing punya judul, url, dan status aktif sendiri-sendiri.
+        // Tautan hanya tampil di menu Profil siswa apabila status "aktif"
+        // bernilai true. Siswa tidak dapat mengubah nilai ini — hanya
+        // melihat/mengklik.
         // ================================================================
-        let linkPengaturan = { judul: '', url: '', aktif: false };
+        let linkPengaturanList = [
+            { judul: '', url: '', aktif: false },
+            { judul: '', url: '', aktif: false },
+            { judul: '', url: '', aktif: false },
+            { judul: '', url: '', aktif: false }
+        ];
+
+        // Menormalkan data tautan (baik format array baru, maupun format lama
+        // single object {judul,url,aktif}) menjadi array 4 slot yang konsisten.
+        function normalizeLinkPengaturanList(data) {
+            const defaultSlot = () => ({ judul: '', url: '', aktif: false });
+            let arr = [];
+            if (Array.isArray(data)) {
+                arr = data.map(item => ({
+                    judul: (item && item.judul) || '',
+                    url: (item && item.url) || '',
+                    aktif: !!(item && item.aktif)
+                }));
+            } else if (data && typeof data === 'object') {
+                // Format lama: satu object tunggal -> jadikan slot ke-1
+                arr = [{
+                    judul: data.judul || '',
+                    url: data.url || '',
+                    aktif: !!data.aktif
+                }];
+            }
+            while (arr.length < 4) arr.push(defaultSlot());
+            return arr.slice(0, 4);
+        }
 
         // ================================================================
         // PENGATURAN GAMBAR POP UP HARI LIBUR AKHIR PEKAN (dikontrol Admin)
@@ -1868,13 +1983,9 @@ function saveJadwalToStorage() {
             if (storedLinkPengaturan) {
                 try {
                     const parsedLink = JSON.parse(storedLinkPengaturan);
-                    linkPengaturan = {
-                        judul: parsedLink.judul || '',
-                        url: parsedLink.url || '',
-                        aktif: !!parsedLink.aktif
-                    };
+                    linkPengaturanList = normalizeLinkPengaturanList(parsedLink);
                 } catch (e) {
-                    linkPengaturan = { judul: '', url: '', aktif: false };
+                    linkPengaturanList = normalizeLinkPengaturanList(null);
                 }
             }
 
@@ -2278,20 +2389,24 @@ function saveJadwalToStorage() {
             }
         }
 
-        // Merender ulang tampilan form Tautan Link di panel Pengaturan Admin
-        // berdasarkan state linkPengaturan yang tersimpan saat ini.
+        // Merender ulang tampilan form 4 slot Tautan Link di panel Pengaturan
+        // Admin berdasarkan state linkPengaturanList yang tersimpan saat ini.
         function renderAdminLinkSettingUI() {
-            const judulInput = document.getElementById('admin-setting-link-judul');
-            const urlInput = document.getElementById('admin-setting-link-url');
-            if (judulInput) judulInput.value = linkPengaturan.judul || '';
-            if (urlInput) urlInput.value = linkPengaturan.url || '';
-            updateAdminLinkToggleUI();
+            for (let idx = 1; idx <= 4; idx++) {
+                const slot = linkPengaturanList[idx - 1] || { judul: '', url: '', aktif: false };
+                const judulInput = document.getElementById(`admin-setting-link-judul-${idx}`);
+                const urlInput = document.getElementById(`admin-setting-link-url-${idx}`);
+                if (judulInput) judulInput.value = slot.judul || '';
+                if (urlInput) urlInput.value = slot.url || '';
+                updateAdminLinkToggleUI(idx);
+            }
         }
 
-        function updateAdminLinkToggleUI() {
-            const toggleBtn = document.getElementById('admin-setting-link-toggle');
+        function updateAdminLinkToggleUI(idx) {
+            const toggleBtn = document.getElementById(`admin-setting-link-toggle-${idx}`);
             if (!toggleBtn) return;
-            if (linkPengaturan.aktif) {
+            const slot = linkPengaturanList[idx - 1] || { aktif: false };
+            if (slot.aktif) {
                 toggleBtn.innerText = "Aktif";
                 toggleBtn.className = "text-[10px] font-extrabold px-3 py-1.5 rounded-full transition-all bg-emerald-100 text-emerald-700";
             } else {
@@ -2300,21 +2415,23 @@ function saveJadwalToStorage() {
             }
         }
 
-        function toggleAdminLinkAktif() {
-            linkPengaturan.aktif = !linkPengaturan.aktif;
-            updateAdminLinkToggleUI();
+        function toggleAdminLinkAktif(idx) {
+            if (!linkPengaturanList[idx - 1]) linkPengaturanList[idx - 1] = { judul: '', url: '', aktif: false };
+            linkPengaturanList[idx - 1].aktif = !linkPengaturanList[idx - 1].aktif;
+            updateAdminLinkToggleUI(idx);
         }
 
-        // Menyimpan pengaturan Tautan Link (judul, url, status aktif) secara
-        // lokal dan (jika terhubung) ke server, lalu memperbarui tampilan
-        // Profil siswa yang sedang aktif jika ada.
-        function saveAdminLinkSetting() {
-            const judulVal = document.getElementById('admin-setting-link-judul').value.trim();
-            const urlVal = document.getElementById('admin-setting-link-url').value.trim();
+        // Menyimpan pengaturan salah satu slot Tautan Link (judul, url, status
+        // aktif) secara lokal dan (jika terhubung) ke server, lalu memperbarui
+        // tampilan Profil siswa yang sedang aktif jika ada.
+        function saveAdminLinkSetting(idx) {
+            const judulVal = document.getElementById(`admin-setting-link-judul-${idx}`).value.trim();
+            const urlVal = document.getElementById(`admin-setting-link-url-${idx}`).value.trim();
+            const slot = linkPengaturanList[idx - 1] || { judul: '', url: '', aktif: false };
 
-            if (linkPengaturan.aktif) {
+            if (slot.aktif) {
                 if (!judulVal || !urlVal) {
-                    showToast("Judul dan URL tautan wajib diisi sebelum diaktifkan!");
+                    showToast(`Judul dan URL Tautan Link ${idx} wajib diisi sebelum diaktifkan!`);
                     return;
                 }
                 if (!/^https?:\/\//i.test(urlVal)) {
@@ -2323,22 +2440,20 @@ function saveJadwalToStorage() {
                 }
             }
 
-            linkPengaturan = {
+            linkPengaturanList[idx - 1] = {
                 judul: judulVal,
                 url: urlVal,
-                aktif: linkPengaturan.aktif
+                aktif: slot.aktif
             };
-            localStorage.setItem('sigesit_link_pengaturan', JSON.stringify(linkPengaturan));
-            showToast("Tautan link berhasil disimpan.");
+            localStorage.setItem('sigesit_link_pengaturan', JSON.stringify(linkPengaturanList));
+            showToast(`Tautan Link ${idx} berhasil disimpan.`);
 
             if (!isMockUrl() && scriptUrl) {
                 fetch(`${scriptUrl}`, {
                     method: 'POST',
                     body: JSON.stringify({
                         action: "updateLinkPengaturan",
-                        judul: linkPengaturan.judul,
-                        url: linkPengaturan.url,
-                        aktif: linkPengaturan.aktif
+                        link_pengaturan_list: linkPengaturanList
                     })
                 }).catch(() => console.log("Gagal sync tautan link ke server."));
             }
@@ -2832,21 +2947,32 @@ function saveJadwalToStorage() {
         }
 
         // Merender kartu "Tautan Dari Administrator" di menu Profil siswa.
-        // Kartu hanya ditampilkan apabila administrator mengaktifkan tautan
-        // (linkPengaturan.aktif === true); jika nonaktif, kartu disembunyikan
-        // sepenuhnya sehingga tautan "menghilang" dari sisi siswa.
+        // Sekarang mendukung SAMPAI 4 TAUTAN sekaligus — setiap slot yang
+        // diaktifkan Administrator (linkPengaturanList[i].aktif === true dan
+        // memiliki url) akan dirender sebagai satu tombol tautan tersendiri.
+        // Jika semua slot nonaktif, kartu disembunyikan sepenuhnya.
         function renderProfilTautanLink() {
             const tautanCard = document.getElementById('profil-card-tautan-link');
-            if (!tautanCard || !currentSiswa || currentSiswa.role === 'walikelas') return;
+            const listContainer = document.getElementById('profil-tautan-link-list');
+            if (!tautanCard || !listContainer || !currentSiswa || currentSiswa.role === 'walikelas') return;
 
-            if (linkPengaturan.aktif && linkPengaturan.url) {
-                document.getElementById('profil-tautan-link-judul').innerText = linkPengaturan.judul || 'Tautan Informasi';
-                const btn = document.getElementById('profil-tautan-link-btn');
-                if (btn) btn.href = linkPengaturan.url;
-                tautanCard.classList.remove('hidden');
-            } else {
+            const activeLinks = (linkPengaturanList || []).filter(l => l && l.aktif && l.url);
+
+            if (activeLinks.length === 0) {
                 tautanCard.classList.add('hidden');
+                listContainer.innerHTML = '';
+                return;
             }
+
+            tautanCard.classList.remove('hidden');
+            listContainer.innerHTML = activeLinks.map(link => `
+                <div class="space-y-1.5">
+                    <p class="text-sm font-extrabold text-slate-800">${link.judul || 'Tautan Informasi'}</p>
+                    <a href="${link.url}" target="_blank" rel="noopener noreferrer" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 rounded-2xl transition-all text-xs flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-arrow-up-right-from-square"></i> Buka Tautan
+                    </a>
+                </div>
+            `).join('');
         }
 
         function switchView(target) {
@@ -4637,13 +4763,13 @@ function saveJadwalToStorage() {
                         localDb.izin = data.izin || [];
                         localDb.poin = data.poin || [];
                         localDb.nilai = data.nilai || []; 
-                        if (data.link_pengaturan) {
-                            linkPengaturan = {
-                                judul: data.link_pengaturan.judul || '',
-                                url: data.link_pengaturan.url || '',
-                                aktif: !!data.link_pengaturan.aktif
-                            };
-                            localStorage.setItem('sigesit_link_pengaturan', JSON.stringify(linkPengaturan));
+                        if (data.link_pengaturan_list) {
+                            linkPengaturanList = normalizeLinkPengaturanList(data.link_pengaturan_list);
+                            localStorage.setItem('sigesit_link_pengaturan', JSON.stringify(linkPengaturanList));
+                        } else if (data.link_pengaturan) {
+                            // Kompatibilitas mundur: server lama hanya mengirim satu object tautan.
+                            linkPengaturanList = normalizeLinkPengaturanList(data.link_pengaturan);
+                            localStorage.setItem('sigesit_link_pengaturan', JSON.stringify(linkPengaturanList));
                         }
                         if (data.libur_pengaturan) {
                             liburPengaturan = {
