@@ -2744,22 +2744,61 @@ function saveJadwalToStorage() {
                 }
             }
 
-            // Log Presensi Seluruh Sekolah
+            // Log Presensi Seluruh Sekolah — digabung per siswa+tanggal, presensi
+            // masuk dan pulang disejajarkan dalam satu baris (format IN/OUT),
+            // konsisten dengan tampilan Live Kehadiran Kelas & Monitoring Wali,
+            // bukan lagi dua baris terpisah seperti sebelumnya.
             const presensiListEl = document.getElementById('admin-rekap-presensi-list');
             if (presensiListEl) {
-                const sortedPresensi = [...presensiTerfilter].sort((a, b) => new Date(b.tanggal) - new Date(a.tanggal));
-                if (sortedPresensi.length === 0) {
+                const groupedPresensi = {};
+                presensiTerfilter.forEach(p => {
+                    const key = `${p.nis}|${p.tanggal}`;
+                    if (!groupedPresensi[key]) {
+                        groupedPresensi[key] = { nis: p.nis, tanggal: p.tanggal, masuk: null, pulang: null };
+                    }
+                    if (p.tipe === 'masuk') groupedPresensi[key].masuk = p;
+                    else if (p.tipe === 'pulang') groupedPresensi[key].pulang = p;
+                });
+
+                const groupedPresensiList = Object.values(groupedPresensi).sort((a, b) => new Date(b.tanggal) - new Date(a.tanggal));
+
+                if (groupedPresensiList.length === 0) {
                     presensiListEl.innerHTML = `<div class="p-6 text-center text-xs text-slate-400">Tidak ada data presensi pada periode ini.</div>`;
                 } else {
-                    presensiListEl.innerHTML = sortedPresensi.slice(0, 100).map(p => {
-                        const muridData = (localDb.siswa || []).find(s => s.nis === p.nis);
+                    presensiListEl.innerHTML = groupedPresensiList.slice(0, 100).map(row => {
+                        const muridData = (localDb.siswa || []).find(s => s.nis === row.nis);
+                        const batasMasukSiswa = getBatasMasukMenit(muridData ? muridData.kelas : null, 6 * 60 + 30);
+
+                        let masukClass = "bg-slate-100 text-slate-400";
+                        let masukTime = '--:--';
+                        if (row.masuk) {
+                            masukTime = row.masuk.jam;
+                            const [h, m] = masukTime.split(':').map(Number);
+                            masukClass = (h * 60 + m > batasMasukSiswa)
+                                ? "bg-rose-50 text-rose-700 border border-rose-200 font-bold"
+                                : "bg-emerald-50 text-emerald-700 border border-emerald-200 font-bold";
+                        }
+
+                        let pulangClass = "bg-slate-100 text-slate-400";
+                        let pulangTime = '--:--';
+                        if (row.pulang) {
+                            pulangTime = row.pulang.jam;
+                            pulangClass = "bg-emerald-50 text-emerald-700 border border-emerald-200 font-bold";
+                        }
+
+                        const namaTampil = muridData ? muridData.nama : ((row.masuk && row.masuk.nama) || (row.pulang && row.pulang.nama) || '-');
+                        const kelasTampil = muridData ? muridData.kelas : '-';
+
                         return `
                             <div class="px-4 py-3 flex justify-between items-center text-xs">
                                 <div>
-                                    <p class="font-bold text-slate-800">${muridData ? muridData.nama : p.nama}</p>
-                                    <p class="text-[9px] text-slate-400">${muridData ? muridData.kelas : '-'} • ${p.tanggal}</p>
+                                    <p class="font-bold text-slate-800">${namaTampil}</p>
+                                    <p class="text-[9px] text-slate-400">${kelasTampil} • ${row.tanggal}</p>
                                 </div>
-                                <span class="px-2 py-0.5 rounded text-[9px] font-bold ${p.tipe === 'masuk' ? 'bg-emerald-50 text-emerald-700' : 'bg-orange-50 text-orange-700'}">${p.tipe.toUpperCase()} - ${p.jam}</span>
+                                <div class="flex items-center gap-1.5">
+                                    <span class="px-2 py-1 rounded text-[9px] ${masukClass}">IN: ${masukTime}</span>
+                                    <span class="px-2 py-1 rounded text-[9px] ${pulangClass}">OUT: ${pulangTime}</span>
+                                </div>
                             </div>
                         `;
                     }).join('');
