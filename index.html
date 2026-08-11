@@ -530,7 +530,7 @@
                     
                     <div class="grid grid-cols-2 gap-2 text-xs">
                         <!-- Hadir -->
-                        <div class="bg-emerald-50/50 p-2.5 rounded-2xl border border-emerald-100 flex items-center justify-between">
+                        <div onclick="openWaliRekapDetail('hadir')" class="bg-emerald-50/50 p-2.5 rounded-2xl border border-emerald-100 flex items-center justify-between cursor-pointer active:scale-95 transition-transform">
                             <div>
                                 <span class="text-[10px] text-emerald-800 font-extrabold block uppercase tracking-wider">Hadir</span>
                                 <span id="rekap-count-hadir" class="text-sm font-black text-slate-800">0 siswa</span>
@@ -538,7 +538,7 @@
                             <i class="fa-solid fa-user-check text-emerald-600 text-lg opacity-80"></i>
                         </div>
                         <!-- Sakit -->
-                        <div class="bg-amber-50/50 p-2.5 rounded-2xl border border-amber-100 flex items-center justify-between">
+                        <div onclick="openWaliRekapDetail('sakit')" class="bg-amber-50/50 p-2.5 rounded-2xl border border-amber-100 flex items-center justify-between cursor-pointer active:scale-95 transition-transform">
                             <div>
                                 <span class="text-[10px] text-amber-800 font-extrabold block uppercase tracking-wider">Sakit</span>
                                 <span id="rekap-count-sakit" class="text-sm font-black text-slate-800">0 siswa</span>
@@ -546,7 +546,7 @@
                             <i class="fa-solid fa-house-medical text-amber-600 text-lg opacity-80"></i>
                         </div>
                         <!-- Izin Tidak Masuk -->
-                        <div class="bg-indigo-50/50 p-2.5 rounded-2xl border border-indigo-100 flex items-center justify-between">
+                        <div onclick="openWaliRekapDetail('izin')" class="bg-indigo-50/50 p-2.5 rounded-2xl border border-indigo-100 flex items-center justify-between cursor-pointer active:scale-95 transition-transform">
                             <div>
                                 <span class="text-[10px] text-indigo-800 font-extrabold block uppercase tracking-wider">Izin Tidak Masuk</span>
                                 <span id="rekap-count-izin" class="text-sm font-black text-slate-800">0 siswa</span>
@@ -554,7 +554,7 @@
                             <i class="fa-solid fa-envelope text-indigo-600 text-lg opacity-80"></i>
                         </div>
                         <!-- Izin Dispen -->
-                        <div class="bg-teal-50/50 p-2.5 rounded-2xl border border-teal-100 flex items-center justify-between">
+                        <div onclick="openWaliRekapDetail('dispen')" class="bg-teal-50/50 p-2.5 rounded-2xl border border-teal-100 flex items-center justify-between cursor-pointer active:scale-95 transition-transform">
                             <div>
                                 <span class="text-[10px] text-teal-800 font-extrabold block uppercase tracking-wider">Izin Dispen</span>
                                 <span id="rekap-count-dispen" class="text-sm font-black text-slate-800">0 siswa</span>
@@ -562,7 +562,7 @@
                             <i class="fa-solid fa-briefcase text-teal-600 text-lg opacity-80"></i>
                         </div>
                         <!-- Izin Terlambat -->
-                        <div class="bg-sky-50/50 p-2.5 rounded-2xl border border-sky-100 flex items-center justify-between">
+                        <div onclick="openWaliRekapDetail('terlambat')" class="bg-sky-50/50 p-2.5 rounded-2xl border border-sky-100 flex items-center justify-between cursor-pointer active:scale-95 transition-transform">
                             <div>
                                 <span class="text-[10px] text-sky-800 font-extrabold block uppercase tracking-wider">Izin Terlambat</span>
                                 <span id="rekap-count-terlambat" class="text-sm font-black text-slate-800">0 siswa</span>
@@ -570,7 +570,7 @@
                             <i class="fa-solid fa-clock-rotate-left text-sky-600 text-lg opacity-80"></i>
                         </div>
                         <!-- Izin Pulang Cepat -->
-                        <div class="bg-rose-50/40 p-2.5 rounded-2xl border border-rose-100 flex items-center justify-between">
+                        <div onclick="openWaliRekapDetail('pulangcepat')" class="bg-rose-50/40 p-2.5 rounded-2xl border border-rose-100 flex items-center justify-between cursor-pointer active:scale-95 transition-transform">
                             <div>
                                 <span class="text-[10px] text-rose-800 font-extrabold block uppercase tracking-wider">Izin Pulang Cepat</span>
                                 <span id="rekap-count-pulangcepat" class="text-sm font-black text-slate-800">0 siswa</span>
@@ -820,7 +820,7 @@
                 <div class="absolute right-0 bottom-0 opacity-10 translate-x-4 translate-y-4">
                     <i class="fa-solid fa-chart-line text-9xl"></i>
                 </div>
-                <p class="text-[10px] text-emerald-100 uppercase font-extrabold tracking-widest">Rata-Rata Nilai Rapor</p>
+                <p class="text-[10px] text-emerald-100 uppercase font-extrabold tracking-widest">Rata-Rata Nilai</p>
                 <div class="mt-4 flex items-baseline gap-2">
                     <span id="nilai-rata-rapor" class="text-5xl font-black tracking-tight">0.0</span>
                     <span class="text-sm font-semibold text-emerald-200">/ Skala 100</span>
@@ -843,8 +843,23 @@
                     <h5 class="text-xs font-bold text-slate-655">Daftar Nilai Mata Pelajaran</h5>
                     <span class="text-[9px] bg-emerald-50 text-emerald-700 font-extrabold px-2.5 py-0.5 rounded-full">Nilai Akademik</span>
                 </div>
-                <div id="nilai-mata-pelajaran-list" class="divide-y divide-slate-100 overflow-y-auto max-h-[360px]">
-                    <div class="p-6 text-center text-xs text-slate-400">Belum ada data nilai masuk.</div>
+                <p class="px-4 pt-2.5 text-[9px] text-slate-400 font-semibold">Ketuk nilai untuk melihat rincian tugas.</p>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-[10px] min-w-[420px]">
+                        <thead>
+                            <tr class="text-slate-400 uppercase text-[8.5px] font-extrabold border-b border-slate-100">
+                                <th class="text-left py-2 px-3 sticky left-0 bg-white">Mata Pelajaran</th>
+                                <th class="text-center py-2 px-1.5">Tugas</th>
+                                <th class="text-center py-2 px-1.5">UH</th>
+                                <th class="text-center py-2 px-1.5">UTS</th>
+                                <th class="text-center py-2 px-1.5">US</th>
+                                <th class="text-center py-2 px-1.5">Poin</th>
+                            </tr>
+                        </thead>
+                        <tbody id="nilai-mata-pelajaran-list" class="divide-y divide-slate-100">
+                            <tr><td colspan="6" class="p-6 text-center text-xs text-slate-400">Belum ada data nilai masuk.</td></tr>
+                        </tbody>
+                    </table>
                 </div>
             </div>
         </div>
@@ -1161,15 +1176,15 @@
             </div>
 
             <div class="grid grid-cols-3 gap-2">
-                <div class="bg-white p-3 rounded-2xl border border-slate-100 shadow-sm text-center">
+                <div onclick="openAdminRekapDetail('hadir')" class="bg-white p-3 rounded-2xl border border-slate-100 shadow-sm text-center cursor-pointer active:scale-95 transition-transform">
                     <span class="text-[9px] font-bold text-emerald-600 uppercase block">Total Hadir</span>
                     <span id="admin-rekap-total-hadir" class="text-lg font-black text-slate-800">0</span>
                 </div>
-                <div class="bg-white p-3 rounded-2xl border border-slate-100 shadow-sm text-center">
+                <div onclick="openAdminRekapDetail('terlambat')" class="bg-white p-3 rounded-2xl border border-slate-100 shadow-sm text-center cursor-pointer active:scale-95 transition-transform">
                     <span class="text-[9px] font-bold text-amber-600 uppercase block">Total Terlambat</span>
                     <span id="admin-rekap-total-terlambat" class="text-lg font-black text-slate-800">0</span>
                 </div>
-                <div class="bg-white p-3 rounded-2xl border border-slate-100 shadow-sm text-center">
+                <div onclick="openAdminRekapDetail('alpha')" class="bg-white p-3 rounded-2xl border border-slate-100 shadow-sm text-center cursor-pointer active:scale-95 transition-transform">
                     <span class="text-[9px] font-bold text-rose-600 uppercase block">Total Alpha</span>
                     <span id="admin-rekap-total-alpha" class="text-lg font-black text-slate-800">0</span>
                 </div>
@@ -1603,6 +1618,55 @@
         </div>
     </div>
 
+    <!-- MODAL RINCIAN NILAI (Siswa - rincian per kategori penilaian) -->
+    <div id="modal-rincian-nilai" class="hidden fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4" onclick="if(event.target===this) closeRincianNilaiModal()">
+        <div class="bg-white rounded-3xl p-5 w-full max-w-sm shadow-2xl transition transform scale-100 max-h-[80vh] flex flex-col">
+            <div class="flex justify-between items-center border-b border-slate-100 pb-2 mb-3 shrink-0">
+                <div>
+                    <h3 id="modal-rincian-mapel-title" class="font-bold text-sm text-slate-800 flex items-center gap-1.5">
+                        <i class="fa-solid fa-list-check text-indigo-600"></i> Rincian Nilai
+                    </h3>
+                    <p id="modal-rincian-kategori-subtitle" class="text-[10px] text-slate-400 font-semibold mt-0.5">Kategori</p>
+                </div>
+                <button type="button" onclick="closeRincianNilaiModal()" class="text-slate-400 text-lg hover:text-slate-600"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="overflow-y-auto pr-1">
+                <table class="w-full text-[10px] border-collapse">
+                    <thead class="sticky top-0 bg-white">
+                        <tr class="text-slate-400 uppercase text-[9px] font-extrabold border-b border-slate-100">
+                            <th class="text-left py-1.5 pr-1 w-6">No</th>
+                            <th class="text-left py-1.5 pr-1">Judul</th>
+                            <th class="text-left py-1.5 pr-1">Tanggal</th>
+                            <th class="text-right py-1.5 pl-1">Nilai</th>
+                        </tr>
+                    </thead>
+                    <tbody id="modal-rincian-nilai-list">
+                        <tr><td colspan="4" class="text-center py-4 text-slate-400">Tidak ada data.</td></tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="bg-indigo-50 p-3 rounded-2xl border border-indigo-100 flex justify-between items-center mt-3 shrink-0">
+                <span class="text-[10px] font-bold text-indigo-800 uppercase">Rata-Rata:</span>
+                <span id="modal-rincian-rata-rata" class="font-black text-indigo-700 text-base">0</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL DETAIL REKAP (daftar siswa per kategori) -->
+    <div id="modal-rekap-detail" class="hidden fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4" onclick="if(event.target===this) closeRekapDetailModal()">
+        <div class="bg-white rounded-3xl p-5 w-full max-w-sm shadow-2xl transition transform scale-100 max-h-[80vh] flex flex-col">
+            <div class="flex justify-between items-center border-b border-slate-100 pb-2 mb-3 shrink-0">
+                <h3 id="modal-rekap-detail-title" class="font-bold text-sm text-slate-800 flex items-center gap-1.5">
+                    <i class="fa-solid fa-users text-emerald-600"></i> Daftar Siswa
+                </h3>
+                <button type="button" onclick="closeRekapDetailModal()" class="text-slate-400 text-lg hover:text-slate-600"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div id="modal-rekap-detail-list" class="space-y-2 overflow-y-auto text-xs pr-1">
+                <div class="text-center py-4 text-slate-400">Tidak ada data.</div>
+            </div>
+        </div>
+    </div>
+
     <!-- TOAST NOTIFICATION -->
     <div id="toast" class="hidden fixed bottom-6 left-1/2 -translate-x-1/2 z-50 bg-slate-900 text-white px-5 py-3 rounded-full text-xs shadow-xl flex items-center gap-2 max-w-xs text-center transition-all duration-300">
         <span id="toast-message">Notifikasi</span>
@@ -1610,7 +1674,7 @@
 
     <script>
         // URL Google Apps Script (hardcoded — tidak perlu diinput manual oleh siswa/wali kelas)
-        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyHlY3upe6vVNXOMxinztVmcwFpPIESy2X3I3kslJ6H1ZiyvsN17ny_O1hmQZ0cEsHBCA/exec";
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwEhnZszudeK7AgEG7PVHW5bNUYfWJggke_C1LuqHFaQ3kFFdsIQOy9zdYMM2u_k9tW8g/exec";
         
         // Konfigurasi Geofencing SMAN 1 Parung
         const SCHOOL_LAT = -6.436954848531352; 
@@ -1770,7 +1834,7 @@ function getJadwalHariIni(kelasStr) {
 } 
 
         function normalizeNamaForMatch(nama) {
-    return (nama || '').toLowerCase().trim();
+    return (nama || '').toLowerCase().trim().replace(/\s+/g, ' ');
 }
         function loadJadwalFromStorage() {
     const stored = localStorage.getItem('sigesit_jadwal_presensi');
@@ -1942,6 +2006,8 @@ function saveJadwalToStorage() {
         // STATE UTAMA
         let currentSiswa = null;
         let currentAdmin = null;
+        let adminRekapDetailData = { hadir: [], terlambat: [], alpha: [] };
+        let waliRekapDetailData = { hadir: [], sakit: [], izin: [], dispen: [], terlambat: [], pulangcepat: [] };
         let scriptUrl = SCRIPT_URL;
         let currentLatitude = null;
         let currentLongitude = null;
@@ -2705,18 +2771,31 @@ function saveJadwalToStorage() {
 
             let totalHadir = 0;
             let totalTerlambat = 0;
+            const detailHadir = [];
+            const detailTerlambat = [];
             presensiTerfilter.forEach(p => {
                 if (p.tipe === 'masuk') {
                     totalHadir++;
                     const siswaData = siswaTerfilter.find(s => s.nis === p.nis);
                     const batasMasuk = getBatasMasukMenit(siswaData ? siswaData.kelas : null, 6 * 60 + 30);
                     const [h, m] = p.jam.split(':').map(Number);
-                    if (h * 60 + m > batasMasuk) totalTerlambat++;
+                    const isTerlambat = h * 60 + m > batasMasuk;
+                    const detailItem = {
+                        nama: siswaData ? siswaData.nama : (p.nama || '-'),
+                        kelas: siswaData ? siswaData.kelas : (p.kelas || '-'),
+                        info: `${p.tanggal} • Masuk ${p.jam}`
+                    };
+                    detailHadir.push(detailItem);
+                    if (isTerlambat) {
+                        totalTerlambat++;
+                        detailTerlambat.push(detailItem);
+                    }
                 }
             });
 
             // Hitung Alpha: hari kerja pada periode yang siswa tidak presensi masuk & tidak ada izin disetujui
             let totalAlpha = 0;
+            const detailAlpha = [];
             const now = new Date();
             const yearNum = parseInt(thn);
             const monthsToCheck = bln === 'Semua' ? Array.from({length: 12}, (_, i) => (i + 1).toString().padStart(2, '0')) : [bln];
@@ -2734,11 +2813,16 @@ function saveJadwalToStorage() {
                         const hadir = (localDb.presensi || []).some(p => p.nis === s.nis && p.tanggal === dateStr && p.tipe === 'masuk');
                         if (!hadir) {
                             const izinOk = (localDb.izin || []).some(i => i.nis === s.nis && i.status === 'Disetujui' && isTodayInRange(i.tanggal, dateStr));
-                            if (!izinOk) totalAlpha++;
+                            if (!izinOk) {
+                                totalAlpha++;
+                                detailAlpha.push({ nama: s.nama, kelas: s.kelas, info: dateStr });
+                            }
                         }
                     }
                 });
             });
+
+            adminRekapDetailData = { hadir: detailHadir, terlambat: detailTerlambat, alpha: detailAlpha };
 
             const setText = (id, val) => { const el = document.getElementById(id); if (el) el.innerText = val; };
             setText('admin-rekap-total-hadir', totalHadir);
@@ -2836,6 +2920,61 @@ function saveJadwalToStorage() {
                     }).join('');
                 }
             }
+        }
+
+        // ===== MODAL DETAIL REKAP (dipakai admin & wali kelas) =====
+        function renderRekapDetailModal(title, iconClass, items, emptyText) {
+            const titleEl = document.getElementById('modal-rekap-detail-title');
+            const listEl = document.getElementById('modal-rekap-detail-list');
+            if (!titleEl || !listEl) return;
+
+            titleEl.innerHTML = `<i class="fa-solid ${iconClass || 'fa-users'}"></i> ${title} <span class="text-slate-400 font-semibold">(${items.length})</span>`;
+
+            if (!items || items.length === 0) {
+                listEl.innerHTML = `<div class="text-center py-6 text-slate-400">${emptyText || 'Tidak ada siswa pada kategori ini.'}</div>`;
+            } else {
+                listEl.innerHTML = items.map(item => `
+                    <div class="bg-slate-50 p-2.5 rounded-2xl border border-slate-100 flex justify-between items-center gap-2">
+                        <div>
+                            <p class="font-bold text-slate-800 leading-tight">${item.nama || '-'}</p>
+                            <p class="text-[9px] text-slate-400 mt-0.5">${item.kelas || '-'}</p>
+                        </div>
+                        ${item.info ? `<span class="text-[9px] text-slate-500 font-semibold shrink-0 text-right">${item.info}</span>` : ''}
+                    </div>
+                `).join('');
+            }
+
+            document.getElementById('modal-rekap-detail').classList.remove('hidden');
+        }
+
+        function closeRekapDetailModal() {
+            const modal = document.getElementById('modal-rekap-detail');
+            if (modal) modal.classList.add('hidden');
+        }
+
+        function openAdminRekapDetail(type) {
+            const config = {
+                hadir: { title: 'Siswa Hadir', icon: 'fa-user-check', empty: 'Belum ada siswa yang hadir pada periode ini.' },
+                terlambat: { title: 'Siswa Terlambat', icon: 'fa-clock-rotate-left', empty: 'Tidak ada siswa yang terlambat pada periode ini.' },
+                alpha: { title: 'Siswa Alpha', icon: 'fa-user-xmark', empty: 'Tidak ada siswa alpha pada periode ini.' }
+            };
+            const c = config[type];
+            if (!c) return;
+            renderRekapDetailModal(c.title, c.icon, adminRekapDetailData[type] || [], c.empty);
+        }
+
+        function openWaliRekapDetail(type) {
+            const config = {
+                hadir: { title: 'Siswa Hadir', icon: 'fa-user-check', empty: 'Belum ada siswa yang hadir hari ini.' },
+                sakit: { title: 'Siswa Sakit', icon: 'fa-house-medical', empty: 'Tidak ada siswa sakit hari ini.' },
+                izin: { title: 'Izin Tidak Masuk', icon: 'fa-envelope', empty: 'Tidak ada siswa izin tidak masuk hari ini.' },
+                dispen: { title: 'Izin Dispen', icon: 'fa-briefcase', empty: 'Tidak ada siswa izin dispen hari ini.' },
+                terlambat: { title: 'Izin Terlambat', icon: 'fa-clock-rotate-left', empty: 'Tidak ada siswa izin terlambat hari ini.' },
+                pulangcepat: { title: 'Izin Pulang Cepat', icon: 'fa-person-walking-arrow-right', empty: 'Tidak ada siswa izin pulang cepat hari ini.' }
+            };
+            const c = config[type];
+            if (!c) return;
+            renderRekapDetailModal(c.title, c.icon, waliRekapDetailData[type] || [], c.empty);
         }
 
         function saveAdminRadiusSetting() {
@@ -3715,70 +3854,126 @@ function saveJadwalToStorage() {
             }).join('');
         }
 
+        // Kategori penilaian yang ditampilkan sejajar dengan nama mata pelajaran
+        const KATEGORI_NILAI_LIST = ['Tugas', 'UH', 'UTS', 'US', 'Poin'];
+
+        // Menyimpan rincian tugas per (mapel|kategori) agar bisa dibuka lewat popup
+        let siswaNilaiKategoriData = {};
+
+        // Mengklasifikasikan satu record nilai ke salah satu kategori:
+        // Tugas, UH (Ulangan Harian), UTS, US, atau Poin — berdasarkan
+        // teks bebas pada field "jenis" dan "judul_penilaian".
+        function classifyKategoriNilai(item) {
+            const jenis = String(item.jenis || '').toLowerCase();
+            const judul = String(item.judul_penilaian || '').toLowerCase();
+            const gabungan = `${jenis} ${judul}`;
+
+            if (gabungan.includes('poin') || gabungan.includes('prestasi')) return 'Poin';
+            if (gabungan.includes('tugas') || gabungan.includes('pekerjaan rumah') || /\bpr\b/.test(gabungan)) return 'Tugas';
+            if (gabungan.includes('akhir semester') || gabungan.includes('ujian sekolah') || gabungan.includes('uas') || /\bpas\b/.test(gabungan) || /\bus\b/.test(gabungan)) return 'US';
+            if (gabungan.includes('tengah semester') || gabungan.includes('mid') || /\bpts\b/.test(gabungan) || /\buts\b/.test(gabungan)) return 'UTS';
+            if (gabungan.includes('harian') || gabungan.includes('ulangan') || /\bph\b/.test(gabungan) || /\buh\b/.test(gabungan)) return 'UH';
+            return 'UH';
+        }
+
+        // Mengambil bagian TANGGAL saja (tanpa jam/waktu) dari sebuah record nilai.
+        // Menangani berbagai format sumber data: "YYYY-MM-DD HH:MM", ISO dengan "T",
+        // string tanggal dari Google Sheets, maupun beberapa kemungkinan nama field
+        // lain yang mungkin dipakai backend (tgl, tanggal_nilai, date) — lalu
+        // diformat rapi tanpa jam. Jika data yang tersedia ternyata hanya berupa
+        // jam saja (mis. "08:00", tanpa info tanggal), tampilkan "-" alih-alih
+        // menampilkan jam tersebut di kolom Tanggal.
+        function ambilTanggalNilai(item) {
+            const raw = item.tanggal || item.tgl || item.tanggal_nilai || item.date || item.waktu;
+            if (!raw) return '-';
+            const rawStr = String(raw).trim();
+            if (!rawStr || rawStr === '-') return '-';
+
+            // Jika seluruh nilai field hanya berupa jam (mis. "08:00" atau "08:00:00"),
+            // berarti sumber data tidak menyertakan tanggal sama sekali.
+            const hanyaJamSaja = /^\d{1,2}:\d{2}(:\d{2})?$/.test(rawStr);
+            if (hanyaJamSaja) return '-';
+
+            // Buang bagian jam jika sudah dalam format "YYYY-MM-DD HH:MM" atau "...T..."
+            const bagianTanggal = rawStr.split(/[T ]/)[0];
+
+            const dateObj = new Date(rawStr);
+            if (!isNaN(dateObj.getTime())) {
+                return dateObj.toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' });
+            }
+
+            // Fallback jika gagal di-parse sebagai Date: tampilkan bagian tanggal mentahnya saja
+            return bagianTanggal || rawStr;
+        }
+
         function renderSiswaNilai() {
   const listContainer = document.getElementById('nilai-mata-pelajaran-list');
   const avgRaporEl = document.getElementById('nilai-rata-rapor');
   const statusAkademisEl = document.getElementById('nilai-status-akademis');
   if (!listContainer || !currentSiswa) return;
 
-  const userNilai = localDb.nilai ? localDb.nilai.filter(n => normalizeNamaForMatch(n.nama) === normalizeNamaForMatch(currentSiswa.nama)) : [];
+  const userNilai = localDb.nilai ? localDb.nilai.filter(n => {
+    if (n.nis && currentSiswa.nis && String(n.nis).trim() === String(currentSiswa.nis).trim()) return true;
+    if (n.nis && currentSiswa.nis) return false;
+    return normalizeNamaForMatch(n.nama) === normalizeNamaForMatch(currentSiswa.nama);
+  }) : [];
   if (userNilai.length === 0) {
-    listContainer.innerHTML = `<div class="p-6 text-center text-xs text-slate-400">Belum ada nilai terinput atas nama "${currentSiswa.nama}". Silakan hubungi wali kelas Anda atau gunakan tombol sinkronisasi.</div>`;
+    listContainer.innerHTML = `<tr><td colspan="6" class="p-6 text-center text-xs text-slate-400">Belum ada nilai terinput atas nama "${currentSiswa.nama}". Silakan hubungi wali kelas Anda atau gunakan tombol sinkronisasi.</td></tr>`;
     if (avgRaporEl) avgRaporEl.innerText = "0.0";
     if (statusAkademisEl) statusAkademisEl.innerText = "Tidak Ada Data";
+    siswaNilaiKategoriData = {};
     return;
   }
 
-  let totalNilai = 0;
-  let nilaiCount = 0;
-  let listHTML = "";
-
-  const grouped = {};
+  // Kelompokkan per mata pelajaran, lalu per kategori penilaian
+  const groupedMapel = {};
   userNilai.forEach(n => {
-    const key = `${n.mapel}|${n.judul_penilaian}`;
-    if (!grouped[key]) {
-      grouped[key] = [];
-    }
-    grouped[key].push(n);
+    const mapel = n.mapel || "Mata Pelajaran";
+    const kategori = classifyKategoriNilai(n);
+    if (!groupedMapel[mapel]) groupedMapel[mapel] = {};
+    if (!groupedMapel[mapel][kategori]) groupedMapel[mapel][kategori] = [];
+    groupedMapel[mapel][kategori].push(n);
   });
 
-  Object.keys(grouped).forEach(key => {
-    const items = grouped[key];
-    const firstItem = items[0];
-    const mapel = firstItem.mapel || "Mata Pelajaran";
-    const judul = firstItem.judul_penilaian || "Penilaian";
-    const jenis = firstItem.jenis || "-";
-    
-    const nilaiList = items.map(n => parseInt(n.nilai) || 0);
-    const avgNilai = Math.round(nilaiList.reduce((a, b) => a + b, 0) / nilaiList.length);
-    
-    totalNilai += avgNilai;
-    nilaiCount++;
+  siswaNilaiKategoriData = {};
+  let totalNilaiKeseluruhan = 0;
+  let jumlahNilaiKeseluruhan = 0;
+  let listHTML = "";
 
-    const statusBadge = avgNilai >= 75 
-      ? `<span class="bg-emerald-50 text-emerald-700 px-2 py-0.5 rounded text-[9px] font-bold border border-emerald-200">Tuntas</span>`
-      : `<span class="bg-rose-50 text-rose-700 px-2 py-0.5 rounded text-[9px] font-bold border border-rose-200">Remedial</span>`;
+  Object.keys(groupedMapel).sort().forEach(mapel => {
+    const kategoriMap = groupedMapel[mapel];
+
+    const kolomHTML = KATEGORI_NILAI_LIST.map(kategori => {
+      const items = kategoriMap[kategori];
+      if (!items || items.length === 0) {
+        return `<td class="text-center py-2.5 px-1.5 text-slate-300 font-semibold">-</td>`;
+      }
+
+      const nilaiList = items.map(n => parseInt(n.nilai) || 0);
+      const avgNilai = Math.round(nilaiList.reduce((a, b) => a + b, 0) / nilaiList.length);
+      totalNilaiKeseluruhan += avgNilai;
+      jumlahNilaiKeseluruhan++;
+
+      const dataKey = `${mapel}|${kategori}`;
+      siswaNilaiKategoriData[dataKey] = items;
+
+      const warnaTeks = avgNilai >= 75 ? 'text-emerald-600' : 'text-rose-600';
+      return `<td class="text-center py-2.5 px-1.5">
+                <button type="button" onclick="openRincianNilaiModal('${mapel.replace(/'/g, "\\'")}', '${kategori}')" class="font-extrabold ${warnaTeks} underline decoration-dotted underline-offset-2 active:scale-95 transition">${avgNilai}</button>
+              </td>`;
+    }).join('');
 
     listHTML += `
-      <div class="p-4 bg-white flex flex-col gap-2 transition-all border-b border-slate-100 last:border-b-0">
-        <div class="flex justify-between items-center">
-          <div>
-            <span class="font-extrabold text-slate-800 text-xs">${mapel}</span>
-            <span class="text-[9px] text-slate-400 block font-semibold mt-0.5">Judul: ${judul} | Jenis: ${jenis}</span>
-          </div>
-          ${statusBadge}
-        </div>
-        <div class="bg-slate-50 p-3 rounded-xl border border-slate-100 flex justify-between items-center">
-          <span class="text-[10px] text-slate-500 font-semibold">Nilai Perolehan</span>
-          <span class="text-2xl font-black text-indigo-600">${avgNilai}</span>
-        </div>
-      </div>
+      <tr class="hover:bg-slate-50/50">
+        <td class="py-2.5 px-3 font-extrabold text-slate-800 sticky left-0 bg-white">${mapel}</td>
+        ${kolomHTML}
+      </tr>
     `;
   });
 
   listContainer.innerHTML = listHTML;
-  
-  const avgRapor = nilaiCount > 0 ? (totalNilai / nilaiCount).toFixed(1) : 0;
+
+  const avgRapor = jumlahNilaiKeseluruhan > 0 ? (totalNilaiKeseluruhan / jumlahNilaiKeseluruhan).toFixed(1) : 0;
   if (avgRaporEl) avgRaporEl.innerText = avgRapor;
 
   if (statusAkademisEl) {
@@ -3791,6 +3986,52 @@ function saveJadwalToStorage() {
     }
   }
 }
+
+        // Membuka popup rincian tugas untuk satu kategori pada satu mata pelajaran
+        function openRincianNilaiModal(mapel, kategori) {
+            const modal = document.getElementById('modal-rincian-nilai');
+            const listEl = document.getElementById('modal-rincian-nilai-list');
+            const titleEl = document.getElementById('modal-rincian-mapel-title');
+            const subtitleEl = document.getElementById('modal-rincian-kategori-subtitle');
+            const rataRataEl = document.getElementById('modal-rincian-rata-rata');
+            if (!modal || !listEl) return;
+
+            const dataKey = `${mapel}|${kategori}`;
+            const items = siswaNilaiKategoriData[dataKey] || [];
+
+            titleEl.innerHTML = `<i class="fa-solid fa-list-check text-indigo-600"></i> ${mapel}`;
+            subtitleEl.innerText = `Kategori: ${kategori}`;
+
+            if (items.length === 0) {
+                listEl.innerHTML = `<tr><td colspan="4" class="text-center py-4 text-slate-400">Tidak ada data.</td></tr>`;
+                rataRataEl.innerText = "0";
+            } else {
+                let totalNilai = 0;
+                listEl.innerHTML = items.map((item, index) => {
+                    const nilai = parseInt(item.nilai) || 0;
+                    totalNilai += nilai;
+                    const judul = item.judul_penilaian || '-';
+                    const tanggal = ambilTanggalNilai(item);
+                    return `
+                        <tr class="border-b border-slate-50 last:border-b-0">
+                            <td class="py-2 pr-1 text-slate-500 font-semibold">${index + 1}</td>
+                            <td class="py-2 pr-1 font-bold text-slate-700">${judul}</td>
+                            <td class="py-2 pr-1 text-slate-500">${tanggal}</td>
+                            <td class="py-2 pl-1 text-right font-extrabold text-indigo-600">${nilai}</td>
+                        </tr>
+                    `;
+                }).join('');
+                const rataRata = (totalNilai / items.length).toFixed(1);
+                rataRataEl.innerText = rataRata;
+            }
+
+            modal.classList.remove('hidden');
+        }
+
+        function closeRincianNilaiModal() {
+            const modal = document.getElementById('modal-rincian-nilai');
+            if (modal) modal.classList.add('hidden');
+        }
 
         function populateWaliNilaiJudulFilter() {
             const judulSelector = document.getElementById('wali-nilai-judul');
@@ -4178,42 +4419,64 @@ function saveJadwalToStorage() {
             const muridKelas = localDb.siswa.filter(s => s.kelas === targetKelas);
             const muridNisList = muridKelas.map(s => s.nis);
 
-            const countHadir = localDb.presensi.filter(p => p.tanggal === todayStr && p.tipe === 'masuk' && muridNisList.includes(p.nis)).length;
+            const muridNisMapCounters = {};
+            muridKelas.forEach(m => { muridNisMapCounters[m.nis] = m; });
+            const toDetail = (nis, extraInfo) => {
+                const m = muridNisMapCounters[nis];
+                return { nama: m ? m.nama : '-', kelas: m ? m.kelas : targetKelas, info: extraInfo || '' };
+            };
 
-            const countSakit = localDb.izin.filter(i => 
+            const listHadir = localDb.presensi.filter(p => p.tanggal === todayStr && p.tipe === 'masuk' && muridNisList.includes(p.nis));
+            const countHadir = listHadir.length;
+
+            const listSakit = localDb.izin.filter(i => 
                 muridNisList.includes(i.nis) && 
                 i.jenis === 'Sakit' && 
                 i.status === 'Disetujui' &&
                 isTodayInRange(i.tanggal, todayStr)
-            ).length;
+            );
+            const countSakit = listSakit.length;
 
-            const countIzin = localDb.izin.filter(i => 
+            const listIzin = localDb.izin.filter(i => 
                 muridNisList.includes(i.nis) && 
                 i.jenis === 'Izin' && 
                 i.status === 'Disetujui' &&
                 isTodayInRange(i.tanggal, todayStr)
-            ).length;
+            );
+            const countIzin = listIzin.length;
 
-            const countDispen = localDb.izin.filter(i => 
+            const listDispen = localDb.izin.filter(i => 
                 muridNisList.includes(i.nis) && 
                 i.jenis === 'Dispen' && 
                 i.status === 'Disetujui' &&
                 isTodayInRange(i.tanggal, todayStr)
-            ).length;
+            );
+            const countDispen = listDispen.length;
 
-            const countTerlambat = localDb.izin.filter(i => 
+            const listTerlambat = localDb.izin.filter(i => 
                 muridNisList.includes(i.nis) && 
                 i.jenis === 'Izin Terlambat Masuk' && 
                 i.status === 'Disetujui' &&
                 isTodayInRange(i.tanggal, todayStr)
-            ).length;
+            );
+            const countTerlambat = listTerlambat.length;
 
-            const countPulangCepat = localDb.izin.filter(i => 
+            const listPulangCepat = localDb.izin.filter(i => 
                 muridNisList.includes(i.nis) && 
                 i.jenis === 'Izin Pulang Cepat' && 
                 i.status === 'Disetujui' &&
                 isTodayInRange(i.tanggal, todayStr)
-            ).length;
+            );
+            const countPulangCepat = listPulangCepat.length;
+
+            waliRekapDetailData = {
+                hadir: listHadir.map(p => toDetail(p.nis, `Masuk ${p.jam || ''}`)),
+                sakit: listSakit.map(i => toDetail(i.nis, i.tanggal)),
+                izin: listIzin.map(i => toDetail(i.nis, i.tanggal)),
+                dispen: listDispen.map(i => toDetail(i.nis, i.tanggal)),
+                terlambat: listTerlambat.map(i => toDetail(i.nis, i.tanggal)),
+                pulangcepat: listPulangCepat.map(i => toDetail(i.nis, i.tanggal))
+            };
 
             const elHadir = document.getElementById('rekap-count-hadir');
             const elSakit = document.getElementById('rekap-count-sakit');
