@@ -1389,6 +1389,160 @@
                 </button>
             </div>
 
+            <!-- ============================================================ -->
+            <!-- HARI LIBUR NASIONAL & KEAGAMAAN (tanggal spesifik)            -->
+            <!-- ============================================================ -->
+            <div class="bg-white p-4 rounded-3xl border border-slate-100 shadow-sm space-y-3">
+                <h4 class="text-xs font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
+                    <i class="fa-solid fa-calendar-xmark text-indigo-600"></i> Hari Libur Nasional & Keagamaan
+                </h4>
+                <p class="text-[11px] text-slate-500">Tambahkan tanggal libur nasional/keagamaan (mis. Idul Fitri, Natal, HUT RI). Pada tanggal yang terdaftar, presensi masuk & pulang siswa otomatis ditutup dan pamplate di bawah ini akan ditampilkan sebagai gantinya.</p>
+
+                <div class="space-y-2">
+                    <div>
+                        <label class="block text-[10px] font-bold text-slate-400 uppercase ml-1 mb-1">Tanggal Libur</label>
+                        <input type="date" id="admin-libur-nasional-tanggal-input" class="w-full p-3 border border-slate-200 rounded-2xl text-sm outline-none focus:ring-2 focus:ring-indigo-500 font-semibold">
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-bold text-slate-400 uppercase ml-1 mb-1">Keterangan</label>
+                        <input type="text" id="admin-libur-nasional-keterangan-input" placeholder="Contoh: Hari Raya Idul Fitri" class="w-full p-3 border border-slate-200 rounded-2xl text-sm outline-none focus:ring-2 focus:ring-indigo-500">
+                    </div>
+                    <button type="button" onclick="tambahLiburNasionalTanggal()" class="w-full bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-bold py-2.5 rounded-2xl transition-all text-xs flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-plus"></i> Tambah Tanggal Libur
+                    </button>
+                </div>
+
+                <div>
+                    <label class="block text-[10px] font-bold text-slate-400 uppercase ml-1 mb-1">Daftar Tanggal Libur Terdaftar</label>
+                    <div id="admin-libur-nasional-tanggal-list" class="space-y-2 max-h-56 overflow-y-auto pr-1"></div>
+                </div>
+
+                <div class="border-t border-slate-100 pt-3 space-y-3">
+                    <p class="text-[11px] text-slate-500 font-semibold">Pamplate (gambar/pesan) untuk seluruh tanggal libur nasional di atas:</p>
+
+                    <div class="space-y-1">
+                        <label class="block text-[10px] font-bold text-slate-400 uppercase ml-1">Unggah Gambar (Maks 2MB)</label>
+                        <div class="border-2 border-dashed border-slate-200 rounded-2xl p-4 text-center cursor-pointer relative hover:bg-slate-50 transition-all">
+                            <input type="file" id="admin-libur-nasional-gambar-file" accept=".jpg, .jpeg, .png" onchange="handleUploadLiburNasionalGambar(this)" class="absolute inset-0 opacity-0 cursor-pointer">
+                            <i class="fa-solid fa-cloud-arrow-up text-2xl text-slate-400 mb-1"></i>
+                            <p class="text-xs text-slate-500 font-semibold" id="admin-libur-nasional-gambar-file-label">Pilih gambar JPG atau PNG</p>
+                        </div>
+                    </div>
+
+                    <div id="admin-libur-nasional-gambar-preview-container" class="hidden">
+                        <img id="admin-libur-nasional-gambar-preview" src="" alt="Preview Gambar Libur Nasional" class="w-full h-32 object-cover rounded-2xl border border-slate-200">
+                        <button type="button" onclick="hapusLiburNasionalGambar()" class="mt-2 w-full bg-rose-50 hover:bg-rose-100 text-rose-600 font-bold py-2 rounded-xl text-[11px] transition-all">
+                            <i class="fa-solid fa-trash"></i> Hapus Gambar
+                        </button>
+                    </div>
+
+                    <div>
+                        <label class="block text-[10px] font-bold text-slate-400 uppercase ml-1 mb-1">Judul Pop Up</label>
+                        <input type="text" id="admin-libur-nasional-judul" placeholder="Contoh: Hari Libur Nasional" class="w-full p-3 border border-slate-200 rounded-2xl text-sm outline-none focus:ring-2 focus:ring-indigo-500 font-semibold">
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-bold text-slate-400 uppercase ml-1 mb-1">Pesan Pop Up</label>
+                        <textarea id="admin-libur-nasional-pesan" rows="2" placeholder="Contoh: Presensi tidak tersedia karena hari ini hari libur nasional." class="w-full p-3 border border-slate-200 rounded-2xl text-sm outline-none focus:ring-2 focus:ring-indigo-500"></textarea>
+                    </div>
+                </div>
+
+                <button onclick="saveLiburNasionalSetting()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 rounded-2xl transition-all text-xs flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-floppy-disk"></i> Simpan Pengaturan Libur Nasional
+                </button>
+            </div>
+
+            <!-- ============================================================ -->
+            <!-- PAMPLATE POP UP PRESENSI MASUK (muncul setelah tersimpan)     -->
+            <!-- ============================================================ -->
+            <div class="bg-white p-4 rounded-3xl border border-slate-100 shadow-sm space-y-3">
+                <h4 class="text-xs font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
+                    <i class="fa-solid fa-image text-indigo-600"></i> Pamplate Pop Up Presensi Masuk
+                </h4>
+                <p class="text-[11px] text-slate-500">Gambar/pesan ini akan muncul sebagai pop up kepada siswa tepat setelah presensi masuk berhasil disimpan.</p>
+
+                <div class="space-y-1">
+                    <label class="block text-[10px] font-bold text-slate-400 uppercase ml-1">Unggah Gambar (Maks 2MB)</label>
+                    <div class="border-2 border-dashed border-slate-200 rounded-2xl p-4 text-center cursor-pointer relative hover:bg-slate-50 transition-all">
+                        <input type="file" id="admin-pamplate-masuk-gambar-file" accept=".jpg, .jpeg, .png" onchange="handleUploadPamplateGambar(this, 'masuk')" class="absolute inset-0 opacity-0 cursor-pointer">
+                        <i class="fa-solid fa-cloud-arrow-up text-2xl text-slate-400 mb-1"></i>
+                        <p class="text-xs text-slate-500 font-semibold" id="admin-pamplate-masuk-gambar-file-label">Pilih gambar JPG atau PNG</p>
+                    </div>
+                </div>
+
+                <div id="admin-pamplate-masuk-gambar-preview-container" class="hidden">
+                    <img id="admin-pamplate-masuk-gambar-preview" src="" alt="Preview Pamplate Masuk" class="w-full h-32 object-cover rounded-2xl border border-slate-200">
+                    <button type="button" onclick="hapusPamplateGambar('masuk')" class="mt-2 w-full bg-rose-50 hover:bg-rose-100 text-rose-600 font-bold py-2 rounded-xl text-[11px] transition-all">
+                        <i class="fa-solid fa-trash"></i> Hapus Gambar
+                    </button>
+                </div>
+
+                <div>
+                    <label class="block text-[10px] font-bold text-slate-400 uppercase ml-1 mb-1">Judul Pop Up</label>
+                    <input type="text" id="admin-pamplate-masuk-judul" placeholder="Contoh: Presensi Masuk Berhasil" class="w-full p-3 border border-slate-200 rounded-2xl text-sm outline-none focus:ring-2 focus:ring-indigo-500 font-semibold">
+                </div>
+                <div>
+                    <label class="block text-[10px] font-bold text-slate-400 uppercase ml-1 mb-1">Pesan Pop Up</label>
+                    <textarea id="admin-pamplate-masuk-pesan" rows="2" placeholder="Contoh: Terima kasih, kehadiran Anda telah tercatat." class="w-full p-3 border border-slate-200 rounded-2xl text-sm outline-none focus:ring-2 focus:ring-indigo-500"></textarea>
+                </div>
+
+                <div class="flex justify-between items-center bg-slate-50 rounded-2xl px-3.5 py-3 border border-slate-100">
+                    <span class="text-xs font-bold text-slate-600">Status Pop Up untuk Siswa</span>
+                    <button type="button" id="admin-pamplate-masuk-toggle" onclick="toggleAdminPamplateAktif('masuk')" class="text-[10px] font-extrabold px-3 py-1.5 rounded-full transition-all bg-slate-200 text-slate-500">
+                        Nonaktif
+                    </button>
+                </div>
+
+                <button onclick="savePamplateGambarSetting('masuk')" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 rounded-2xl transition-all text-xs flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-floppy-disk"></i> Simpan Pamplate Presensi Masuk
+                </button>
+            </div>
+
+            <!-- ============================================================ -->
+            <!-- PAMPLATE POP UP PRESENSI PULANG (muncul setelah tersimpan)    -->
+            <!-- ============================================================ -->
+            <div class="bg-white p-4 rounded-3xl border border-slate-100 shadow-sm space-y-3">
+                <h4 class="text-xs font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
+                    <i class="fa-solid fa-image text-indigo-600"></i> Pamplate Pop Up Presensi Pulang
+                </h4>
+                <p class="text-[11px] text-slate-500">Gambar/pesan ini akan muncul sebagai pop up kepada siswa tepat setelah presensi pulang berhasil disimpan.</p>
+
+                <div class="space-y-1">
+                    <label class="block text-[10px] font-bold text-slate-400 uppercase ml-1">Unggah Gambar (Maks 2MB)</label>
+                    <div class="border-2 border-dashed border-slate-200 rounded-2xl p-4 text-center cursor-pointer relative hover:bg-slate-50 transition-all">
+                        <input type="file" id="admin-pamplate-pulang-gambar-file" accept=".jpg, .jpeg, .png" onchange="handleUploadPamplateGambar(this, 'pulang')" class="absolute inset-0 opacity-0 cursor-pointer">
+                        <i class="fa-solid fa-cloud-arrow-up text-2xl text-slate-400 mb-1"></i>
+                        <p class="text-xs text-slate-500 font-semibold" id="admin-pamplate-pulang-gambar-file-label">Pilih gambar JPG atau PNG</p>
+                    </div>
+                </div>
+
+                <div id="admin-pamplate-pulang-gambar-preview-container" class="hidden">
+                    <img id="admin-pamplate-pulang-gambar-preview" src="" alt="Preview Pamplate Pulang" class="w-full h-32 object-cover rounded-2xl border border-slate-200">
+                    <button type="button" onclick="hapusPamplateGambar('pulang')" class="mt-2 w-full bg-rose-50 hover:bg-rose-100 text-rose-600 font-bold py-2 rounded-xl text-[11px] transition-all">
+                        <i class="fa-solid fa-trash"></i> Hapus Gambar
+                    </button>
+                </div>
+
+                <div>
+                    <label class="block text-[10px] font-bold text-slate-400 uppercase ml-1 mb-1">Judul Pop Up</label>
+                    <input type="text" id="admin-pamplate-pulang-judul" placeholder="Contoh: Presensi Pulang Berhasil" class="w-full p-3 border border-slate-200 rounded-2xl text-sm outline-none focus:ring-2 focus:ring-indigo-500 font-semibold">
+                </div>
+                <div>
+                    <label class="block text-[10px] font-bold text-slate-400 uppercase ml-1 mb-1">Pesan Pop Up</label>
+                    <textarea id="admin-pamplate-pulang-pesan" rows="2" placeholder="Contoh: Terima kasih, sampai jumpa besok!" class="w-full p-3 border border-slate-200 rounded-2xl text-sm outline-none focus:ring-2 focus:ring-indigo-500"></textarea>
+                </div>
+
+                <div class="flex justify-between items-center bg-slate-50 rounded-2xl px-3.5 py-3 border border-slate-100">
+                    <span class="text-xs font-bold text-slate-600">Status Pop Up untuk Siswa</span>
+                    <button type="button" id="admin-pamplate-pulang-toggle" onclick="toggleAdminPamplateAktif('pulang')" class="text-[10px] font-extrabold px-3 py-1.5 rounded-full transition-all bg-slate-200 text-slate-500">
+                        Nonaktif
+                    </button>
+                </div>
+
+                <button onclick="savePamplateGambarSetting('pulang')" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 rounded-2xl transition-all text-xs flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-floppy-disk"></i> Simpan Pamplate Presensi Pulang
+                </button>
+            </div>
+
             <div class="bg-white p-4 rounded-3xl border border-slate-100 shadow-sm space-y-3">
                 <h4 class="text-xs font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
                     <i class="fa-solid fa-key text-indigo-600"></i> Ubah Password Administrator
@@ -1679,6 +1833,46 @@
         </div>
     </div>
 
+    <!-- MODAL: Preview Bukti Izin (Foto/Surat) - Wali Kelas -->
+    <div id="modal-bukti-izin" class="hidden fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4" onclick="if(event.target===this) closeBuktiIzinModal()">
+        <div class="bg-white rounded-3xl p-5 w-full max-w-sm shadow-2xl transition transform scale-100 max-h-[85vh] flex flex-col">
+            <div class="flex justify-between items-center border-b border-slate-100 pb-2 mb-3 shrink-0">
+                <h3 id="modal-bukti-izin-title" class="font-bold text-sm text-slate-800 flex items-center gap-1.5">
+                    <i class="fa-solid fa-paperclip text-emerald-600"></i> Bukti Pengajuan Izin
+                </h3>
+                <button type="button" onclick="closeBuktiIzinModal()" class="text-slate-400 text-lg hover:text-slate-600"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="overflow-y-auto flex-1 flex items-center justify-center">
+                <img id="bukti-izin-image" src="" class="hidden max-w-full max-h-[65vh] rounded-xl border border-slate-100 object-contain mx-auto">
+                <a id="bukti-izin-pdf-link" href="" target="_blank" rel="noopener" class="hidden w-full text-center bg-indigo-50 text-indigo-700 font-bold text-xs py-4 rounded-xl border border-indigo-100">
+                    <i class="fa-solid fa-file-pdf text-lg block mb-1"></i> Buka Berkas PDF
+                </a>
+                <div id="bukti-izin-empty" class="hidden text-center py-6 text-slate-400 text-xs">Tidak ada berkas bukti untuk pengajuan ini.</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- MODAL: Pop Up Pamplate Presensi Masuk/Pulang (Siswa)          -->
+    <!-- Muncul otomatis setelah presensi masuk/pulang berhasil        -->
+    <!-- tersimpan. Gambar, judul, pesan, dan status aktif diatur      -->
+    <!-- sepenuhnya oleh Administrator lewat menu Pengaturan.          -->
+    <!-- ============================================================ -->
+    <div id="modal-pamplate-presensi" class="hidden fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-4 animate-fadeIn" onclick="if(event.target===this) closePamplatePresensiPopup()">
+        <div class="bg-white rounded-3xl overflow-hidden w-full max-w-sm shadow-2xl transition transform scale-100 max-h-[85vh] flex flex-col">
+            <div class="relative shrink-0">
+                <img id="pamplate-presensi-gambar" src="" alt="Pamplate Presensi" class="hidden w-full max-h-[60vh] object-contain bg-slate-50">
+                <button type="button" onclick="closePamplatePresensiPopup()" class="absolute top-2 right-2 w-8 h-8 rounded-full bg-black/50 hover:bg-black/70 text-white flex items-center justify-center transition-all">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+            <div class="p-5 space-y-1 text-center overflow-y-auto">
+                <h3 id="pamplate-presensi-judul" class="font-extrabold text-slate-800 text-sm"></h3>
+                <p id="pamplate-presensi-pesan" class="text-xs text-slate-500 whitespace-pre-line"></p>
+            </div>
+        </div>
+    </div>
+
     <!-- MODAL: Detail Kehadiran per Kelas (Admin Dashboard) -->
     <div id="modal-admin-kelas-detail" class="hidden fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4" onclick="if(event.target===this) closeAdminKelasDetailModal()">
         <div class="bg-white rounded-3xl p-5 w-full max-w-sm shadow-2xl transition transform scale-100 max-h-[85vh] flex flex-col">
@@ -1704,7 +1898,7 @@
 
     <script>
         // URL Google Apps Script (hardcoded — tidak perlu diinput manual oleh siswa/wali kelas)
-        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwEhnZszudeK7AgEG7PVHW5bNUYfWJggke_C1LuqHFaQ3kFFdsIQOy9zdYMM2u_k9tW8g/exec";
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwfhISKXzK3rnmYpid1CGH5MuS3grYv89FX0evRlHQnNDaZNOJmLC7ijgotyeIGm0cNCA/exec";
         
         // Konfigurasi Geofencing SMAN 1 Parung
         const SCHOOL_LAT = -6.436954848531352; 
@@ -1760,9 +1954,83 @@
             pesan: 'Presensi tidak tersedia pada hari Sabtu & Minggu. Selamat beristirahat!'
         };
 
+        // ================================================================
+        // PENGATURAN HARI LIBUR NASIONAL & KEAGAMAAN (dikontrol Admin)
+        // Berbeda dari liburPengaturan di atas (khusus Sabtu & Minggu):
+        // ini adalah daftar TANGGAL SPESIFIK (mis. Idul Fitri, Natal, HUT
+        // RI, dll) yang diinput manual oleh Administrator. Pada tanggal
+        // yang terdaftar, presensi masuk & pulang ikut ditutup (memakai
+        // mekanisme isHariLibur() yang sudah ada) dan siswa akan melihat
+        // pamplate/pesan liburNasionalPengaturan sebagai gantinya.
+        // ================================================================
+        let liburNasionalPengaturan = {
+            gambar: '',
+            judul: 'Hari Libur Nasional',
+            pesan: 'Presensi tidak tersedia karena hari ini merupakan hari libur nasional/keagamaan.'
+        };
+        let liburNasionalTanggalList = []; // [{ tanggal: 'YYYY-MM-DD', keterangan: 'Idul Fitri' }, ...]
+
+        // Mengecek apakah sebuah tanggal (format YYYY-MM-DD) terdaftar
+        // sebagai hari libur nasional/keagamaan oleh Admin.
+        function isTanggalLiburNasional(tanggalStr) {
+            return (liburNasionalTanggalList || []).some(item => item && item.tanggal === tanggalStr);
+        }
+
         function isHariLibur() {
             const dow = new Date().getDay();
-            return dow === 0 || dow === 6; // 0 = Minggu, 6 = Sabtu
+            const isWeekend = dow === 0 || dow === 6; // 0 = Minggu, 6 = Sabtu
+            // [TAMBAHAN] Hari libur nasional/keagamaan yang diatur Admin
+            // (tanggal spesifik di luar Sabtu/Minggu) juga menutup presensi,
+            // tanpa mengubah aturan Sabtu/Minggu yang sudah berjalan di atas.
+            return isWeekend || isTanggalLiburNasional(getTanggalHariIniLokal(new Date()));
+        }
+
+        // ================================================================
+        // PENGATURAN GAMBAR POP UP PAMPLATE PRESENSI MASUK & PULANG
+        // (dikontrol Admin, tampil ke siswa TEPAT SETELAH presensi masuk
+        // atau pulang berhasil tersimpan — berbeda dari popup libur di
+        // atas yang menggantikan tombol presensi pada hari Sabtu/Minggu).
+        // ================================================================
+        let pamplatePengaturan = {
+            masuk: {
+                gambar: '',
+                judul: 'Presensi Masuk Berhasil',
+                pesan: 'Terima kasih, kehadiran Anda telah tercatat.',
+                aktif: false
+            },
+            pulang: {
+                gambar: '',
+                judul: 'Presensi Pulang Berhasil',
+                pesan: 'Terima kasih, sampai jumpa besok!',
+                aktif: false
+            }
+        };
+
+        // Menampilkan popup pamplate presensi (masuk/pulang) ke siswa.
+        // Hanya tampil jika Admin sudah mengaktifkan DAN mengunggah gambar
+        // untuk jenis presensi terkait; jika tidak, popup tidak dipanggil
+        // sama sekali sehingga alur presensi yang sudah berjalan tidak
+        // terganggu.
+        function showPamplatePresensiPopup(type) {
+            const setting = pamplatePengaturan[type];
+            if (!setting || !setting.aktif || !setting.gambar) return;
+            const modal = document.getElementById('modal-pamplate-presensi');
+            if (!modal) return;
+            const imgEl = document.getElementById('pamplate-presensi-gambar');
+            const judulEl = document.getElementById('pamplate-presensi-judul');
+            const pesanEl = document.getElementById('pamplate-presensi-pesan');
+            if (imgEl) {
+                imgEl.src = setting.gambar;
+                imgEl.classList.remove('hidden');
+            }
+            if (judulEl) judulEl.innerText = setting.judul || (type === 'masuk' ? 'Presensi Masuk Berhasil' : 'Presensi Pulang Berhasil');
+            if (pesanEl) pesanEl.innerText = setting.pesan || '';
+            modal.classList.remove('hidden');
+        }
+
+        function closePamplatePresensiPopup() {
+            const modal = document.getElementById('modal-pamplate-presensi');
+            if (modal) modal.classList.add('hidden');
         }
 
         // ================================================================
@@ -1923,17 +2191,29 @@ function saveJadwalToStorage() {
                 const judulEl = document.getElementById('libur-weekend-judul');
                 const pesanEl = document.getElementById('libur-weekend-pesan');
 
+                // [TAMBAHAN] Jika hari ini terdaftar sebagai hari libur
+                // nasional/keagamaan oleh Admin, tampilkan pamplate libur
+                // nasional (liburNasionalPengaturan). Jika bukan, perilaku
+                // lama tetap berjalan apa adanya: tampilkan pamplate libur
+                // akhir pekan (liburPengaturan).
+                const liburNasionalAktifHariIni = isTanggalLiburNasional(getTanggalHariIniLokal(new Date()));
+                const sumberLiburPengaturan = liburNasionalAktifHariIni ? liburNasionalPengaturan : liburPengaturan;
+                const defaultJudulLibur = liburNasionalAktifHariIni ? 'Hari Libur Nasional' : 'Hari Libur Sekolah';
+                const defaultPesanLibur = liburNasionalAktifHariIni
+                    ? 'Presensi tidak tersedia karena hari ini merupakan hari libur nasional/keagamaan.'
+                    : 'Presensi tidak tersedia pada hari Sabtu & Minggu.';
+
                 if (imgEl) {
-                    if (liburPengaturan.gambar) {
-                        imgEl.src = liburPengaturan.gambar;
+                    if (sumberLiburPengaturan.gambar) {
+                        imgEl.src = sumberLiburPengaturan.gambar;
                         imgEl.classList.remove('hidden');
                     } else {
                         imgEl.classList.add('hidden');
                         imgEl.src = '';
                     }
                 }
-                if (judulEl) judulEl.innerText = liburPengaturan.judul || 'Hari Libur Sekolah';
-                if (pesanEl) pesanEl.innerText = liburPengaturan.pesan || 'Presensi tidak tersedia pada hari Sabtu & Minggu.';
+                if (judulEl) judulEl.innerText = sumberLiburPengaturan.judul || defaultJudulLibur;
+                if (pesanEl) pesanEl.innerText = sumberLiburPengaturan.pesan || defaultPesanLibur;
             } else {
                 btnContainer.classList.remove('hidden');
                 banner.classList.add('hidden');
@@ -2128,6 +2408,53 @@ function saveJadwalToStorage() {
                     };
                 } catch (e) {
                     console.log("Gagal load pengaturan libur, gunakan default.");
+                }
+            }
+
+            const storedLiburNasionalPengaturan = localStorage.getItem('sigesit_libur_nasional_pengaturan');
+            if (storedLiburNasionalPengaturan) {
+                try {
+                    const parsedLiburNasional = JSON.parse(storedLiburNasionalPengaturan);
+                    liburNasionalPengaturan = {
+                        gambar: parsedLiburNasional.gambar || '',
+                        judul: parsedLiburNasional.judul || 'Hari Libur Nasional',
+                        pesan: parsedLiburNasional.pesan || 'Presensi tidak tersedia karena hari ini merupakan hari libur nasional/keagamaan.'
+                    };
+                } catch (e) {
+                    console.log("Gagal load pengaturan libur nasional, gunakan default.");
+                }
+            }
+
+            const storedLiburNasionalTanggalList = localStorage.getItem('sigesit_libur_nasional_tanggal_list');
+            if (storedLiburNasionalTanggalList) {
+                try {
+                    const parsedTanggalList = JSON.parse(storedLiburNasionalTanggalList);
+                    liburNasionalTanggalList = Array.isArray(parsedTanggalList) ? parsedTanggalList : [];
+                } catch (e) {
+                    console.log("Gagal load daftar tanggal libur nasional, gunakan default.");
+                }
+            }
+
+            const storedPamplatePengaturan = localStorage.getItem('sigesit_pamplate_pengaturan');
+            if (storedPamplatePengaturan) {
+                try {
+                    const parsedPamplate = JSON.parse(storedPamplatePengaturan);
+                    pamplatePengaturan = {
+                        masuk: {
+                            gambar: (parsedPamplate.masuk && parsedPamplate.masuk.gambar) || '',
+                            judul: (parsedPamplate.masuk && parsedPamplate.masuk.judul) || 'Presensi Masuk Berhasil',
+                            pesan: (parsedPamplate.masuk && parsedPamplate.masuk.pesan) || 'Terima kasih, kehadiran Anda telah tercatat.',
+                            aktif: !!(parsedPamplate.masuk && parsedPamplate.masuk.aktif)
+                        },
+                        pulang: {
+                            gambar: (parsedPamplate.pulang && parsedPamplate.pulang.gambar) || '',
+                            judul: (parsedPamplate.pulang && parsedPamplate.pulang.judul) || 'Presensi Pulang Berhasil',
+                            pesan: (parsedPamplate.pulang && parsedPamplate.pulang.pesan) || 'Terima kasih, sampai jumpa besok!',
+                            aktif: !!(parsedPamplate.pulang && parsedPamplate.pulang.aktif)
+                        }
+                    };
+                } catch (e) {
+                    console.log("Gagal load pengaturan pamplate presensi, gunakan default.");
                 }
             }
 
@@ -2530,6 +2857,8 @@ function saveJadwalToStorage() {
                 if (radiusInput) radiusInput.value = ABSENCE_RADIUS_METERS;
                 renderAdminLinkSettingUI();
                 renderAdminLiburSettingUI();
+                renderAdminLiburNasionalUI();
+                renderAdminPamplateSettingUI();
                 updateIntegrationStatus();
                 renderJadwalTable();
                 switchJadwalJenjang(currentJadwalJenjang);
@@ -2688,6 +3017,275 @@ function saveJadwalToStorage() {
             }
 
             updateWeekendPresensiUI();
+        }
+
+        // ================================================================
+        // PANEL ADMIN: PENGATURAN HARI LIBUR NASIONAL & KEAGAMAAN
+        // Admin menambah/menghapus tanggal libur nasional/keagamaan
+        // (mis. Idul Fitri, Natal, HUT RI) beserta satu pamplate gambar/
+        // judul/pesan yang dipakai bersama untuk seluruh tanggal tersebut.
+        // Pada tanggal terdaftar, presensi masuk & pulang ikut ditutup
+        // lewat mekanisme isHariLibur() yang sudah ada (lihat di atas).
+        // ================================================================
+        function formatTanggalLiburNasionalIndo(tanggalStr) {
+            const parts = (tanggalStr || '').split('-').map(Number);
+            if (parts.length !== 3 || parts.some(isNaN)) return tanggalStr || '-';
+            const dateObj = new Date(parts[0], parts[1] - 1, parts[2]);
+            if (isNaN(dateObj.getTime())) return tanggalStr;
+            return dateObj.toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+        }
+
+        function renderAdminLiburNasionalUI() {
+            renderAdminLiburNasionalTanggalList();
+
+            const judulInput = document.getElementById('admin-libur-nasional-judul');
+            const pesanInput = document.getElementById('admin-libur-nasional-pesan');
+            if (judulInput) judulInput.value = liburNasionalPengaturan.judul || '';
+            if (pesanInput) pesanInput.value = liburNasionalPengaturan.pesan || '';
+
+            const previewContainer = document.getElementById('admin-libur-nasional-gambar-preview-container');
+            const previewImg = document.getElementById('admin-libur-nasional-gambar-preview');
+            const fileLabel = document.getElementById('admin-libur-nasional-gambar-file-label');
+            if (liburNasionalPengaturan.gambar) {
+                if (previewImg) previewImg.src = liburNasionalPengaturan.gambar;
+                if (previewContainer) previewContainer.classList.remove('hidden');
+                if (fileLabel) fileLabel.innerText = "Gambar tersimpan (unggah ulang untuk mengganti)";
+            } else {
+                if (previewContainer) previewContainer.classList.add('hidden');
+                if (fileLabel) fileLabel.innerText = "Pilih gambar JPG atau PNG";
+            }
+        }
+
+        function renderAdminLiburNasionalTanggalList() {
+            const listEl = document.getElementById('admin-libur-nasional-tanggal-list');
+            if (!listEl) return;
+            if (!liburNasionalTanggalList || liburNasionalTanggalList.length === 0) {
+                listEl.innerHTML = `<p class="text-center text-[11px] text-slate-400 py-3">Belum ada tanggal libur nasional yang ditambahkan.</p>`;
+                return;
+            }
+            const sorted = [...liburNasionalTanggalList].sort((a, b) => (a.tanggal || '').localeCompare(b.tanggal || ''));
+            listEl.innerHTML = sorted.map(item => `
+                <div class="flex items-center justify-between bg-slate-50 rounded-xl px-3 py-2.5 border border-slate-100">
+                    <div class="min-w-0">
+                        <p class="text-xs font-bold text-slate-700 truncate">${formatTanggalLiburNasionalIndo(item.tanggal)}</p>
+                        <p class="text-[10px] text-slate-400 truncate">${item.keterangan || '-'}</p>
+                    </div>
+                    <button type="button" onclick="hapusLiburNasionalTanggal('${item.tanggal}')" class="text-rose-500 hover:text-rose-700 text-sm px-2 shrink-0">
+                        <i class="fa-solid fa-trash"></i>
+                    </button>
+                </div>
+            `).join('');
+        }
+
+        // Menambahkan satu tanggal libur nasional/keagamaan baru ke daftar
+        // (lokal dulu, disinkronkan ke server saat tombol Simpan ditekan).
+        function tambahLiburNasionalTanggal() {
+            const tanggalInput = document.getElementById('admin-libur-nasional-tanggal-input');
+            const keteranganInput = document.getElementById('admin-libur-nasional-keterangan-input');
+            const tanggalVal = tanggalInput ? tanggalInput.value : '';
+            const keteranganVal = keteranganInput ? keteranganInput.value.trim() : '';
+
+            if (!tanggalVal) {
+                showToast("Pilih tanggal libur terlebih dahulu.");
+                return;
+            }
+            if (isTanggalLiburNasional(tanggalVal)) {
+                showToast("Tanggal tersebut sudah ada di daftar libur nasional.");
+                return;
+            }
+
+            liburNasionalTanggalList.push({ tanggal: tanggalVal, keterangan: keteranganVal });
+            renderAdminLiburNasionalTanggalList();
+            if (tanggalInput) tanggalInput.value = '';
+            if (keteranganInput) keteranganInput.value = '';
+            showToast("Tanggal libur ditambahkan. Klik Simpan untuk menerapkan.");
+        }
+
+        function hapusLiburNasionalTanggal(tanggalVal) {
+            liburNasionalTanggalList = (liburNasionalTanggalList || []).filter(item => item.tanggal !== tanggalVal);
+            renderAdminLiburNasionalTanggalList();
+            showToast("Tanggal libur dihapus. Klik Simpan untuk menerapkan.");
+        }
+
+        function handleUploadLiburNasionalGambar(input) {
+            const file = input.files[0];
+            if (!file) return;
+            if (file.size > 2 * 1024 * 1024) {
+                showToast("Ukuran gambar melebihi batas 2MB!");
+                input.value = "";
+                return;
+            }
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                liburNasionalPengaturan.gambar = e.target.result;
+                const previewContainer = document.getElementById('admin-libur-nasional-gambar-preview-container');
+                const previewImg = document.getElementById('admin-libur-nasional-gambar-preview');
+                const fileLabel = document.getElementById('admin-libur-nasional-gambar-file-label');
+                if (previewImg) previewImg.src = liburNasionalPengaturan.gambar;
+                if (previewContainer) previewContainer.classList.remove('hidden');
+                if (fileLabel) fileLabel.innerText = file.name;
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function hapusLiburNasionalGambar() {
+            liburNasionalPengaturan.gambar = '';
+            const previewContainer = document.getElementById('admin-libur-nasional-gambar-preview-container');
+            const fileInput = document.getElementById('admin-libur-nasional-gambar-file');
+            const fileLabel = document.getElementById('admin-libur-nasional-gambar-file-label');
+            if (previewContainer) previewContainer.classList.add('hidden');
+            if (fileInput) fileInput.value = "";
+            if (fileLabel) fileLabel.innerText = "Pilih gambar JPG atau PNG";
+            showToast("Gambar libur nasional dihapus. Klik Simpan untuk menerapkan.");
+        }
+
+        // Menyimpan daftar tanggal libur nasional beserta gambar/judul/pesan
+        // pamplate-nya secara lokal dan (jika terhubung) ke server, lalu
+        // memperbarui tampilan siswa (jika sedang login & hari ini termasuk
+        // salah satu tanggal libur nasional yang terdaftar).
+        function saveLiburNasionalSetting() {
+            const judulVal = document.getElementById('admin-libur-nasional-judul').value.trim();
+            const pesanVal = document.getElementById('admin-libur-nasional-pesan').value.trim();
+
+            liburNasionalPengaturan.judul = judulVal || 'Hari Libur Nasional';
+            liburNasionalPengaturan.pesan = pesanVal || 'Presensi tidak tersedia karena hari ini merupakan hari libur nasional/keagamaan.';
+
+            localStorage.setItem('sigesit_libur_nasional_pengaturan', JSON.stringify(liburNasionalPengaturan));
+            localStorage.setItem('sigesit_libur_nasional_tanggal_list', JSON.stringify(liburNasionalTanggalList));
+            showToast("Pengaturan libur nasional berhasil disimpan.");
+
+            if (!isMockUrl() && scriptUrl) {
+                fetch(`${scriptUrl}`, {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        action: "updateLiburNasionalPengaturan",
+                        gambar: liburNasionalPengaturan.gambar,
+                        judul: liburNasionalPengaturan.judul,
+                        pesan: liburNasionalPengaturan.pesan,
+                        tanggal_list: liburNasionalTanggalList
+                    })
+                }).catch(() => console.log("Gagal sync pengaturan libur nasional ke server."));
+            }
+
+            updateWeekendPresensiUI();
+        }
+
+        // ================================================================
+        // PANEL ADMIN: PENGATURAN GAMBAR POP UP PAMPLATE PRESENSI
+        // MASUK & PULANG (muncul ke siswa setelah presensi tersimpan)
+        // ================================================================
+        function renderAdminPamplateSettingUI() {
+            ['masuk', 'pulang'].forEach(type => renderAdminPamplateSettingUIByType(type));
+        }
+
+        function renderAdminPamplateSettingUIByType(type) {
+            const setting = pamplatePengaturan[type];
+            if (!setting) return;
+            const judulInput = document.getElementById(`admin-pamplate-${type}-judul`);
+            const pesanInput = document.getElementById(`admin-pamplate-${type}-pesan`);
+            if (judulInput) judulInput.value = setting.judul || '';
+            if (pesanInput) pesanInput.value = setting.pesan || '';
+
+            const previewContainer = document.getElementById(`admin-pamplate-${type}-gambar-preview-container`);
+            const previewImg = document.getElementById(`admin-pamplate-${type}-gambar-preview`);
+            const fileLabel = document.getElementById(`admin-pamplate-${type}-gambar-file-label`);
+            if (setting.gambar) {
+                if (previewImg) previewImg.src = setting.gambar;
+                if (previewContainer) previewContainer.classList.remove('hidden');
+                if (fileLabel) fileLabel.innerText = "Gambar tersimpan (unggah ulang untuk mengganti)";
+            } else {
+                if (previewContainer) previewContainer.classList.add('hidden');
+                if (fileLabel) fileLabel.innerText = "Pilih gambar JPG atau PNG";
+            }
+            updateAdminPamplateToggleUI(type);
+        }
+
+        function updateAdminPamplateToggleUI(type) {
+            const toggleBtn = document.getElementById(`admin-pamplate-${type}-toggle`);
+            if (!toggleBtn) return;
+            const setting = pamplatePengaturan[type] || { aktif: false };
+            if (setting.aktif) {
+                toggleBtn.innerText = "Aktif";
+                toggleBtn.className = "text-[10px] font-extrabold px-3 py-1.5 rounded-full transition-all bg-emerald-100 text-emerald-700";
+            } else {
+                toggleBtn.innerText = "Nonaktif";
+                toggleBtn.className = "text-[10px] font-extrabold px-3 py-1.5 rounded-full transition-all bg-slate-200 text-slate-500";
+            }
+        }
+
+        function toggleAdminPamplateAktif(type) {
+            if (!pamplatePengaturan[type]) return;
+            pamplatePengaturan[type].aktif = !pamplatePengaturan[type].aktif;
+            updateAdminPamplateToggleUI(type);
+        }
+
+        function handleUploadPamplateGambar(input, type) {
+            const file = input.files[0];
+            if (!file) return;
+            if (!pamplatePengaturan[type]) return;
+            if (file.size > 2 * 1024 * 1024) {
+                showToast("Ukuran gambar melebihi batas 2MB!");
+                input.value = "";
+                return;
+            }
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                pamplatePengaturan[type].gambar = e.target.result;
+                const previewContainer = document.getElementById(`admin-pamplate-${type}-gambar-preview-container`);
+                const previewImg = document.getElementById(`admin-pamplate-${type}-gambar-preview`);
+                const fileLabel = document.getElementById(`admin-pamplate-${type}-gambar-file-label`);
+                if (previewImg) previewImg.src = pamplatePengaturan[type].gambar;
+                if (previewContainer) previewContainer.classList.remove('hidden');
+                if (fileLabel) fileLabel.innerText = file.name;
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function hapusPamplateGambar(type) {
+            if (!pamplatePengaturan[type]) return;
+            pamplatePengaturan[type].gambar = '';
+            const previewContainer = document.getElementById(`admin-pamplate-${type}-gambar-preview-container`);
+            const fileInput = document.getElementById(`admin-pamplate-${type}-gambar-file`);
+            const fileLabel = document.getElementById(`admin-pamplate-${type}-gambar-file-label`);
+            if (previewContainer) previewContainer.classList.add('hidden');
+            if (fileInput) fileInput.value = "";
+            if (fileLabel) fileLabel.innerText = "Pilih gambar JPG atau PNG";
+            showToast(`Gambar pamplate presensi ${type === 'masuk' ? 'masuk' : 'pulang'} dihapus. Klik Simpan untuk menerapkan.`);
+        }
+
+        // Menyimpan pengaturan gambar/judul/pesan/status aktif pamplate pop up
+        // presensi masuk atau pulang secara lokal dan (jika terhubung) ke
+        // server, tanpa mengubah alur presensi yang sudah berjalan.
+        function savePamplateGambarSetting(type) {
+            const setting = pamplatePengaturan[type];
+            if (!setting) return;
+            const judulInput = document.getElementById(`admin-pamplate-${type}-judul`);
+            const pesanInput = document.getElementById(`admin-pamplate-${type}-pesan`);
+            const judulVal = judulInput ? judulInput.value.trim() : '';
+            const pesanVal = pesanInput ? pesanInput.value.trim() : '';
+
+            const defaultJudul = type === 'masuk' ? 'Presensi Masuk Berhasil' : 'Presensi Pulang Berhasil';
+            const defaultPesan = type === 'masuk' ? 'Terima kasih, kehadiran Anda telah tercatat.' : 'Terima kasih, sampai jumpa besok!';
+
+            setting.judul = judulVal || defaultJudul;
+            setting.pesan = pesanVal || defaultPesan;
+
+            localStorage.setItem('sigesit_pamplate_pengaturan', JSON.stringify(pamplatePengaturan));
+            showToast(`Pengaturan pamplate presensi ${type === 'masuk' ? 'masuk' : 'pulang'} berhasil disimpan.`);
+
+            if (!isMockUrl() && scriptUrl) {
+                fetch(`${scriptUrl}`, {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        action: "updatePamplatePengaturan",
+                        tipe: type,
+                        gambar: setting.gambar,
+                        judul: setting.judul,
+                        pesan: setting.pesan,
+                        aktif: setting.aktif
+                    })
+                }).catch(() => console.log(`Gagal sync pengaturan pamplate ${type} ke server.`));
+            }
         }
 
         function populateAdminKelasFilter() {
@@ -3144,6 +3742,193 @@ function saveJadwalToStorage() {
             const c = config[type];
             if (!c) return;
             renderRekapDetailModal(c.title, c.icon, adminRekapDetailData[type] || [], c.empty);
+        }
+
+        // Preview bukti/foto/surat yang diunggah siswa saat mengajukan izin.
+        // Dicari lewat kombinasi nis + created_at (unik per pengajuan) supaya
+        // tidak perlu menaruh data base64 yang besar langsung di atribut
+        // onclick. Berfungsi untuk semua jenis izin (Sakit, Izin, Dispen,
+        // Terlambat, Pulang Cepat, dst) karena field `file` sama-sama
+        // tersimpan di record `localDb.izin`.
+        function openBuktiIzin(nis, createdAt) {
+            // =========================================================================
+            // PERBAIKAN: PENCARIAN RECORD DENGAN MULTIPLE FALLBACK
+            // =========================================================================
+            // Coba 3 metode pencarian karena created_at bisa format berbeda
+            
+            // Metode 1: Exact match (jika created_at format konsisten)
+            let rec = (localDb.izin || []).find(i => i.nis === nis && i.created_at === createdAt);
+            
+            // Metode 2: Normalize whitespace (jika ada trailing space)
+            if (!rec && createdAt) {
+                const normalizedCreatedAt = createdAt.toString().trim();
+                rec = (localDb.izin || []).find(i => 
+                    i.nis === nis && 
+                    (i.created_at || '').toString().trim() === normalizedCreatedAt
+                );
+            }
+            
+            // Metode 3: Ambil izin terbaru untuk siswa ini (fallback jika truly tidak ketemu)
+            // PERBAIKAN: TIDAK MEMFILTER BERDASARKAN i.file AGAR SEMUA JENIS IZIN BISA DITAMPILKAN
+            if (!rec) {
+                const allIzinForNis = (localDb.izin || []).filter(i => i.nis === nis);
+                if (allIzinForNis.length > 0) {
+                    // Ambil yang paling baru (terakhir di list)
+                    rec = allIzinForNis[allIzinForNis.length - 1];
+                }
+            }
+            
+            // =========================================================================
+            // VALIDASI ELEMEN MODAL
+            // =========================================================================
+            const modal = document.getElementById('modal-bukti-izin');
+            const imgEl = document.getElementById('bukti-izin-image');
+            const pdfEl = document.getElementById('bukti-izin-pdf-link');
+            const emptyEl = document.getElementById('bukti-izin-empty');
+            const titleEl = document.getElementById('modal-bukti-izin-title');
+            
+            if (!modal || !imgEl || !pdfEl || !emptyEl) return;
+
+            // =========================================================================
+            // RESET SEMUA ELEMEN MODAL
+            // =========================================================================
+            imgEl.classList.add('hidden');
+            pdfEl.classList.add('hidden');
+            emptyEl.classList.add('hidden');
+            imgEl.src = "";
+            pdfEl.href = "";
+            imgEl.onerror = null;
+
+            // =========================================================================
+            // UPDATE TITLE
+            // =========================================================================
+            if (titleEl) {
+                titleEl.innerHTML = `<i class="fa-solid fa-paperclip text-emerald-600"></i> Bukti Izin${rec ? ' - ' + rec.jenis : ''}`;
+            }
+
+            // =========================================================================
+            // TAMPILKAN FILE ATAU PESAN KOSONG (DENGAN MULTIPLE FORMAT SUPPORT)
+            // =========================================================================
+            if (!rec) {
+                // Tidak ada record sama sekali
+                emptyEl.classList.remove('hidden');
+                emptyEl.innerHTML = `<div class="text-center py-6 text-slate-400 text-xs">Data izin tidak ditemukan untuk siswa ini.</div>`;
+                console.warn(`Data izin tidak ditemukan. NIS: ${nis}, CreatedAt: ${createdAt}`);
+            } else if (!rec.file) {
+                // Record ada tapi file kosong - tampilkan info detail izin
+                emptyEl.classList.remove('hidden');
+                const muridData = (localDb.siswa || []).find(s => s.nis === rec.nis);
+                const muridNama = muridData ? muridData.nama : 'Siswa';
+                emptyEl.innerHTML = `
+                    <div class="text-center py-4 space-y-2 text-xs">
+                        <p class="font-bold text-slate-600">Detail Pengajuan Izin</p>
+                        <div class="bg-white/50 rounded-lg p-3 space-y-1.5 text-left text-slate-600 text-[9px]">
+                            <p><strong>Siswa:</strong> ${muridNama}</p>
+                            <p><strong>Jenis Izin:</strong> ${rec.jenis || '-'}</p>
+                            <p><strong>Tanggal:</strong> ${rec.tanggal || '-'}</p>
+                            ${rec.waktu && rec.waktu !== '-' ? `<p><strong>Waktu:</strong> ${rec.waktu}</p>` : ''}
+                            <p><strong>Alasan:</strong> ${rec.keterangan || '-'}</p>
+                            ${rec.status ? `<p><strong>Status:</strong> <span class="font-bold text-indigo-600">${rec.status}</span></p>` : ''}
+                            ${rec.dispen_alamat ? `<p><strong>Lokasi Dispen:</strong> ${rec.dispen_alamat}</p>` : ''}
+                        </div>
+                        <p class="text-slate-400 text-[9px] mt-2">Bukti/Surat belum diunggah untuk izin ini.</p>
+                    </div>
+                `;
+                console.warn(`File bukti tidak ditemukan. NIS: ${nis}, CreatedAt: ${createdAt}`);
+            } else {
+                // File ada - determine format dan tampilkan
+                const fileData = rec.file.toString().trim();
+                
+                // ===== CASE 1: PDF Base64 (offline/mock upload) =====
+                if (fileData.startsWith('data:application/pdf')) {
+                    pdfEl.href = fileData;
+                    pdfEl.innerHTML = '<i class="fa-solid fa-file-pdf text-lg block mb-1"></i> Buka Berkas PDF';
+                    pdfEl.classList.remove('hidden');
+                }
+                
+                // ===== CASE 2: Google Drive File Link (format: drive.google.com/file/d/...) =====
+                else if (fileData.indexOf('drive.google.com/file/d/') !== -1) {
+                    // Ekstrak file ID dari URL
+                    const fileIdMatch = fileData.match(/\/file\/d\/([a-zA-Z0-9-_]+)/);
+                    
+                    if (fileIdMatch && fileIdMatch[1]) {
+                        const fileId = fileIdMatch[1];
+                        
+                        // Coba tampilkan sebagai thumbnail/preview dulu
+                        const thumbnailUrl = `https://drive.google.com/thumbnail?id=${fileId}&sz=w500`;
+                        imgEl.src = thumbnailUrl;
+                        
+                        // Jika thumbnail gagal diload, fallback ke link
+                        imgEl.onerror = () => {
+                            imgEl.classList.add('hidden');
+                            pdfEl.href = fileData;
+                            pdfEl.innerHTML = '<i class="fa-solid fa-file-pdf text-lg block mb-1"></i> Buka di Google Drive';
+                            pdfEl.classList.remove('hidden');
+                        };
+                        
+                        imgEl.classList.remove('hidden');
+                    } else {
+                        // File ID tidak bisa diextract, buka sebagai link
+                        pdfEl.href = fileData;
+                        pdfEl.innerHTML = '<i class="fa-solid fa-file-pdf text-lg block mb-1"></i> Buka Berkas';
+                        pdfEl.classList.remove('hidden');
+                    }
+                }
+                
+                // ===== CASE 3: Google Drive Thumbnail URL (format: drive.google.com/thumbnail?id=...) =====
+                else if (fileData.indexOf('drive.google.com/thumbnail') !== -1 || 
+                         fileData.indexOf('googleusercontent.com') !== -1) {
+                    imgEl.src = fileData;
+                    
+                    // Error handler jika thumbnail tidak bisa diload
+                    imgEl.onerror = () => {
+                        imgEl.classList.add('hidden');
+                        emptyEl.classList.remove('hidden');
+                        emptyEl.innerHTML = `<div class="text-center py-6 text-slate-400 text-xs">Tidak dapat memuat berkas.<br><small>${fileData.substring(0, 50)}...</small></div>`;
+                    };
+                    
+                    imgEl.classList.remove('hidden');
+                }
+                
+                // ===== CASE 4: Image Base64 (offline/mock upload) =====
+                else if (fileData.startsWith('data:image/')) {
+                    imgEl.src = fileData;
+                    imgEl.classList.remove('hidden');
+                }
+                
+                // ===== CASE 5: External URL (generic HTTP/HTTPS) =====
+                else if (fileData.startsWith('http://') || fileData.startsWith('https://')) {
+                    // Coba sebagai image dulu
+                    imgEl.src = fileData;
+                    
+                    // Jika gagal, fallback ke PDF link
+                    imgEl.onerror = () => {
+                        imgEl.classList.add('hidden');
+                        pdfEl.href = fileData;
+                        pdfEl.innerHTML = '<i class="fa-solid fa-file-pdf text-lg block mb-1"></i> Buka File';
+                        pdfEl.classList.remove('hidden');
+                    };
+                    
+                    imgEl.classList.remove('hidden');
+                }
+                
+                // ===== CASE 6: Format tidak dikenal =====
+                else {
+                    emptyEl.classList.remove('hidden');
+                    emptyEl.innerHTML = `<div class="text-center py-6 text-slate-400 text-xs">Format file tidak dikenal<br><small class="text-slate-300">${fileData.substring(0, 50)}</small></div>`;
+                    console.warn(`Format file tidak dikenal untuk NIS ${nis}:`, fileData);
+                }
+            }
+
+            // =========================================================================
+            // TAMPILKAN MODAL
+            // =========================================================================
+            modal.classList.remove('hidden');
+        }
+
+        function closeBuktiIzinModal() {
+            const modal = document.getElementById('modal-bukti-izin');
+            if (modal) modal.classList.add('hidden');
         }
 
         function openWaliRekapDetail(type) {
@@ -3608,7 +4393,13 @@ function saveJadwalToStorage() {
 
         function triggerPresensi(type) {
             if (isHariLibur()) {
-                showToast("Presensi ditutup pada hari Sabtu & Minggu.");
+                // [TAMBAHAN] Pesan toast menyesuaikan alasan penutupan: hari
+                // libur nasional/keagamaan (diatur Admin) atau akhir pekan
+                // biasa seperti semula.
+                const pesanTutupLibur = isTanggalLiburNasional(getTanggalHariIniLokal(new Date()))
+                    ? "Presensi ditutup karena hari ini hari libur nasional/keagamaan."
+                    : "Presensi ditutup pada hari Sabtu & Minggu.";
+                showToast(pesanTutupLibur);
                 return;
             }
             if (!currentLatitude || !currentLongitude) {
@@ -3669,6 +4460,10 @@ function saveJadwalToStorage() {
             }
             if (type === 'pulang' && statusAbsen.pulang) {
                 showToast("Anda sudah absen pulang hari ini.");
+                return;
+            }
+            if (type === 'pulang' && !statusAbsen.masuk) {
+                showToast("Anda belum presensi masuk. Silakan presensi masuk terlebih dahulu.");
                 return;
             }
             activeAbsenceType = type;
@@ -3748,10 +4543,24 @@ function saveJadwalToStorage() {
         }
 
         function savePresensiToState(record) {
+            // Cegah data presensi dobel/duplikat (nis + tanggal + tipe sama):
+            // jika sudah ada record presensi pertama untuk kombinasi ini,
+            // pertahankan yang pertama dan abaikan yang baru masuk.
+            const sudahAdaPresensi = (localDb.presensi || []).some(p =>
+                p.nis === record.nis && p.tanggal === record.tanggal && p.tipe === record.tipe
+            );
+            if (sudahAdaPresensi) {
+                updateHomePresensiUI();
+                renderLivePresensiKelas();
+                return;
+            }
             localDb.presensi.push(record);
             localStorage.setItem('local_offline_db', JSON.stringify(localDb));
             updateHomePresensiUI();
             renderLivePresensiKelas();
+            // Tampilkan popup pamplate (gambar pengumuman yang diatur Admin)
+            // tepat setelah presensi masuk/pulang BARU berhasil tersimpan.
+            showPamplatePresensiPopup(record.tipe);
         }
 
         function kirimNotifikasiWhatsApp(tipe, detail) {
@@ -3847,7 +4656,8 @@ function saveJadwalToStorage() {
                 } else {
                     iconPulang.className = "fa-solid fa-bell text-2xl";
                     textPulang.className = "text-[10px] text-slate-455 mt-0.5";
-                    textPulang.innerText = "Belum Presensi";
+                    textPulang.innerText = status.masuk ? "Belum Presensi" : "Presensi masuk dahulu";
+                    btnPulang.disabled = !status.masuk;
                     if (badgeDonePulang) badgeDonePulang.classList.add('hidden');
                 }
             }
@@ -4504,6 +5314,7 @@ function saveJadwalToStorage() {
                             <span><i class="fa-regular fa-calendar"></i> Tanggal: ${item.tanggal}</span>
                             ${item.waktu && item.waktu !== '-' ? '<span><i class="fa-regular fa-clock"></i> Jam: ' + item.waktu + '</span>' : ''}
                         </div>
+                        <button type="button" onclick="openBuktiIzin('${item.nis}','${item.created_at}')" class="text-[10px] text-indigo-600 font-bold underline flex items-center gap-1"><i class="fa-regular fa-image"></i> Lihat Bukti/Surat</button>
                         <div class="flex gap-2 pt-1">
                             <button onclick="approveOrRejectWaliIzin(${index}, 'Disetujui')" class="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2.5 rounded-xl transition text-[11px]">Setujui</button>
                             <button onclick="approveOrRejectWaliIzin(${index}, 'Ditolak')" class="flex-1 bg-rose-50 hover:bg-rose-100 text-rose-600 font-bold py-2.5 rounded-xl transition text-[11px] border border-rose-100">Tolak</button>
@@ -4588,6 +5399,7 @@ function saveJadwalToStorage() {
                             <p class="text-[9px] text-slate-500 mt-0.5">Kategori: <span class="font-bold text-indigo-700">${item.jenis}</span></p>
                             <p class="text-[9px] text-slate-400 mt-0.5">Alasan: "${item.keterangan || '-'}"</p>
                             <p class="text-[8px] text-slate-400 font-semibold mt-1"><i class="fa-regular fa-calendar"></i> ${item.tanggal}</p>
+                            <button type="button" onclick="openBuktiIzin('${item.nis}','${item.created_at}')" class="text-[9px] text-indigo-600 font-bold underline mt-1 flex items-center gap-1"><i class="fa-regular fa-image"></i> Lihat Bukti/Surat</button>
                         </div>
                         <span class="px-2 py-0.5 rounded text-[8px] font-bold border shrink-0 ${badgeClass}">${item.status}</span>
                     </div>
@@ -4891,6 +5703,17 @@ function saveJadwalToStorage() {
                 });
             };
 
+            // Cegah pengiriman ganda ke server: jika pengajuan jenis izin yang
+            // sama untuk tanggal yang sama sudah ada di data lokal, hentikan
+            // di sini tanpa mengirim request duplikat ke server.
+            const sudahDiajukanTh = (localDb.izin || []).some(i =>
+                i.nis === record.nis && i.jenis === record.jenis && i.tanggal === record.tanggal
+            );
+            if (sudahDiajukanTh) {
+                saveIzinToState(record);
+                return;
+            }
+
             if (fileInput.files.length > 0) {
                 fileToCompressedDataUrl(fileInput.files[0]).then(function(dataUrl) {
                     record.file = dataUrl;
@@ -4948,6 +5771,17 @@ function saveJadwalToStorage() {
                 });
             };
 
+            // Cegah pengiriman ganda ke server: jika pengajuan jenis izin yang
+            // sama untuk tanggal yang sama sudah ada di data lokal, hentikan
+            // di sini tanpa mengirim request duplikat ke server.
+            const sudahDiajukanKd = (localDb.izin || []).some(i =>
+                i.nis === record.nis && i.jenis === record.jenis && i.tanggal === record.tanggal
+            );
+            if (sudahDiajukanKd) {
+                saveIzinToState(record);
+                return;
+            }
+
             if (fileInput.files.length > 0) {
                 fileToCompressedDataUrl(fileInput.files[0]).then(function(dataUrl) {
                     record.file = dataUrl;
@@ -4961,6 +5795,22 @@ function saveJadwalToStorage() {
         }
 
         function saveIzinToState(record) {
+            // Cegah pengajuan izin dobel/duplikat (semua jenis izin): jika
+            // siswa yang sama sudah pernah mengajukan jenis izin yang sama
+            // untuk tanggal yang sama, pertahankan pengajuan pertama saja
+            // dan abaikan pengajuan berikutnya yang duplikat.
+            const sudahAdaIzin = (localDb.izin || []).some(i =>
+                i.nis === record.nis && i.jenis === record.jenis && i.tanggal === record.tanggal
+            );
+            if (sudahAdaIzin) {
+                showToast("Pengajuan izin ini sudah pernah dikirim sebelumnya.");
+                document.getElementById('form-izin-tidak-hadir').reset();
+                document.getElementById('form-izin-kondisional').reset();
+                document.getElementById('th-file-label').innerText = "Pilih berkas PDF, JPG, atau PNG";
+                document.getElementById('kd-file-label').innerText = "Pilih berkas PDF, JPG, atau PNG";
+                switchIzinTab('riwayat');
+                return;
+            }
             localDb.izin.push(record);
             localStorage.setItem('local_offline_db', JSON.stringify(localDb));
             if (record.status === 'Disetujui') {
@@ -5381,13 +6231,34 @@ function saveJadwalToStorage() {
                         localDb.walikelas = data.walikelas || [];
                         localDb.admin = data.admin || [];
 
-                        const serverPresensi = data.presensi || [];
-                        const localOnlyPresensi = localDb.presensi.filter(lp =>
-                            !serverPresensi.some(sp => sp.nis === lp.nis && sp.tanggal === lp.tanggal && sp.tipe === lp.tipe)
-                        );
+                        // Dedup data presensi dari server: jika ada baris dobel/duplikat
+                        // (nis + tanggal + tipe sama, misal dari spreadsheet), pertahankan
+                        // hanya kemunculan pertamanya saja.
+                        const seenPresensiKeys = new Set();
+                        const serverPresensi = (data.presensi || []).filter(sp => {
+                            const key = `${sp.nis}|${sp.tanggal}|${sp.tipe}`;
+                            if (seenPresensiKeys.has(key)) return false;
+                            seenPresensiKeys.add(key);
+                            return true;
+                        });
+                        const localOnlyPresensi = localDb.presensi.filter(lp => {
+                            const key = `${lp.nis}|${lp.tanggal}|${lp.tipe}`;
+                            if (seenPresensiKeys.has(key)) return false;
+                            seenPresensiKeys.add(key);
+                            return true;
+                        });
                         localDb.presensi = [...serverPresensi, ...localOnlyPresensi];
 
-                        localDb.izin = data.izin || [];
+                        // Dedup data izin dari server: jika ada baris dobel/duplikat
+                        // (nis + jenis + tanggal sama), pertahankan hanya
+                        // kemunculan pertamanya saja.
+                        const seenIzinKeys = new Set();
+                        localDb.izin = (data.izin || []).filter(i => {
+                            const key = `${i.nis}|${i.jenis}|${i.tanggal}`;
+                            if (seenIzinKeys.has(key)) return false;
+                            seenIzinKeys.add(key);
+                            return true;
+                        });
                         localDb.poin = data.poin || [];
                         localDb.nilai = data.nilai || []; 
                         if (data.link_pengaturan_list) {
@@ -5405,6 +6276,32 @@ function saveJadwalToStorage() {
                                 pesan: data.libur_pengaturan.pesan || 'Presensi tidak tersedia pada hari Sabtu & Minggu. Selamat beristirahat!'
                             };
                             localStorage.setItem('sigesit_libur_pengaturan', JSON.stringify(liburPengaturan));
+                        }
+                        if (data.libur_nasional_pengaturan) {
+                            liburNasionalPengaturan = {
+                                gambar: data.libur_nasional_pengaturan.gambar || '',
+                                judul: data.libur_nasional_pengaturan.judul || 'Hari Libur Nasional',
+                                pesan: data.libur_nasional_pengaturan.pesan || 'Presensi tidak tersedia karena hari ini merupakan hari libur nasional/keagamaan.'
+                            };
+                            localStorage.setItem('sigesit_libur_nasional_pengaturan', JSON.stringify(liburNasionalPengaturan));
+                        }
+                        if (data.libur_nasional_tanggal_list && Array.isArray(data.libur_nasional_tanggal_list)) {
+                            liburNasionalTanggalList = data.libur_nasional_tanggal_list;
+                            localStorage.setItem('sigesit_libur_nasional_tanggal_list', JSON.stringify(liburNasionalTanggalList));
+                        }
+                        if (data.pamplate_pengaturan) {
+                            ['masuk', 'pulang'].forEach(type => {
+                                const src = data.pamplate_pengaturan[type];
+                                if (src) {
+                                    pamplatePengaturan[type] = {
+                                        gambar: src.gambar || '',
+                                        judul: src.judul || (type === 'masuk' ? 'Presensi Masuk Berhasil' : 'Presensi Pulang Berhasil'),
+                                        pesan: src.pesan || (type === 'masuk' ? 'Terima kasih, kehadiran Anda telah tercatat.' : 'Terima kasih, sampai jumpa besok!'),
+                                        aktif: !!src.aktif
+                                    };
+                                }
+                            });
+                            localStorage.setItem('sigesit_pamplate_pengaturan', JSON.stringify(pamplatePengaturan));
                         }
                         if (data.jadwal_presensi) {
                             JADWAL_PRESENSI = data.jadwal_presensi;
