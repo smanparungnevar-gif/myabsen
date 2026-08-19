@@ -117,8 +117,8 @@
 
                     <input type="hidden" id="current-role" value="siswa">
 
-                    <button onclick="handleLogin()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-4 rounded-2xl shadow-lg shadow-emerald-600/30 transition duration-300 flex items-center justify-center gap-2 text-sm mt-4 transform active:scale-95">
-                        Masuk Sistem <i class="fa-solid fa-arrow-right text-xs"></i>
+                    <button id="btn-login-masuk" onclick="handleLogin()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-4 rounded-2xl shadow-lg shadow-emerald-600/30 transition duration-300 flex items-center justify-center gap-2 text-sm mt-4 transform active:scale-95 disabled:opacity-70 disabled:cursor-not-allowed">
+                        <span id="btn-login-masuk-label" class="flex items-center justify-center gap-2">Masuk Sistem <i class="fa-solid fa-arrow-right text-xs"></i></span>
                     </button>
                 </div>
             </div>
@@ -873,54 +873,178 @@
         </div>
 
         <!-- 4C. VIEW INPUT/EDIT NILAI AKADEMIK (Wali Kelas) -->
-        <div id="view-wali-nilai" class="hidden flex-1 overflow-y-auto p-4 space-y-4 pb-24">
-            <div class="bg-white p-4 rounded-3xl border border-slate-100 shadow-sm space-y-3">
-                <div class="flex justify-between items-center border-b border-slate-100 pb-2.5">
-                    <h4 class="text-xs font-extrabold text-slate-550 uppercase tracking-wider flex items-center gap-1.5">
-                        <i class="fa-solid fa-pen-to-square text-indigo-600"></i> Pengelolaan Nilai Akademis
-                    </h4>
-                    <button onclick="fetchDatabaseState(true)" class="px-3 py-1 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-extrabold rounded-xl text-[10px] flex items-center gap-1">
-                        <i class="fa-solid fa-rotate sync-icon-spin text-[9px]"></i> Tarik Data Sheet
-                    </button>
-                </div>
-                
-                <div class="grid grid-cols-2 gap-2">
-                    <div>
-                        <label class="block text-[10px] font-extrabold text-slate-400 uppercase tracking-widest mb-1.5">Mata Pelajaran</label>
-                        <select id="wali-nilai-mapel" onchange="renderWaliNilaiSiswa()" class="w-full p-2.5 border border-slate-200 rounded-2xl text-xs outline-none bg-white font-bold text-slate-700">
-                            <option value="Matematika">Matematika</option>
-                            <option value="Fisika">Fisika</option>
-                            <option value="Kimia">Kimia</option>
-                            <option value="Biologi">Biologi</option>
-                            <option value="Bahasa Indonesia">Bahasa Indonesia</option>
-                            <option value="Bahasa Inggris">Bahasa Inggris</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label class="block text-[10px] font-extrabold text-slate-400 uppercase tracking-widest mb-1.5">Judul Penilaian</label>
-                        <select id="wali-nilai-judul" onchange="handleWaliNilaiJudulChange()" class="w-full p-2.5 border border-slate-200 rounded-2xl text-xs outline-none bg-white font-bold text-slate-700">
-                        </select>
-                    </div>
-                </div>
+        <!-- 4B. MENU NILAI WALI KELAS (Disamakan dengan Siswa View) -->
+<!-- 4B. MENU NILAI WALI KELAS (BARU - Disamakan dengan Siswa View) -->
+<!-- 
+  CATATAN: Section ini mengganti view-wali-nilai lama (lines 876-923)
+  Struktur baru mirip dengan view-nilai siswa, tapi dengan fitur edit/hapus
+-->
+<div id="view-wali-nilai" class="hidden flex-1 overflow-y-auto p-4 space-y-4 pb-24">
 
-                <div id="container-custom-judul" class="hidden bg-indigo-50/50 p-3 rounded-2xl border border-indigo-150 space-y-2 animate-fadeIn">
-                    <label class="block text-[9px] font-extrabold text-indigo-700 uppercase tracking-wider">Ketik Judul Penilaian Baru</label>
-                    <div class="flex gap-2">
-                        <input type="text" id="custom-judul-input" placeholder="Contoh: PH 3, Tugas Mandiri" class="flex-1 p-2.5 bg-white border border-indigo-200 rounded-xl text-xs font-semibold outline-none focus:ring-2 focus:ring-indigo-500">
-                        <button onclick="saveCustomJudul()" class="px-3.5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold transition shadow-sm">Simpan</button>
-                        <button onclick="cancelCustomJudul()" class="px-3 py-2 bg-slate-100 hover:bg-slate-200 text-slate-500 rounded-xl text-xs font-bold transition">Batal</button>
-                    </div>
+    <!-- Pilih Siswa (khusus wali kelas) -->
+    <div class="bg-white px-4 py-3 rounded-2xl border border-slate-100 shadow-sm">
+        <label for="wali-nilai-pilih-siswa" class="text-[10px] font-bold text-slate-500 uppercase tracking-wider block mb-1.5">
+            <i class="fa-solid fa-user-graduate mr-1"></i> Pilih Siswa
+        </label>
+        <select id="wali-nilai-pilih-siswa" onchange="renderWaliNilaiAkademis()" class="w-full p-2.5 border border-slate-200 rounded-2xl text-xs outline-none bg-white font-bold text-slate-700">
+            <option value="">-- Pilih Siswa --</option>
+        </select>
+    </div>
+
+    <!-- Header Rata Rapor (disamakan dengan Siswa View) -->
+    <div class="bg-gradient-to-br from-indigo-600 to-blue-700 rounded-3xl p-5 text-white shadow-xl relative overflow-hidden">
+        <div class="absolute right-0 bottom-0 opacity-10 translate-x-4 translate-y-4">
+            <i class="fa-solid fa-chart-line text-9xl"></i>
+        </div>
+        <p class="text-[10px] text-indigo-100 uppercase font-extrabold tracking-widest">Rata-Rata Nilai</p>
+        <div class="mt-4 flex items-baseline gap-2">
+            <span id="wali-nilai-rata-rapor" class="text-5xl font-black tracking-tight">0.0</span>
+            <span class="text-sm font-semibold text-indigo-200">/ Skala 100</span>
+        </div>
+        <div class="mt-3 text-xs bg-white/20 px-3 py-1 rounded-xl inline-flex items-center gap-1.5 font-bold">
+            <i class="fa-solid fa-circle-check"></i> Status: <span id="wali-nilai-status-akademis">Memuat...</span>
+        </div>
+    </div>
+
+    <!-- Sinkronisasi Manual Button -->
+    <div class="flex justify-between items-center bg-white px-4 py-3 rounded-2xl border border-slate-100 shadow-sm">
+        <span class="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Sinkronisasi Portal</span>
+        <button onclick="fetchDatabaseState(true)" class="px-3.5 py-1.5 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-bold rounded-xl text-xs transition-all flex items-center gap-1.5">
+            <i class="fa-solid fa-rotate sync-icon-spin"></i> Tarik Data Nilai
+        </button>
+    </div>
+
+    <!-- Table Nilai (disamakan dengan Siswa View) -->
+    <div class="bg-white rounded-3xl border border-slate-100 shadow-sm overflow-hidden">
+        <div class="px-4 py-3 bg-slate-50 border-b border-slate-100 flex justify-between items-center">
+            <h5 class="text-xs font-bold text-slate-655">Daftar Nilai Mata Pelajaran</h5>
+            <span class="text-[9px] bg-indigo-50 text-indigo-700 font-extrabold px-2.5 py-0.5 rounded-full">Nilai Akademik</span>
+        </div>
+        <p class="px-4 pt-2.5 text-[9px] text-slate-400 font-semibold">Ketuk nilai untuk melihat rincian tugas.</p>
+        <div class="overflow-x-auto">
+            <table class="w-full text-[10px] min-w-[420px]">
+                <thead>
+                    <tr class="text-slate-400 uppercase text-[8.5px] font-extrabold border-b border-slate-100">
+                        <th class="text-left py-2 px-3 sticky left-0 bg-white">Mata Pelajaran</th>
+                        <th class="text-center py-2 px-1.5">Tugas</th>
+                        <th class="text-center py-2 px-1.5">UH</th>
+                        <th class="text-center py-2 px-1.5">UTS</th>
+                        <th class="text-center py-2 px-1.5">US</th>
+                        <th class="text-center py-2 px-1.5">Poin</th>
+                    </tr>
+                </thead>
+                <tbody id="wali-nilai-mata-pelajaran-list" class="divide-y divide-slate-100">
+                    <tr>
+                        <td colspan="6" class="p-6 text-center text-xs text-slate-400">Pilih siswa terlebih dahulu untuk melihat nilai.</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- ========================================================================= -->
+<!-- MODAL: DETAIL & EDIT NILAI PER KATEGORI (Modifikasi) -->
+<!-- ========================================================================= -->
+<div id="modal-nilai-kategori" class="hidden fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4 overflow-y-auto" onclick="if(event.target===this) closeNilaiKategoriModal()">
+    <div class="bg-white rounded-3xl p-5 w-full max-w-md shadow-2xl transition transform my-8">
+        <!-- Header Modal -->
+        <div class="flex justify-between items-center border-b border-slate-100 pb-3 mb-4 shrink-0">
+            <div>
+                <h3 id="modal-nilai-kat-title" class="font-bold text-sm text-slate-800 flex items-center gap-1.5">
+                    <i class="fa-solid fa-list-check text-indigo-600"></i> Rincian Nilai
+                </h3>
+                <p id="modal-nilai-kat-subtitle" class="text-[10px] text-slate-400 font-semibold mt-0.5"></p>
+            </div>
+            <button type="button" onclick="closeNilaiKategoriModal()" class="text-slate-400 text-lg hover:text-slate-600 shrink-0">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </div>
+
+        <!-- List Nilai Siswa -->
+        <div id="modal-nilai-kat-list" class="space-y-2 max-h-[400px] overflow-y-auto mb-4">
+            <div class="text-center py-6 text-slate-400 text-xs">Memuat data...</div>
+        </div>
+
+        <!-- Action Bar -->
+        <div class="border-t border-slate-100 pt-3 flex gap-2">
+            <button onclick="openTambahNilaiKategoriModal()" class="flex-1 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 font-bold py-2.5 rounded-2xl text-xs transition">
+                <i class="fa-solid fa-plus mr-1"></i> Tambah Nilai
+            </button>
+            <button type="button" onclick="closeNilaiKategoriModal()" class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold py-2.5 rounded-2xl text-xs transition">
+                Tutup
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- ========================================================================= -->
+<!-- MODAL: FORM INPUT NILAI BARU (untuk tambah/edit via kategori) -->
+<!-- ========================================================================= -->
+<div id="modal-nilai-form-kategori" class="hidden fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl p-5 w-full max-w-sm space-y-4 shadow-2xl transition transform">
+        <div class="flex justify-between items-center border-b border-slate-100 pb-2">
+            <h3 class="font-bold text-sm text-slate-800 flex items-center gap-1.5">
+                <i class="fa-solid fa-plus text-emerald-500"></i> <span id="form-kat-title">Tambah Nilai</span>
+            </h3>
+            <button type="button" onclick="closeNilaiFormKategoriModal()" class="text-slate-400 text-lg hover:text-slate-600">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </div>
+        
+        <div class="space-y-3 text-xs">
+            <!-- Info yang tidak bisa diubah -->
+            <div class="grid grid-cols-2 gap-2">
+                <div>
+                    <label class="block text-[10px] font-extrabold text-slate-400 uppercase tracking-widest mb-1">Mata Pelajaran</label>
+                    <p id="form-kat-mapel" class="font-extrabold text-indigo-700 bg-indigo-50 p-2.5 rounded-xl">Loading...</p>
+                </div>
+                <div>
+                    <label class="block text-[10px] font-extrabold text-slate-400 uppercase tracking-widest mb-1">Kategori</label>
+                    <p id="form-kat-kategori" class="font-extrabold text-teal-700 bg-teal-50 p-2.5 rounded-xl">Loading...</p>
                 </div>
             </div>
 
-            <!-- List Nilai Siswa -->
-            <div class="bg-white p-4 rounded-3xl border border-slate-100 shadow-sm space-y-3">
-                <h5 class="text-xs font-extrabold text-slate-455 uppercase tracking-wider">Daftar Nilai Siswa</h5>
-                <div id="wali-siswa-nilai-list" class="space-y-3 divide-y divide-slate-100 max-h-[340px] overflow-y-auto pr-1">
-                    <div class="text-center py-6 text-slate-400 text-xs">Mempersiapkan data...</div>
-                </div>
+            <!-- Pilih Siswa (jika edit satu) atau Kirim ke Semua -->
+            <div id="form-kat-siswa-section" class="hidden">
+                <label class="block font-bold text-slate-550 mb-1">Pilih Siswa</label>
+                <select id="form-kat-select-siswa" class="w-full p-2.5 border border-slate-200 rounded-2xl outline-none bg-white font-bold text-slate-700">
+                    <option value="">-- Pilih Siswa --</option>
+                </select>
+            </div>
+
+            <!-- Input Nilai -->
+            <div>
+                <label class="block font-bold text-slate-500 mb-1">Nilai (0-100)</label>
+                <input type="number" id="form-kat-nilai" placeholder="Contoh: 85" class="w-full p-2.5 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-emerald-500 font-bold text-center" min="0" max="100">
+            </div>
+
+            <!-- Jenis Penilaian -->
+            <div>
+                <label class="block font-bold text-slate-500 mb-1">Jenis Penilaian</label>
+                <input type="text" id="form-kat-jenis" placeholder="Contoh: Harian, Mid Semester" class="w-full p-2.5 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-emerald-500 font-semibold text-sm">
+            </div>
+
+            <!-- Nama Guru -->
+            <div>
+                <label class="block font-bold text-slate-500 mb-1">Nama Guru Pengajar</label>
+                <input type="text" id="form-kat-guru" placeholder="Nama guru" class="w-full p-2.5 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-emerald-500 font-semibold text-sm">
+            </div>
+
+            <!-- Tugas Ke -->
+            <div>
+                <label class="block font-bold text-slate-500 mb-1">Tugas Ke</label>
+                <input type="text" id="form-kat-tugas" placeholder="Contoh: 1, 2, 3" class="w-full p-2.5 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-emerald-500 font-semibold text-sm">
             </div>
         </div>
+
+        <button type="button" onclick="submitNilaiKategoriForm()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 rounded-2xl text-xs shadow-md transition transform active:scale-95">
+            <i class="fa-solid fa-check mr-1"></i> Simpan & Sinkronkan Nilai
+        </button>
+    </div>
+</div>
+
+
 
         <!-- 5. VIEW LAPORAN POIN UTAMA -->
         <div id="view-laporan" class="hidden flex-1 overflow-y-auto p-4 space-y-4 pb-24">
@@ -2683,6 +2807,10 @@ function saveJadwalToStorage() {
                 return;
             }
 
+            // Feedback instan begitu tombol diklik, agar tidak terasa "diam"
+            // selama menunggu respons server (proses verifikasi di bawah tidak diubah).
+            setLoginButtonLoading(true);
+
             if (isMockUrl()) {
                 if (role === 'siswa') {
                     const siswaData = localDb.siswa ? localDb.siswa.find(s => s.nis === idInput && s.nisn === passInput) : null;
@@ -2691,6 +2819,7 @@ function saveJadwalToStorage() {
                         localStorage.setItem('sigesit_active_user', JSON.stringify(currentSiswa));
                         doPostLoginActions();
                         showToast("Masuk Sesi Lokal Siswa!");
+                        setLoginButtonLoading(false);
                         return;
                     }
                 } else {
@@ -2700,10 +2829,12 @@ function saveJadwalToStorage() {
                         localStorage.setItem('sigesit_active_user', JSON.stringify(currentSiswa));
                         doPostLoginActions();
                         showToast("Masuk Sesi Lokal Wali!");
+                        setLoginButtonLoading(false);
                         return;
                     }
                 }
                 showToast("NIS/NIP atau Password salah untuk data demo!");
+                setLoginButtonLoading(false);
                 return;
             }
 
@@ -2727,8 +2858,28 @@ function saveJadwalToStorage() {
                 })
                 .catch(() => {
                     showToast("Gagal terhubung ke Google Apps Script.");
+                })
+                .finally(() => {
+                    setLoginButtonLoading(false);
                 });
         }
+
+        // Mengubah tampilan tombol "Masuk Sistem" menjadi status loading (spinner)
+        // secara instan saat diklik, murni untuk feedback visual — tidak mengubah
+        // proses verifikasi/validasi akun yang sudah berjalan di atas.
+        function setLoginButtonLoading(isLoading) {
+            const btn = document.getElementById('btn-login-masuk');
+            const label = document.getElementById('btn-login-masuk-label');
+            if (!btn || !label) return;
+            if (isLoading) {
+                btn.disabled = true;
+                label.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Memvalidasi...';
+            } else {
+                btn.disabled = false;
+                label.innerHTML = 'Masuk Sistem <i class="fa-solid fa-arrow-right text-xs"></i>';
+            }
+        }
+
 
         // ================================================================
         // ADMINISTRATOR: LOGIN, LOGOUT, NAVIGASI
@@ -4210,9 +4361,8 @@ function saveJadwalToStorage() {
                 document.getElementById('nav-laporan').className = "flex flex-col items-center gap-1 text-emerald-600";
             } else if (target === 'nilai') {
                 if (isWali) {
-                    populateWaliNilaiJudulFilter();
                     document.getElementById('view-wali-nilai').classList.remove('hidden');
-                    renderWaliNilaiSiswa();
+                    renderWaliNilaiAkademis();
                 } else {
                     document.getElementById('view-nilai').classList.remove('hidden');
                     renderSiswaNilai();
@@ -4800,53 +4950,6 @@ function saveJadwalToStorage() {
             }).join('');
         }
 
-        function renderWaliNilaiSiswa() {
-            const listEl = document.getElementById('wali-siswa-nilai-list');
-            const mapelSelector = document.getElementById('wali-nilai-mapel');
-            const judulSelector = document.getElementById('wali-nilai-judul');
-            
-            if (!listEl || !currentSiswa || !mapelSelector || !judulSelector) return;
-            const targetKelas = currentSiswa.kelas;
-            const selectedMapel = mapelSelector.value;
-            const selectedJudul = judulSelector.value;
-            if (selectedJudul === '__NEW_JUDUL__') return;
-
-            const muridKelas = localDb.siswa.filter(s => s.kelas === targetKelas);
-            if (muridKelas.length === 0) {
-                listEl.innerHTML = `<div class="p-6 text-center text-xs text-slate-400">Belum ada siswa terdaftar di kelas bimbingan Anda.</div>`;
-                return;
-            }
-
-            listEl.innerHTML = muridKelas.map(murid => {
-                const nRecord = (localDb.nilai || []).find(n =>
-                    normalizeNamaForMatch(n.nama) === normalizeNamaForMatch(murid.nama) && n.mapel === selectedMapel && n.judul_penilaian === selectedJudul
-                );
-                const nilaiAkhir = nRecord ? (parseInt(nRecord.nilai) || 0) : 0;
-                const kkm = 75;
-                const statusClass = nilaiAkhir >= kkm ? "text-emerald-600 bg-emerald-50" : "text-rose-600 bg-rose-50";
-
-                return `
-                    <div class="flex items-center justify-between py-3 last:pb-0">
-                        <div class="flex items-center gap-2">
-                            <img src="${murid.foto || 'https://placehold.co/100x100?text=Siswa'}" class="w-8 h-8 rounded-full object-cover border" onerror="this.src='https://placehold.co/100x100?text=Siswa'">
-                            <div>
-                                <h6 class="text-xs font-bold text-slate-800 leading-tight">${murid.nama}</h6>
-                                <p class="text-[9px] text-slate-400">NIS: ${murid.nis}</p>
-                            </div>
-                        </div>
-                        <div class="flex items-center gap-2">
-                            <div class="text-right text-[10px] pr-1">
-                                <span class="block text-[8px] text-slate-400 font-bold uppercase">Nilai</span>
-                                <span class="font-extrabold px-2 py-0.5 rounded-md ${statusClass}">${nilaiAkhir}</span>
-                            </div>
-                            <button onclick="openEditNilaiModal('${murid.nama}', '${selectedMapel}', '${selectedJudul}')" class="p-2 bg-indigo-50 hover:bg-indigo-100 text-indigo-655 rounded-xl transition-all" title="Edit Nilai">
-                                <i class="fa-solid fa-pen-to-square text-xs"></i>
-                            </button>
-                        </div>
-                    </div>
-                `;
-            }).join('');
-        }
 
         // Kategori penilaian yang ditampilkan sejajar dengan nama mata pelajaran
         const KATEGORI_NILAI_LIST = ['Tugas', 'UH', 'UTS', 'US', 'Poin'];
@@ -5027,63 +5130,9 @@ function saveJadwalToStorage() {
             if (modal) modal.classList.add('hidden');
         }
 
-        function populateWaliNilaiJudulFilter() {
-            const judulSelector = document.getElementById('wali-nilai-judul');
-            if (!judulSelector) return;
-            let uniqueJuduls = [];
-            if (localDb.nilai && localDb.nilai.length > 0) {
-                uniqueJuduls = [...new Set(localDb.nilai.map(n => n.judul_penilaian).filter(Boolean))];
-            }
-            if (uniqueJuduls.length === 0) {
-                uniqueJuduls = ["PH 1", "PH 2", "PTS", "PAS"];
-            }
-            const currentSelected = judulSelector.value;
-            let optionsHTML = uniqueJuduls.map(j => `<option value="${j}">${j}</option>`).join('');
-            optionsHTML += `<option value="__NEW_JUDUL__" class="text-indigo-650 font-bold">+ Tambah Judul Baru...</option>`;
-            judulSelector.innerHTML = optionsHTML;
-            if (uniqueJuduls.includes(currentSelected)) {
-                judulSelector.value = currentSelected;
-            } else {
-                judulSelector.selectedIndex = 0;
-            }
-        }
 
-        function handleWaliNilaiJudulChange() {
-            const selector = document.getElementById('wali-nilai-judul');
-            const customInputContainer = document.getElementById('container-custom-judul');
-            if (selector.value === '__NEW_JUDUL__') {
-                customInputContainer.classList.remove('hidden');
-                document.getElementById('custom-judul-input').value = "";
-                document.getElementById('custom-judul-input').focus();
-            } else {
-                customInputContainer.classList.add('hidden');
-                renderWaliNilaiSiswa();
-            }
-        }
 
-        function saveCustomJudul() {
-            const inputVal = document.getElementById('custom-judul-input').value.trim();
-            const selector = document.getElementById('wali-nilai-judul');
-            if (!inputVal) {
-                showToast("Nama judul tidak boleh kosong!");
-                return;
-            }
-            const opt = document.createElement('option');
-            opt.value = inputVal;
-            opt.innerText = inputVal;
-            selector.insertBefore(opt, selector.lastChild);
-            selector.value = inputVal;
-            document.getElementById('container-custom-judul').classList.add('hidden');
-            showToast(`Judul "${inputVal}" berhasil dibuat!`);
-            renderWaliNilaiSiswa();
-        }
 
-        function cancelCustomJudul() {
-            const selector = document.getElementById('wali-nilai-judul');
-            document.getElementById('container-custom-judul').classList.add('hidden');
-            selector.selectedIndex = 0;
-            renderWaliNilaiSiswa();
-        }
 
         function openEditNilaiModal(studentNama, mapel, judulPenilaian) {
     const modal = document.getElementById('modal-nilai-input');
@@ -5156,7 +5205,7 @@ function saveJadwalToStorage() {
   localStorage.setItem('local_offline_db', JSON.stringify(localDb));
   closeNilaiModal();
   showToast("Nilai akademik berhasil diperbarui!");
-  renderWaliNilaiSiswa();
+  renderWaliNilaiAkademis();
 
   if (!isMockUrl() && scriptUrl) {
     fetch(`${scriptUrl}`, {
@@ -6199,8 +6248,7 @@ function saveJadwalToStorage() {
                 renderPoinKarakter();
                 renderLivePresensiKelas();
                 renderSiswaNilai();
-                populateWaliNilaiJudulFilter();
-                renderWaliNilaiSiswa();
+                renderWaliNilaiAkademis();
                 renderProfilTautanLink();
                 if (currentSiswa && currentSiswa.role === 'walikelas') {
                     updateWaliRekapKehadiranCounters();
@@ -6509,6 +6557,488 @@ function saveJadwalToStorage() {
                 </tr>
             `).join('');
         }
-    </script>
+    
+
+/**
+ * =====================================================================
+ * FUNGSI-FUNGSI BARU UNTUK MENU NILAI WALI KELAS
+ * (Mengganti renderWaliNilaiSiswa + fungsi terkait lama)
+ * =====================================================================
+ * 
+ * Struktur baru:
+ * 1. renderWaliNilaiAkademis() - Display table (mirip siswa)
+ * 2. openNilaiKategoriModal() - Buka detail nilai per kategori
+ * 3. openTambahNilaiKategoriModal() - Buka form input nilai baru
+ * 4. submitNilaiKategoriForm() - Simpan nilai baru
+ * 5. deleteNilaiKategori() - Hapus nilai
+ * 6. Helper functions lainnya
+ */
+
+/**
+ * =====================================================================
+ * RENDER TABLE NILAI AKADEMIS (WALI KELAS)
+ * =====================================================================
+ * Menampilkan tabel mata pelajaran x kategori penilaian
+ * Mirip dengan renderSiswaNilai() tapi untuk semua siswa di kelas
+ */
+function renderWaliNilaiAkademis() {
+    const listContainer = document.getElementById('wali-nilai-mata-pelajaran-list');
+    const avgRaporEl = document.getElementById('wali-nilai-rata-rapor');
+    const statusAkademisEl = document.getElementById('wali-nilai-status-akademis');
+    const pilihSiswaEl = document.getElementById('wali-nilai-pilih-siswa');
+
+    if (!listContainer || !currentSiswa || !pilihSiswaEl) return;
+
+    // 1. Siapkan/refresh daftar siswa di kelas wali kelas ini pada dropdown,
+    //    sambil mempertahankan siswa yang sedang dipilih (jika masih ada).
+    const targetKelas = currentSiswa.kelas;
+    const siswaKelas = (localDb.siswa || [])
+        .filter(s => s.kelas === targetKelas)
+        .sort((a, b) => String(a.nama).localeCompare(String(b.nama)));
+
+    const selectedSebelumnya = pilihSiswaEl.value;
+    pilihSiswaEl.innerHTML = `<option value="">-- Pilih Siswa --</option>` +
+        siswaKelas.map(s => `<option value="${s.nis}">${s.nama}${s.nis ? ' (' + s.nis + ')' : ''}</option>`).join('');
+    if (selectedSebelumnya && siswaKelas.some(s => String(s.nis) === String(selectedSebelumnya))) {
+        pilihSiswaEl.value = selectedSebelumnya;
+    }
+
+    const selectedNis = pilihSiswaEl.value;
+    const siswaTerpilih = siswaKelas.find(s => String(s.nis) === String(selectedNis));
+
+    // Belum ada siswa dipilih
+    if (!siswaTerpilih) {
+        listContainer.innerHTML = `<tr><td colspan="6" class="p-6 text-center text-xs text-slate-400">Pilih siswa terlebih dahulu untuk melihat nilai.</td></tr>`;
+        if (avgRaporEl) avgRaporEl.innerText = "0.0";
+        if (statusAkademisEl) statusAkademisEl.innerText = "Tidak Ada Data";
+        siswaNilaiKategoriData = {};
+        return;
+    }
+
+    // 2. Ambil nilai milik siswa terpilih saja (persis logika renderSiswaNilai)
+    const userNilai = localDb.nilai ? localDb.nilai.filter(n => {
+        if (n.nis && siswaTerpilih.nis && String(n.nis).trim() === String(siswaTerpilih.nis).trim()) return true;
+        if (n.nis && siswaTerpilih.nis) return false;
+        return normalizeNamaForMatch(n.nama) === normalizeNamaForMatch(siswaTerpilih.nama);
+    }) : [];
+
+    if (userNilai.length === 0) {
+        listContainer.innerHTML = `<tr><td colspan="6" class="p-6 text-center text-xs text-slate-400">Belum ada nilai terinput atas nama "${siswaTerpilih.nama}". Silakan tambahkan nilai baru atau gunakan tombol sinkronisasi.</td></tr>`;
+        if (avgRaporEl) avgRaporEl.innerText = "0.0";
+        if (statusAkademisEl) statusAkademisEl.innerText = "Tidak Ada Data";
+        siswaNilaiKategoriData = {};
+        return;
+    }
+
+    // 3. Kelompokkan per mata pelajaran, lalu per kategori penilaian (sama seperti siswa)
+    const groupedMapel = {};
+    userNilai.forEach(n => {
+        const mapel = n.mapel || "Mata Pelajaran";
+        const kategori = classifyKategoriNilai(n);
+        if (!groupedMapel[mapel]) groupedMapel[mapel] = {};
+        if (!groupedMapel[mapel][kategori]) groupedMapel[mapel][kategori] = [];
+        groupedMapel[mapel][kategori].push(n);
+    });
+
+    siswaNilaiKategoriData = {};
+    let totalNilaiKeseluruhan = 0;
+    let jumlahNilaiKeseluruhan = 0;
+    let listHTML = "";
+
+    Object.keys(groupedMapel).sort().forEach(mapel => {
+        const kategoriMap = groupedMapel[mapel];
+
+        const kolomHTML = KATEGORI_NILAI_LIST.map(kategori => {
+            const items = kategoriMap[kategori];
+            if (!items || items.length === 0) {
+                return `<td class="text-center py-2.5 px-1.5 text-slate-300 font-semibold">-</td>`;
+            }
+
+            const nilaiList = items.map(n => parseInt(n.nilai) || 0);
+            const avgNilai = Math.round(nilaiList.reduce((a, b) => a + b, 0) / nilaiList.length);
+            totalNilaiKeseluruhan += avgNilai;
+            jumlahNilaiKeseluruhan++;
+
+            const dataKey = `${mapel}|${kategori}`;
+            siswaNilaiKategoriData[dataKey] = items;
+
+            const warnaTeks = avgNilai >= 75 ? 'text-emerald-600' : 'text-rose-600';
+            return `<td class="text-center py-2.5 px-1.5">
+                        <button type="button" onclick="openRincianNilaiModal('${mapel.replace(/'/g, "\\'")}', '${kategori}')" class="font-extrabold ${warnaTeks} underline decoration-dotted underline-offset-2 active:scale-95 transition">${avgNilai}</button>
+                      </td>`;
+        }).join('');
+
+        listHTML += `
+            <tr class="hover:bg-slate-50/50">
+                <td class="py-2.5 px-3 font-extrabold text-slate-800 sticky left-0 bg-white">${mapel}</td>
+                ${kolomHTML}
+            </tr>
+        `;
+    });
+
+    listContainer.innerHTML = listHTML;
+
+    const avgRapor = jumlahNilaiKeseluruhan > 0 ? (totalNilaiKeseluruhan / jumlahNilaiKeseluruhan).toFixed(1) : 0;
+    if (avgRaporEl) avgRaporEl.innerText = avgRapor;
+
+    if (statusAkademisEl) {
+        if (avgRapor >= 85) {
+            statusAkademisEl.innerText = "Sangat Memuaskan (A)";
+        } else if (avgRapor >= 75) {
+            statusAkademisEl.innerText = "Tuntas Kompetensi (B)";
+        } else {
+            statusAkademisEl.innerText = "Perlu Bimbingan (C)";
+        }
+    }
+}
+
+/**
+ * =====================================================================
+ * BUKA MODAL DETAIL NILAI (PER KATEGORI)
+ * =====================================================================
+ */
+function openNilaiKategoriModal(mapel, kategori) {
+    const modal = document.getElementById('modal-nilai-kategori');
+    const listEl = document.getElementById('modal-nilai-kat-list');
+    const titleEl = document.getElementById('modal-nilai-kat-title');
+    const subtitleEl = document.getElementById('modal-nilai-kat-subtitle');
+    
+    if (!modal || !listEl) return;
+    
+    // Get all nilai untuk mapel & kategori ini di kelas wali
+    const targetKelas = currentSiswa.kelas;
+    const items = (localDb.nilai || []).filter(n => {
+        const isMapel = n.mapel === mapel;
+        const isKategori = classifyKategoriNilai(n) === kategori;
+        const isKelas = n.kelas === targetKelas || 
+            (localDb.siswa.find(s => 
+                normalizeNamaForMatch(s.nama) === normalizeNamaForMatch(n.nama)
+            )?.kelas === targetKelas);
+        return isMapel && isKategori && isKelas;
+    });
+    
+    // Update title
+    titleEl.innerHTML = `<i class="fa-solid fa-list-check text-indigo-600"></i> ${mapel}`;
+    subtitleEl.innerText = `Kategori: ${kategori}`;
+    
+    // Render list
+    if (items.length === 0) {
+        listEl.innerHTML = `
+            <div class="text-center py-6 text-slate-400 text-xs">
+                <i class="fa-solid fa-inbox mr-2"></i> Belum ada nilai untuk kategori ini
+            </div>
+        `;
+    } else {
+        listEl.innerHTML = items.map((item, idx) => {
+            const siswaData = localDb.siswa.find(s => 
+                normalizeNamaForMatch(s.nama) === normalizeNamaForMatch(item.nama)
+            );
+            const nilai = parseInt(item.nilai) || 0;
+            const warnaNilai = nilai >= 75 ? 'text-emerald-600 bg-emerald-50' : 'text-rose-600 bg-rose-50';
+            
+            return `
+                <div class="flex items-center justify-between p-3 bg-slate-50 rounded-xl hover:bg-slate-100 transition border border-slate-200">
+                    <div class="flex-1">
+                        <p class="text-xs font-bold text-slate-800">${item.nama}</p>
+                        <p class="text-[8px] text-slate-500">
+                            NIS: <span class="font-mono font-bold">${item.nis || '-'}</span>
+                        </p>
+                        <p class="text-[8px] text-slate-400 mt-0.5">
+                            ${item.judul_penilaian || '-'} | ${item.jenis || '-'}
+                        </p>
+                    </div>
+                    <div class="flex items-center gap-2 ml-2 shrink-0">
+                        <span class="font-extrabold px-3 py-1.5 rounded-lg text-sm ${warnaNilai}">
+                            ${nilai}
+                        </span>
+                        <button 
+                            onclick="openEditNilaiModal('${item.nama.replace(/'/g, "\\'")}', '${mapel.replace(/'/g, "\\'")}', '${kategori}')" 
+                            class="p-1.5 text-indigo-600 hover:bg-indigo-50 rounded-lg transition" 
+                            title="Edit">
+                            <i class="fa-solid fa-pen-to-square text-xs"></i>
+                        </button>
+                        <button 
+                            onclick="deleteNilaiKategori('${item.nis || item.nama}', '${mapel.replace(/'/g, "\\'")}', '${kategori}')" 
+                            class="p-1.5 text-rose-600 hover:bg-rose-50 rounded-lg transition" 
+                            title="Hapus">
+                            <i class="fa-solid fa-trash-can text-xs"></i>
+                        </button>
+                    </div>
+                </div>
+            `;
+        }).join('');
+    }
+    
+    // Store untuk tombol "Tambah Nilai" di modal
+    window.currentModalMapel = mapel;
+    window.currentModalKategori = kategori;
+    
+    modal.classList.remove('hidden');
+}
+
+/**
+ * =====================================================================
+ * BUKA MODAL FORM INPUT NILAI BARU
+ * =====================================================================
+ */
+function openTambahNilaiKategoriModal(mapel, kategori) {
+    const formModal = document.getElementById('modal-nilai-form-kategori');
+    if (!formModal) return;
+    
+    // Clear form
+    document.getElementById('form-kat-nilai').value = '';
+    document.getElementById('form-kat-jenis').value = '';
+    document.getElementById('form-kat-guru').value = '';
+    document.getElementById('form-kat-tugas').value = '';
+    
+    // Set info yang tidak bisa diubah
+    document.getElementById('form-kat-mapel').innerText = mapel;
+    document.getElementById('form-kat-kategori').innerText = kategori;
+    document.getElementById('form-kat-title').innerText = `Tambah Nilai - ${mapel}`;
+    
+    // Tampilkan option pilih siswa
+    const siswaSection = document.getElementById('form-kat-siswa-section');
+    const siswaSelect = document.getElementById('form-kat-select-siswa');
+    const targetKelas = currentSiswa.kelas;
+    const siswasKelas = (localDb.siswa || []).filter(s => s.kelas === targetKelas);
+    
+    if (siswasKelas.length > 0) {
+        siswaSelect.innerHTML = `
+            <option value="">-- Pilih Siswa --</option>
+            ${siswasKelas.map(s => `<option value="${s.nis}">${s.nama} (${s.nis})</option>`).join('')}
+        `;
+        siswaSection.classList.remove('hidden');
+    } else {
+        siswaSection.classList.add('hidden');
+    }
+    
+    // Store info
+    window.currentFormMapel = mapel;
+    window.currentFormKategori = kategori;
+    window.isNewNilai = true;
+    
+    formModal.classList.remove('hidden');
+}
+
+/**
+ * =====================================================================
+ * SUBMIT FORM INPUT NILAI BARU
+ * =====================================================================
+ */
+function submitNilaiKategoriForm() {
+    const nilaiInput = document.getElementById('form-kat-nilai').value.trim();
+    const siswaSelect = document.getElementById('form-kat-select-siswa');
+    const jenisInput = document.getElementById('form-kat-jenis').value.trim();
+    const guruInput = document.getElementById('form-kat-guru').value.trim();
+    const tugasInput = document.getElementById('form-kat-tugas').value.trim();
+    
+    if (!nilaiInput || parseInt(nilaiInput) < 0 || parseInt(nilaiInput) > 100) {
+        alert('Masukkan nilai antara 0-100');
+        return;
+    }
+    
+    // Cek apakah ada siswa yang dipilih (jika form menampilkan siswa dropdown)
+    const siswaOption = document.getElementById('form-kat-siswa-section');
+    let nisTarget = null;
+    
+    if (!siswaOption.classList.contains('hidden')) {
+        // Harus pilih siswa
+        const selectedNis = siswaSelect.value;
+        if (!selectedNis) {
+            alert('Pilih siswa terlebih dahulu');
+            return;
+        }
+        nisTarget = selectedNis;
+    }
+    
+    const mapel = window.currentFormMapel;
+    const kategori = window.currentFormKategori;
+    
+    // Catat waktu
+    const waktu = new Date().toLocaleString('id-ID', {
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit'
+    });
+    
+    // Buat record nilai baru
+    const newNilai = {
+        nis: nisTarget,
+        nama: nisTarget ? (localDb.siswa.find(s => s.nis === nisTarget)?.nama || 'Unknown') : '',
+        kelas: currentSiswa.kelas,
+        mapel: mapel,
+        judul_penilaian: kategori,
+        jenis: jenisInput || kategori,
+        nilai: parseInt(nilaiInput),
+        nama_guru: guruInput || 'Unknown',
+        tugas_ke: tugasInput || '1',
+        waktu: waktu
+    };
+    
+    // Tambah ke local db
+    if (!localDb.nilai) localDb.nilai = [];
+    localDb.nilai.push(newNilai);
+    
+    // Sinkron ke backend
+    callBackendAction('updateNilai', {
+        action: 'add',
+        nilai: newNilai
+    }, (res) => {
+        console.log('✓ Nilai baru berhasil ditambahkan');
+        renderWaliNilaiAkademis();
+        closeNilaiFormKategoriModal();
+        
+        // Refresh modal kategori jika masih terbuka
+        if (!document.getElementById('modal-nilai-kategori').classList.contains('hidden')) {
+            openNilaiKategoriModal(mapel, kategori);
+        }
+    }, (err) => {
+        console.error('✗ Gagal menambah nilai:', err);
+        alert('Gagal menambah nilai. Cek console untuk detail.');
+    });
+}
+
+/**
+ * =====================================================================
+ * HAPUS NILAI
+ * =====================================================================
+ */
+function deleteNilaiKategori(nisOrNama, mapel, kategori) {
+    const targetKelas = currentSiswa.kelas;
+    
+    // Cari nilai yang akan dihapus
+    const nilaiToDelete = (localDb.nilai || []).find(n => 
+        (String(n.nis || '').trim() === String(nisOrNama).trim() || 
+         normalizeNamaForMatch(n.nama) === normalizeNamaForMatch(nisOrNama)) &&
+        n.mapel === mapel &&
+        classifyKategoriNilai(n) === kategori &&
+        (n.kelas === targetKelas || 
+         localDb.siswa.find(s => normalizeNamaForMatch(s.nama) === normalizeNamaForMatch(n.nama))?.kelas === targetKelas)
+    );
+    
+    if (!nilaiToDelete) {
+        alert('Nilai tidak ditemukan');
+        return;
+    }
+    
+    if (!confirm(`Yakin hapus nilai ${nilaiToDelete.nama}?\n\n${mapel} - ${kategori}\nNilai: ${nilaiToDelete.nilai}`)) {
+        return;
+    }
+    
+    // Hapus dari local db
+    localDb.nilai = localDb.nilai.filter(n => n !== nilaiToDelete);
+    
+    // Sinkron ke backend - PERHATIAN: backend harus support delete action
+    callBackendAction('updateNilai', {
+        action: 'delete',
+        nis: nilaiToDelete.nis,
+        nama: nilaiToDelete.nama,
+        mapel: mapel,
+        jenis: nilaiToDelete.jenis,
+        waktu: nilaiToDelete.waktu
+    }, (res) => {
+        console.log('✓ Nilai berhasil dihapus');
+        renderWaliNilaiAkademis();
+        openNilaiKategoriModal(mapel, kategori);
+    }, (err) => {
+        console.error('✗ Gagal menghapus nilai:', err);
+        alert('Gagal menghapus nilai. Cek console untuk detail.');
+    });
+}
+
+/**
+ * =====================================================================
+ * TUTUP MODAL
+ * =====================================================================
+ */
+function closeNilaiKategoriModal() {
+    const modal = document.getElementById('modal-nilai-kategori');
+    if (modal) modal.classList.add('hidden');
+}
+
+function closeNilaiFormKategoriModal() {
+    const modal = document.getElementById('modal-nilai-form-kategori');
+    if (modal) modal.classList.add('hidden');
+}
+
+/**
+ * =====================================================================
+ * TOGGLE FILTER PANEL (FUTURE USE)
+ * =====================================================================
+ */
+function toggleWaliNilaiFilter() {
+    const filterPanel = document.getElementById('wali-nilai-filter-panel');
+    if (filterPanel) {
+        filterPanel.classList.toggle('hidden');
+    }
+}
+
+/**
+ * =====================================================================
+ * CALL BACKEND ACTION (HELPER)
+ * =====================================================================
+ * Wrapper untuk mengirim action ke Google Apps Script
+ */
+function callBackendAction(action, data, successCallback, errorCallback) {
+    const payload = { action: action, ...data };
+    
+    fetch(WEB_APP_URL, {
+        method: 'POST',
+        body: JSON.stringify(payload),
+        headers: { 'Content-Type': 'application/json' }
+    })
+    .then(res => res.json())
+    .then(result => {
+        if (result.status === 'success' || result.success) {
+            if (successCallback) successCallback(result);
+        } else {
+            console.error('Backend error:', result);
+            if (errorCallback) errorCallback(result);
+        }
+    })
+    .catch(err => {
+        console.error('Network error:', err);
+        if (errorCallback) errorCallback(err);
+    });
+}
+
+/**
+ * =====================================================================
+ * INITIALIZE WALI NILAI (dipanggil saat switch ke wali role)
+ * =====================================================================
+ */
+function initWaliNilaiView() {
+    console.log('🎓 Inisialisasi Menu Nilai Wali Kelas');
+    renderWaliNilaiAkademis();
+}
+
+/**
+ * =====================================================================
+ * CATATAN PENTING
+ * =====================================================================
+ * 1. Function lama yang harus DIHAPUS dari codebase:
+ *    - renderWaliNilaiSiswa()
+ *    - handleWaliNilaiJudulChange()
+ *    - saveCustomJudul()
+ *    - cancelCustomJudul()
+ *    - populateWaliNilaiJudulFilter()
+ * 
+ * 2. Function yang tetap dipakai (JANGAN HAPUS):
+ *    - classifyKategoriNilai()
+ *    - KATEGORI_NILAI_LIST
+ *    - normalizeNamaForMatch()
+ *    - openEditNilaiModal() (kemungkinan perlu minor modification)
+ * 
+ * 3. Mekanisme sinkronisasi:
+ *    - Frontend mengirim updateNilai action ke backend
+ *    - Backend harus handle: action='add', action='delete', action='update'
+ *    - Atau bisa handle sepenuhnya di frontend dan sync manual
+ */
+
+
+</script>
 </body>
 </html>
