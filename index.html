@@ -2233,8 +2233,20 @@
 function getJadwalHariIni(kelasStr) {
     const jenjang = getJenjangKelas(kelasStr);
     const namaHari = getNamaHari(new Date());
-    const jadwalJenjang = JADWAL_PRESENSI[jenjang] || JADWAL_PRESENSI['XII'];
-    return jadwalJenjang[namaHari] || jadwalJenjang['Senin'];
+    // [FIX] JADWAL_PRESENSI bisa ditimpa oleh pengaturan jadwal presensi
+    // yang disimpan Admin (lewat sheet 'Pengaturan', lihat fetchDatabaseState()).
+    // Kalau hasil timpaan itu ternyata tidak lengkap — mis. kehilangan salah
+    // satu jenjang (X/XI/XII) atau salah satu hari kerja — akses langsung ke
+    // jadwalJenjang[namaHari] di bawah bisa melempar error dan MENGHENTIKAN
+    // seluruh proses render di tengah jalan. Ini yang membuat panel "Live
+    // Kehadiran Kelas", "Monitoring Absensi Kelas", dan Rekap Admin bisa
+    // macet/kosong total tanpa pesan apa pun — bukan sekadar soal data siswa
+    // atau presensinya tidak cocok. Sekarang selalu jatuh ke jadwal default
+    // yang aman kalau strukturnya tidak lengkap, tanpa mengubah nilai
+    // JADWAL_PRESENSI yang sudah benar sama sekali.
+    const DEFAULT_JADWAL_FALLBACK = { masukBuka: 0, masukBatas: 6 * 60 + 30, pulangBuka: 15 * 60 };
+    const jadwalJenjang = (JADWAL_PRESENSI && (JADWAL_PRESENSI[jenjang] || JADWAL_PRESENSI['XII'])) || {};
+    return jadwalJenjang[namaHari] || jadwalJenjang['Senin'] || DEFAULT_JADWAL_FALLBACK;
 }
 
         // Jam buka presensi masuk. Kelas XII tidak dibatasi (sesuai aturan lama / tidak diubah).
@@ -4850,6 +4862,14 @@ function saveJadwalToStorage() {
         function renderLivePresensiKelas() {
             const container = document.getElementById('live-presensi-kelas-container');
             if (!container || !currentSiswa) return;
+            // [FIX] Seluruh isi fungsi ini dibungkus try/catch. Sebelumnya, kalau
+            // ada error tak terduga di tengah proses (mis. data jadwal presensi
+            // yang tidak lengkap), fungsi berhenti begitu saja dan container
+            // TETAP menampilkan teks "Memuat daftar..." selamanya — terlihat
+            // seperti data "tidak muncul" tanpa ada petunjuk penyebabnya. Sekarang
+            // errornya ditangkap dan ditampilkan langsung di panel supaya mudah
+            // ditelusuri, tanpa mengubah alur normal saat tidak ada error.
+            try {
             const targetKelas = currentSiswa.kelas;
             const hariIniStr = getTanggalHariIniLokal(new Date());
             const rekanSiswa = localDb.siswa.filter(s => normalizeKelasForMatch(s.kelas) === normalizeKelasForMatch(targetKelas));
@@ -4908,11 +4928,20 @@ function saveJadwalToStorage() {
                     </div>
                 `;
             }).join('');
+            } catch (errRenderLive) {
+                console.log('renderLivePresensiKelas ERROR: ' + errRenderLive.toString());
+                container.innerHTML = `<div class="text-center py-4 text-rose-500 text-[10px]">Gagal memuat data: ${errRenderLive.message || errRenderLive.toString()}</div>`;
+            }
         }
 
         function renderWaliMonitoringPresensi() {
             const listEl = document.getElementById('wali-siswa-presensi-list');
             if (!listEl || !currentSiswa) return;
+            // [FIX] Sama seperti renderLivePresensiKelas() — dibungkus try/catch
+            // supaya error tak terduga tidak membuat panel macet diam di teks
+            // "Mengambil data murid..." selamanya, dan langsung terlihat pesan
+            // errornya kalau memang ada masalah lain di luar dugaan.
+            try {
             const targetKelas = currentSiswa.kelas;
             const todayStr = getTanggalHariIniLokal(new Date());
             const todayDateText = document.getElementById('wali-today-date');
@@ -4980,6 +5009,10 @@ function saveJadwalToStorage() {
                     </div>
                 `;
             }).join('');
+            } catch (errRenderWali) {
+                console.log('renderWaliMonitoringPresensi ERROR: ' + errRenderWali.toString());
+                listEl.innerHTML = `<div class="p-6 text-center text-rose-500 text-[10px]">Gagal memuat data: ${errRenderWali.message || errRenderWali.toString()}</div>`;
+            }
         }
 
 
@@ -7069,6 +7102,8 @@ function initWaliNilaiView() {
  *    - Backend harus handle: action='add', action='delete', action='update'
  *    - Atau bisa handle sepenuhnya di frontend dan sync manual
  */
+
+
 </script>
 </body>
 </html>
