@@ -4367,9 +4367,11 @@ function saveJadwalToStorage() {
             if (target === 'home') {
                 if (isWali) {
                     document.getElementById('view-wali-home').classList.remove('hidden');
+                    fetchDatabaseState();
                     renderWaliMonitoringPresensi();
                 } else {
                     document.getElementById('view-home').classList.remove('hidden');
+                    fetchDatabaseState();
                     renderLivePresensiKelas();
                     updateHomePresensiUI();
                     updateWeekendPresensiUI();
@@ -4870,13 +4872,6 @@ function saveJadwalToStorage() {
             // errornya ditangkap dan ditampilkan langsung di panel supaya mudah
             // ditelusuri, tanpa mengubah alur normal saat tidak ada error.
             try {
-            // [PERBAIKAN] Cek apakah localDb.siswa sudah dimuat. Jika kosong/belum ada data,
-            // tampilkan pesan loading daripada "Belum ada rekan sekelas terdaftar"
-            if (!localDb.siswa || localDb.siswa.length === 0) {
-                container.innerHTML = `<div class="text-center py-4 text-slate-400 text-xs"><i class="fa-solid fa-rotate text-lg mb-1 block animate-spin text-emerald-500"></i> Memuat data kelas...</div>`;
-                return;
-            }
-            
             const targetKelas = currentSiswa.kelas;
             const hariIniStr = getTanggalHariIniLokal(new Date());
             const rekanSiswa = localDb.siswa.filter(s => normalizeKelasForMatch(s.kelas) === normalizeKelasForMatch(targetKelas));
