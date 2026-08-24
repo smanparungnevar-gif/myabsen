@@ -2271,6 +2271,25 @@ function getJadwalHariIni(kelasStr) {
         function normalizeKelasForMatch(kelas) {
     return (kelas || '').toString().toLowerCase().trim().replace(/\s+/g, ' ');
 }
+        // [FIX] Status presensi masuk/pulang rekan sekelas tidak muncul di
+        // panel "Live Kehadiran Kelas" / "Monitoring Absensi Kelas" walau
+        // siswa yang bersangkutan sudah presensi. Penyebabnya: NIS pada
+        // sheet 'siswa' bisa saja tersimpan sebagai ANGKA (bukan teks) kalau
+        // pernah diketik/ditempel manual di Spreadsheet tanpa format teks,
+        // sehingga angka 0 di depan NIS hilang (mis. "0101295229" menjadi
+        // "101295229"). Sementara NIS pada sheet 'presensi'/'izin' selalu
+        // tersimpan apa adanya sebagai teks (lewat appendRowAsText()).
+        // Akibatnya perbandingan persis (p.nis === siswa.nis) gagal cocok.
+        // Fungsi ini menyamakan kedua nilai sebelum dibandingkan (memangkas
+        // spasi, dan membuang angka 0 di depan bila nilainya murni digit),
+        // tanpa mengubah data asli apa pun di Spreadsheet.
+        function normalizeIdForMatch(id) {
+    var s = (id === null || id === undefined) ? '' : id.toString().trim();
+    if (/^\d+$/.test(s)) {
+        s = s.replace(/^0+(?=\d)/, '');
+    }
+    return s;
+}
         function loadJadwalFromStorage() {
     const stored = localStorage.getItem('sigesit_jadwal_presensi');
     if (stored) {
@@ -4842,10 +4861,10 @@ function saveJadwalToStorage() {
             }
 
             container.innerHTML = rekanSiswa.map(siswa => {
-                const presensiToday = localDb.presensi.filter(p => p.nis === siswa.nis && p.tanggal === hariIniStr);
+                const presensiToday = localDb.presensi.filter(p => normalizeIdForMatch(p.nis) === normalizeIdForMatch(siswa.nis) && p.tanggal === hariIniStr);
                 const masukToday = presensiToday.find(p => p.tipe === 'masuk');
                 const pulangToday = presensiToday.find(p => p.tipe === 'pulang');
-                const izinToday = localDb.izin.find(i => i.nis === siswa.nis && i.status === 'Disetujui' && isTodayInRange(i.tanggal, hariIniStr));
+                const izinToday = localDb.izin.find(i => normalizeIdForMatch(i.nis) === normalizeIdForMatch(siswa.nis) && i.status === 'Disetujui' && isTodayInRange(i.tanggal, hariIniStr));
                 let statusHTML = "";
 
                 if (presensiToday.length > 0) {
@@ -4909,10 +4928,10 @@ function saveJadwalToStorage() {
             }
 
             listEl.innerHTML = muridKelas.map(murid => {
-                const presensiToday = localDb.presensi.filter(p => p.nis === murid.nis && p.tanggal === todayStr);
+                const presensiToday = localDb.presensi.filter(p => normalizeIdForMatch(p.nis) === normalizeIdForMatch(murid.nis) && p.tanggal === todayStr);
                 const masukToday = presensiToday.find(p => p.tipe === 'masuk');
                 const pulangToday = presensiToday.find(p => p.tipe === 'pulang');
-                const izinToday = localDb.izin.find(i => i.nis === murid.nis && i.status === 'Disetujui' && isTodayInRange(i.tanggal, todayStr));
+                const izinToday = localDb.izin.find(i => normalizeIdForMatch(i.nis) === normalizeIdForMatch(murid.nis) && i.status === 'Disetujui' && isTodayInRange(i.tanggal, todayStr));
                 let statusHTML = "";
 
                 if (presensiToday.length > 0) {
@@ -7050,8 +7069,6 @@ function initWaliNilaiView() {
  *    - Backend harus handle: action='add', action='delete', action='update'
  *    - Atau bisa handle sepenuhnya di frontend dan sync manual
  */
-
-
 </script>
 </body>
 </html>
