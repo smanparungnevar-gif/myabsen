@@ -4935,7 +4935,15 @@ function saveJadwalToStorage() {
             // "Mengambil data murid..." selamanya, dan langsung terlihat pesan
             // errornya kalau memang ada masalah lain di luar dugaan.
             try {
-            const targetKelas = currentSiswa.kelas;
+            // [PERBAIKAN] Validasi dan ambil kelas wali dari currentSiswa
+            // Jika currentSiswa.kelas tidak ada/kosong, tampilkan pesan yang jelas
+            let targetKelas = (currentSiswa.kelas || '').toString().trim();
+            
+            if (!targetKelas) {
+                listEl.innerHTML = `<div class="p-6 text-center text-xs text-slate-400">Kelas Anda belum terdaftar di sistem. Hubungi administrator.</div>`;
+                return;
+            }
+            
             const todayStr = getTanggalHariIniLokal(new Date());
             const todayDateText = document.getElementById('wali-today-date');
             if (todayDateText) {
