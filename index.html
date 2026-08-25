@@ -4579,10 +4579,58 @@ function saveJadwalToStorage() {
     const list = (localDb.presensi || []).filter(p => 
         p.nis === currentSiswa.nis && p.tanggal === tanggalStr
     );
+    // [FIX] Bug: presensi yang sudah "Done" bisa tampil kembali "Belum
+    // Presensi" setelah refresh — ini terjadi kalau localDb.presensi hasil
+    // sinkronisasi/merge dari fetchDatabaseState() (mis. karena respons
+    // server belum sempat mencerminkan baris yang baru saja disimpan, atau
+    // ada selisih kecil format data) belum/tidak memuat baris presensi hari
+    // ini. Sebagai jaring pengaman TAMBAHAN (tidak mengubah logika pencarian
+    // di atas sama sekali), kalau baris masuk/pulang tidak ketemu di
+    // localDb.presensi, dicek juga cache khusus "presensi hari ini" yang
+    // ditulis langsung oleh savePresensiToState() saat presensi berhasil
+    // disimpan pada perangkat ini — supaya status presensi milik siswa yang
+    // sedang login tidak pernah "hilang" hanya karena proses refresh/sync.
+    const cached = readPresensiTodayCache(currentSiswa.nis);
+    const cachedValid = cached && cached.tanggal === tanggalStr;
     return {
-        masuk: list.find(p => p.tipe === 'masuk') || null,
-        pulang: list.find(p => p.tipe === 'pulang') || null
+        masuk: list.find(p => p.tipe === 'masuk') || (cachedValid ? cached.masuk : null) || null,
+        pulang: list.find(p => p.tipe === 'pulang') || (cachedValid ? cached.pulang : null) || null
     };
+}
+
+// [FIX] Helper cache "presensi hari ini" per siswa (lihat catatan pada
+// checkHariIniAbsenStatus() di atas). Disimpan terpisah dari localDb.presensi
+// supaya tidak bergantung/tidak ikut ter-timpa oleh proses merge data server
+// di fetchDatabaseState(). Key localStorage unik per NIS.
+function getPresensiTodayCacheKey(nis) {
+    return 'sigesit_presensi_today_' + nis;
+}
+function savePresensiTodayCache(record) {
+    try {
+        const key = getPresensiTodayCacheKey(record.nis);
+        const existingRaw = localStorage.getItem(key);
+        let existing = null;
+        try { existing = existingRaw ? JSON.parse(existingRaw) : null; } catch (e) { existing = null; }
+        // Reset cache kalau tanggalnya beda (hari baru), supaya status hari
+        // sebelumnya tidak terbawa ke hari ini.
+        if (!existing || existing.tanggal !== record.tanggal) {
+            existing = { tanggal: record.tanggal, masuk: null, pulang: null };
+        }
+        if (record.tipe === 'masuk') existing.masuk = record;
+        else if (record.tipe === 'pulang') existing.pulang = record;
+        localStorage.setItem(key, JSON.stringify(existing));
+    } catch (e) {
+        // Kalau localStorage gagal (mis. penuh/private mode), abaikan saja —
+        // ini murni jaring pengaman tambahan, bukan penyimpanan utama.
+    }
+}
+function readPresensiTodayCache(nis) {
+    try {
+        const raw = localStorage.getItem(getPresensiTodayCacheKey(nis));
+        return raw ? JSON.parse(raw) : null;
+    } catch (e) {
+        return null;
+    }
 }
 
         let activeAbsenceType = '';
@@ -4747,12 +4795,14 @@ function saveJadwalToStorage() {
                 p.nis === record.nis && p.tanggal === record.tanggal && p.tipe === record.tipe
             );
             if (sudahAdaPresensi) {
+                savePresensiTodayCache(record);
                 updateHomePresensiUI();
                 renderLivePresensiKelas();
                 return;
             }
             localDb.presensi.push(record);
             localStorage.setItem('local_offline_db', JSON.stringify(localDb));
+            savePresensiTodayCache(record);
             updateHomePresensiUI();
             renderLivePresensiKelas();
             // Tampilkan popup pamplate (gambar pengumuman yang diatur Admin)
