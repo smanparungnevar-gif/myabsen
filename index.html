@@ -832,6 +832,44 @@
                 </div>
             </div>
 
+            <!-- [TAMBAHAN] Rekap Bulanan (Siswa) -->
+            <div class="bg-white p-4 rounded-3xl border border-slate-100 shadow-sm space-y-3">
+                <div class="flex justify-between items-center border-b border-slate-100 pb-2.5">
+                    <h4 class="text-xs font-extrabold text-slate-550 uppercase tracking-wider flex items-center gap-1.5">
+                        <i class="fa-solid fa-calendar-days text-indigo-600"></i> Rekap Bulanan
+                    </h4>
+                    <span id="rekap-bulanan-siswa-label-bulan" class="text-[10px] text-slate-400 font-bold">...</span>
+                </div>
+
+                <!-- Tab Bulan Lalu / Bulan Ini -->
+                <div class="flex bg-slate-50 rounded-2xl p-1 border border-slate-100">
+                    <button type="button" onclick="switchRekapBulananSiswaTab('lalu')" id="tab-rekap-bulanan-siswa-lalu" class="flex-1 py-2 text-center text-[11px] font-extrabold rounded-xl transition-all text-slate-450">
+                        Bulan Lalu
+                    </button>
+                    <button type="button" onclick="switchRekapBulananSiswaTab('ini')" id="tab-rekap-bulanan-siswa-ini" class="flex-1 py-2 text-center text-[11px] font-extrabold rounded-xl transition-all bg-white text-indigo-600 shadow-sm">
+                        Bulan Ini
+                    </button>
+                </div>
+
+                <!-- Tombol Export -->
+                <div class="flex gap-2">
+                    <button type="button" onclick="exportRekapBulananSiswa('excel')" class="flex-1 flex items-center justify-center gap-1.5 py-2 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 rounded-xl text-[11px] font-bold border border-emerald-200 transition-all">
+                        <i class="fa-solid fa-file-excel"></i> Excel
+                    </button>
+                    <button type="button" onclick="exportRekapBulananSiswa('pdf')" class="flex-1 flex items-center justify-center gap-1.5 py-2 bg-rose-50 hover:bg-rose-100 text-rose-700 rounded-xl text-[11px] font-bold border border-rose-200 transition-all">
+                        <i class="fa-solid fa-file-pdf"></i> PDF
+                    </button>
+                </div>
+
+                <!-- Tabel Rekap Bulanan -->
+                <div id="rekap-bulanan-siswa-table-wrap" class="overflow-x-auto -mx-1 px-1 pb-1 rounded-xl border border-slate-100">
+                    <div class="text-center py-6 text-slate-400 text-xs">Mengambil data rekap bulanan...</div>
+                </div>
+                <p class="text-[9px] text-slate-400 leading-relaxed">
+                    Keterangan: H=Hadir, L=Terlambat, D=Izin Dispen, S=Izin Sakit, I=Izin Tidak Masuk, T=Izin Terlambat, P=Izin Pulang Cepat, B=Bolos, A=Alpha, off=Libur/Akhir Pekan.
+                </p>
+            </div>
+
             <!-- Poin Karakter History -->
             <div class="bg-white p-4 rounded-3xl shadow-sm border border-slate-100 space-y-3">
                 <h4 class="text-xs font-bold text-slate-455 uppercase tracking-wider flex items-center gap-1.5">
@@ -4457,6 +4495,7 @@ function saveJadwalToStorage() {
                     document.getElementById('view-riwayat').classList.remove('hidden');
                     renderRekapPresensi();
                     renderRekapPoin();
+                    if (typeof renderRekapBulananSiswa === 'function') renderRekapBulananSiswa(); // [TAMBAHAN] Rekap Bulanan (Siswa)
                 }
                 document.getElementById('nav-middle').className = "flex flex-col items-center gap-1 text-emerald-600";
             } else if (target === 'laporan') {
@@ -6033,6 +6072,204 @@ function readPresensiTodayCache(nis) {
                     doc.save(namaFile + '.pdf');
                 } catch (errPdf) {
                     console.log('exportRekapBulanan(pdf) ERROR: ' + errPdf.toString());
+                    alert('Gagal membuat file PDF: ' + (errPdf.message || errPdf.toString()));
+                }
+            }
+        }
+
+        // ===========================================================================
+        // [TAMBAHAN] REKAP BULANAN (Siswa)
+        // Berbeda dari "Rekap Bulanan (Wali Kelas)" di atas (yang menampilkan SATU
+        // KELAS berisi banyak siswa), fitur ini menampilkan rekap kehadiran BULANAN
+        // milik siswa yang SEDANG LOGIN saja (1 baris = siswa itu sendiri), untuk
+        // tab "Bulan Lalu" & "Bulan Ini": kode 1 huruf per tanggal (H=Hadir,
+        // L=Terlambat aktual, D=Izin Dispen, S=Izin Sakit, I=Izin Tidak Masuk,
+        // T=Izin Terlambat, P=Izin Pulang Cepat, B=Bolos, A=Alpha, atau "off" untuk
+        // Sabtu/Minggu/hari libur), lengkap ringkasan jumlah per kategori di kolom
+        // akhir, dan bisa diekspor ke Excel (SheetJS) & PDF (jsPDF + autoTable).
+        //
+        // Ditambahkan murni sebagai fitur BARU dengan nama fungsi/variabel sendiri
+        // (tidak menimpa punya Wali Kelas), memakai kembali (tanpa mengubah) fungsi
+        // yang sudah berjalan: getRekapBulananRange(), isTanggalOffRekapBulanan(),
+        // getTanggalHariIniLokal(), normalizeIdForMatch(), isTodayInRange(),
+        // getBatasMasukMenit(), hitungMenitTerlambat(). Tidak ada fungsi/kode lama
+        // yang diubah oleh blok ini.
+        // ===========================================================================
+        let rekapBulananSiswaActiveTab = 'ini'; // 'ini' | 'lalu'
+        let rekapBulananSiswaCurrentData = null; // menyimpan hasil render terakhir untuk keperluan export
+
+        function switchRekapBulananSiswaTab(tab) {
+            rekapBulananSiswaActiveTab = (tab === 'lalu') ? 'lalu' : 'ini';
+            const btnIni = document.getElementById('tab-rekap-bulanan-siswa-ini');
+            const btnLalu = document.getElementById('tab-rekap-bulanan-siswa-lalu');
+            const activeClass = 'flex-1 py-2 text-center text-[11px] font-extrabold rounded-xl transition-all bg-white text-indigo-600 shadow-sm';
+            const inactiveClass = 'flex-1 py-2 text-center text-[11px] font-extrabold rounded-xl transition-all text-slate-450';
+            if (btnIni) btnIni.className = (rekapBulananSiswaActiveTab === 'ini') ? activeClass : inactiveClass;
+            if (btnLalu) btnLalu.className = (rekapBulananSiswaActiveTab === 'lalu') ? activeClass : inactiveClass;
+            renderRekapBulananSiswa();
+        }
+
+        // Kode status siswa pada 1 tanggal tertentu, KHUSUS Rekap Bulanan Siswa:
+        // membedakan Hadir tepat waktu (H) dari Terlambat aktual (L, dihitung dari
+        // selisih jam presensi masuk terhadap batas jam masuk kelasnya memakai
+        // hitungMenitTerlambat() yang sudah ada) — berbeda dari
+        // getStatusRekapBulananSiswaTanggal() punya Wali Kelas di atas yang
+        // menyamakan keduanya sebagai 'H'. Urutan prioritas lain (Bolos, lalu
+        // jenis izin yang disetujui, baru Alpha) tetap sama.
+        function getKodeRekapBulananSiswaSendiri(nis, kelas, tanggalStr) {
+            const presensiHari = localDb.presensi.filter(p =>
+                normalizeIdForMatch(p.nis) === normalizeIdForMatch(nis) && p.tanggal === tanggalStr
+            );
+            const masuk = presensiHari.find(p => p.tipe === 'masuk');
+            const pulang = presensiHari.find(p => p.tipe === 'pulang');
+
+            if (masuk && pulang) {
+                const menitTerlambat = (masuk.jam && typeof hitungMenitTerlambat === 'function')
+                    ? hitungMenitTerlambat(masuk.jam, kelas) : 0;
+                return (menitTerlambat > 0) ? 'L' : 'H';
+            }
+            if (masuk && !pulang) return 'B'; // Bolos (masuk tapi tidak presensi pulang)
+
+            const izinTanggalIni = localDb.izin.filter(i =>
+                normalizeIdForMatch(i.nis) === normalizeIdForMatch(nis) &&
+                i.status === 'Disetujui' &&
+                isTodayInRange(i.tanggal, tanggalStr)
+            );
+            if (izinTanggalIni.some(i => i.jenis === 'Sakit')) return 'S';
+            if (izinTanggalIni.some(i => i.jenis === 'Dispen')) return 'D';
+            if (izinTanggalIni.some(i => i.jenis === 'Izin')) return 'I';
+            if (izinTanggalIni.some(i => i.jenis === 'Izin Terlambat Masuk')) return 'T';
+            if (izinTanggalIni.some(i => i.jenis === 'Izin Pulang Cepat')) return 'P';
+
+            return 'A'; // Alpha
+        }
+
+        function renderRekapBulananSiswa() {
+            const wrapEl = document.getElementById('rekap-bulanan-siswa-table-wrap');
+            const labelEl = document.getElementById('rekap-bulanan-siswa-label-bulan');
+            if (!wrapEl || !currentSiswa || !currentSiswa.nis) return;
+            try {
+                const offsetBulan = (rekapBulananSiswaActiveTab === 'lalu') ? -1 : 0;
+                const range = getRekapBulananRange(offsetBulan);
+                if (labelEl) labelEl.innerText = range.namaBulan + ' ' + range.year;
+
+                // Urutan kategori SESUAI permintaan: Hadir, Terlambat, Izin Dispen,
+                // Izin Sakit, Izin Tidak Masuk, Izin Terlambat, Izin Pulang Cepat,
+                // Bolos, Alpha.
+                const kategoriTally = ['H', 'L', 'D', 'S', 'I', 'T', 'P', 'B', 'A'];
+
+                const kodePerTanggal = [];
+                const tally = { H: 0, L: 0, D: 0, S: 0, I: 0, T: 0, P: 0, B: 0, A: 0 };
+                for (let d = 1; d <= range.lastDay; d++) {
+                    const dateObj = new Date(range.year, range.month, d);
+                    const tanggalStr = getTanggalHariIniLokal(dateObj);
+                    if (isTanggalOffRekapBulanan(dateObj, tanggalStr)) {
+                        kodePerTanggal.push('off');
+                        continue;
+                    }
+                    const kode = getKodeRekapBulananSiswaSendiri(currentSiswa.nis, currentSiswa.kelas, tanggalStr);
+                    kodePerTanggal.push(kode);
+                    if (Object.prototype.hasOwnProperty.call(tally, kode)) tally[kode]++;
+                }
+
+                const row = { nis: currentSiswa.nis, nama: currentSiswa.nama || '-', kodePerTanggal, tally };
+                rekapBulananSiswaCurrentData = { range, row, kategoriTally };
+
+                // --- Bangun HTML tabel (1 baris = siswa yang sedang login) ---
+                let theadHtml = '<tr>' +
+                    '<th class="sticky left-0 z-10 bg-slate-100 p-1.5 border border-slate-200 text-left font-extrabold text-slate-600 min-w-[110px]">Nama Siswa</th>';
+                for (let d = 1; d <= range.lastDay; d++) {
+                    theadHtml += `<th class="p-1 border border-slate-200 font-bold text-slate-500 min-w-[20px]">${d}</th>`;
+                }
+                kategoriTally.forEach(k => {
+                    theadHtml += `<th class="p-1 border border-slate-200 font-extrabold text-indigo-700 bg-indigo-50 min-w-[24px]">${k}</th>`;
+                });
+                theadHtml += '</tr>';
+
+                let tbodyHtml = '<tr class="bg-white">' +
+                    `<td class="sticky left-0 z-10 bg-white p-1.5 border border-slate-200 text-left font-bold text-slate-700 whitespace-nowrap">${row.nama}</td>`;
+                row.kodePerTanggal.forEach(kode => {
+                    const isOff = (kode === 'off');
+                    let kodeClass = 'text-slate-500 font-bold';
+                    if (isOff) kodeClass = 'text-slate-300';
+                    else if (kode === 'A') kodeClass = 'text-red-600 font-extrabold';
+                    else if (kode === 'H') kodeClass = 'text-emerald-600 font-bold';
+                    else if (kode === 'L') kodeClass = 'text-amber-600 font-extrabold';
+                    tbodyHtml += `<td class="p-1 border border-slate-200 text-center ${kodeClass}">${isOff ? 'off' : kode}</td>`;
+                });
+                kategoriTally.forEach(k => {
+                    tbodyHtml += `<td class="p-1 border border-slate-200 text-center font-extrabold text-indigo-700 bg-indigo-50/40">${row.tally[k]}</td>`;
+                });
+                tbodyHtml += '</tr>';
+
+                wrapEl.innerHTML = `<table class="border-collapse text-[9px] min-w-max">
+                    <thead>${theadHtml}</thead>
+                    <tbody>${tbodyHtml}</tbody>
+                </table>`;
+            } catch (errRekapBulananSiswa) {
+                console.log('renderRekapBulananSiswa ERROR: ' + errRekapBulananSiswa.toString());
+                wrapEl.innerHTML = `<div class="p-6 text-center text-rose-500 text-[10px]">Gagal memuat rekap bulanan: ${errRekapBulananSiswa.message || errRekapBulananSiswa.toString()}</div>`;
+                rekapBulananSiswaCurrentData = null;
+            }
+        }
+
+        // Ekspor tabel Rekap Bulanan Siswa yang sedang tampil ke format 'excel'
+        // atau 'pdf'. Memakai data hasil render terakhir (rekapBulananSiswaCurrentData)
+        // supaya selalu sesuai dengan tab yang sedang aktif (Bulan Lalu / Bulan Ini).
+        function exportRekapBulananSiswa(format) {
+            if (!rekapBulananSiswaCurrentData || !rekapBulananSiswaCurrentData.row) {
+                if (typeof showToast === 'function') showToast('Data rekap bulanan belum siap, coba lagi sesaat lagi.');
+                else alert('Data rekap bulanan belum siap, coba lagi sesaat lagi.');
+                return;
+            }
+            const { range, row, kategoriTally } = rekapBulananSiswaCurrentData;
+            const namaFileSiswa = (row.nama || 'Siswa').toString().replace(/\s+/g, '_');
+            const namaFile = `Rekap_Bulanan_${namaFileSiswa}_${range.namaBulan}_${range.year}`;
+
+            const headerTanggal = [];
+            for (let d = 1; d <= range.lastDay; d++) headerTanggal.push(d.toString());
+            const headerRow = ['Nama Siswa'].concat(headerTanggal).concat(kategoriTally);
+            const bodyRow = [row.nama].concat(row.kodePerTanggal).concat(kategoriTally.map(k => row.tally[k]));
+
+            if (format === 'excel') {
+                if (typeof XLSX === 'undefined') {
+                    alert('Pustaka export Excel belum siap dimuat. Pastikan koneksi internet aktif, lalu coba lagi.');
+                    return;
+                }
+                try {
+                    const aoa = [headerRow, bodyRow];
+                    const ws = XLSX.utils.aoa_to_sheet(aoa);
+                    const wb = XLSX.utils.book_new();
+                    XLSX.utils.book_append_sheet(wb, ws, 'Rekap Bulanan');
+                    XLSX.writeFile(wb, namaFile + '.xlsx');
+                } catch (errExcel) {
+                    console.log('exportRekapBulananSiswa(excel) ERROR: ' + errExcel.toString());
+                    alert('Gagal membuat file Excel: ' + (errExcel.message || errExcel.toString()));
+                }
+            } else if (format === 'pdf') {
+                if (typeof window.jspdf === 'undefined') {
+                    alert('Pustaka export PDF belum siap dimuat. Pastikan koneksi internet aktif, lalu coba lagi.');
+                    return;
+                }
+                try {
+                    const { jsPDF } = window.jspdf;
+                    const doc = new jsPDF({ orientation: 'landscape', unit: 'pt', format: 'a4' });
+                    doc.setFontSize(11);
+                    doc.text(
+                        `Rekap Bulanan Absensi - ${row.nama || '-'} - ${range.namaBulan} ${range.year}`,
+                        30, 24
+                    );
+                    doc.autoTable({
+                        head: [headerRow],
+                        body: [bodyRow],
+                        startY: 34,
+                        styles: { fontSize: 6, cellPadding: 2, halign: 'center' },
+                        columnStyles: { 0: { halign: 'left', cellWidth: 90 } },
+                        headStyles: { fillColor: [13, 148, 136] }
+                    });
+                    doc.save(namaFile + '.pdf');
+                } catch (errPdf) {
+                    console.log('exportRekapBulananSiswa(pdf) ERROR: ' + errPdf.toString());
                     alert('Gagal membuat file PDF: ' + (errPdf.message || errPdf.toString()));
                 }
             }
