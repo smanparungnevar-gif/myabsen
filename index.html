@@ -307,6 +307,83 @@
                 </div>
             </div>
 
+            <!-- Rekap Kehadiran Hari Ini -->
+            <div class="bg-white p-4 rounded-3xl border border-slate-100 shadow-sm space-y-3">
+                <div class="flex justify-between items-center border-b border-slate-100 pb-2">
+                    <h4 class="text-xs font-bold text-slate-550 uppercase tracking-wider flex items-center gap-1.5">
+                        <i class="fa-solid fa-clipboard-user text-emerald-600"></i> Rekap Kehadiran Hari Ini
+                    </h4>
+                    <span id="rekap-today-str" class="text-[9px] bg-emerald-650 text-white px-2.5 py-0.5 rounded-full font-extrabold uppercase">Hari Ini</span>
+                </div>
+                
+                <div class="grid grid-cols-2 gap-2 text-xs">
+                    <!-- Hadir -->
+                    <div onclick="openWaliRekapDetail('hadir')" class="bg-emerald-50/50 p-2.5 rounded-2xl border border-emerald-100 flex items-center justify-between cursor-pointer active:scale-95 transition-transform">
+                        <div>
+                            <span class="text-[10px] text-emerald-800 font-extrabold block uppercase tracking-wider">Hadir</span>
+                            <span id="rekap-count-hadir" class="text-sm font-black text-slate-800">0 siswa</span>
+                        </div>
+                        <i class="fa-solid fa-user-check text-emerald-600 text-lg opacity-80"></i>
+                    </div>
+                    <!-- Sakit -->
+                    <div onclick="openWaliRekapDetail('sakit')" class="bg-amber-50/50 p-2.5 rounded-2xl border border-amber-100 flex items-center justify-between cursor-pointer active:scale-95 transition-transform">
+                        <div>
+                            <span class="text-[10px] text-amber-800 font-extrabold block uppercase tracking-wider">Sakit</span>
+                            <span id="rekap-count-sakit" class="text-sm font-black text-slate-800">0 siswa</span>
+                        </div>
+                        <i class="fa-solid fa-house-medical text-amber-600 text-lg opacity-80"></i>
+                    </div>
+                    <!-- Izin Tidak Masuk -->
+                    <div onclick="openWaliRekapDetail('izin')" class="bg-indigo-50/50 p-2.5 rounded-2xl border border-indigo-100 flex items-center justify-between cursor-pointer active:scale-95 transition-transform">
+                        <div>
+                            <span class="text-[10px] text-indigo-800 font-extrabold block uppercase tracking-wider">Izin Tidak Masuk</span>
+                            <span id="rekap-count-izin" class="text-sm font-black text-slate-800">0 siswa</span>
+                        </div>
+                        <i class="fa-solid fa-envelope text-indigo-600 text-lg opacity-80"></i>
+                    </div>
+                    <!-- Izin Dispen -->
+                    <div onclick="openWaliRekapDetail('dispen')" class="bg-teal-50/50 p-2.5 rounded-2xl border border-teal-100 flex items-center justify-between cursor-pointer active:scale-95 transition-transform">
+                        <div>
+                            <span class="text-[10px] text-teal-800 font-extrabold block uppercase tracking-wider">Izin Dispen</span>
+                            <span id="rekap-count-dispen" class="text-sm font-black text-slate-800">0 siswa</span>
+                        </div>
+                        <i class="fa-solid fa-briefcase text-teal-600 text-lg opacity-80"></i>
+                    </div>
+                    <!-- Izin Terlambat -->
+                    <div onclick="openWaliRekapDetail('terlambat')" class="bg-sky-50/50 p-2.5 rounded-2xl border border-sky-100 flex items-center justify-between cursor-pointer active:scale-95 transition-transform">
+                        <div>
+                            <span class="text-[10px] text-sky-800 font-extrabold block uppercase tracking-wider">Izin Terlambat</span>
+                            <span id="rekap-count-terlambat" class="text-sm font-black text-slate-800">0 siswa</span>
+                        </div>
+                        <i class="fa-solid fa-clock-rotate-left text-sky-600 text-lg opacity-80"></i>
+                    </div>
+                    <!-- Izin Pulang Cepat -->
+                    <div onclick="openWaliRekapDetail('pulangcepat')" class="bg-rose-50/40 p-2.5 rounded-2xl border border-rose-100 flex items-center justify-between cursor-pointer active:scale-95 transition-transform">
+                        <div>
+                            <span class="text-[10px] text-rose-800 font-extrabold block uppercase tracking-wider">Izin Pulang Cepat</span>
+                            <span id="rekap-count-pulangcepat" class="text-sm font-black text-slate-800">0 siswa</span>
+                        </div>
+                        <i class="fa-solid fa-person-walking-arrow-right text-rose-600 text-lg opacity-80"></i>
+                    </div>
+                    <!-- Bolos -->
+                    <div onclick="openWaliRekapDetail('bolos')" class="bg-fuchsia-50/50 p-2.5 rounded-2xl border border-fuchsia-100 flex items-center justify-between cursor-pointer active:scale-95 transition-transform">
+                        <div>
+                            <span class="text-[10px] text-fuchsia-800 font-extrabold block uppercase tracking-wider">Bolos</span>
+                            <span id="rekap-count-bolos" class="text-sm font-black text-slate-800">0 siswa</span>
+                        </div>
+                        <i class="fa-solid fa-door-open text-fuchsia-600 text-lg opacity-80"></i>
+                    </div>
+                    <!-- Alpha -->
+                    <div onclick="openWaliRekapDetail('alpha')" class="bg-red-50/50 p-2.5 rounded-2xl border border-red-100 flex items-center justify-between cursor-pointer active:scale-95 transition-transform">
+                        <div>
+                            <span class="text-[10px] text-red-800 font-extrabold block uppercase tracking-wider">Alpha</span>
+                            <span id="rekap-count-alpha" class="text-sm font-black text-slate-800">0 siswa</span>
+                        </div>
+                        <i class="fa-solid fa-user-xmark text-red-600 text-lg opacity-80"></i>
+                    </div>
+                </div>
+            </div>
+
             <!-- Monitoring Kehadiran Kelas -->
             <div class="bg-white p-4 rounded-3xl border border-slate-100 shadow-sm space-y-3">
                 <div class="flex justify-between items-center border-b border-slate-100 pb-2.5">
@@ -519,74 +596,6 @@
 
             <!-- Rekap Panel Grid Sejajar -->
             <div class="grid grid-cols-1 gap-4">
-                <!-- Rekap Kehadiran Hari Ini -->
-                <div class="bg-white p-4 rounded-3xl border border-slate-100 shadow-sm space-y-3">
-                    <div class="flex justify-between items-center border-b border-slate-100 pb-2">
-                        <h4 class="text-xs font-bold text-slate-550 uppercase tracking-wider flex items-center gap-1.5">
-                            <i class="fa-solid fa-clipboard-user text-emerald-600"></i> Rekap Kehadiran Hari Ini
-                        </h4>
-                        <span id="rekap-today-str" class="text-[9px] bg-emerald-650 text-white px-2.5 py-0.5 rounded-full font-extrabold uppercase">Hari Ini</span>
-                    </div>
-                    
-                    <div class="grid grid-cols-2 gap-2 text-xs">
-                        <!-- Hadir -->
-                        <div onclick="openWaliRekapDetail('hadir')" class="bg-emerald-50/50 p-2.5 rounded-2xl border border-emerald-100 flex items-center justify-between cursor-pointer active:scale-95 transition-transform">
-                            <div>
-                                <span class="text-[10px] text-emerald-800 font-extrabold block uppercase tracking-wider">Hadir</span>
-                                <span id="rekap-count-hadir" class="text-sm font-black text-slate-800">0 siswa</span>
-                            </div>
-                            <i class="fa-solid fa-user-check text-emerald-600 text-lg opacity-80"></i>
-                        </div>
-                        <!-- Sakit -->
-                        <div onclick="openWaliRekapDetail('sakit')" class="bg-amber-50/50 p-2.5 rounded-2xl border border-amber-100 flex items-center justify-between cursor-pointer active:scale-95 transition-transform">
-                            <div>
-                                <span class="text-[10px] text-amber-800 font-extrabold block uppercase tracking-wider">Sakit</span>
-                                <span id="rekap-count-sakit" class="text-sm font-black text-slate-800">0 siswa</span>
-                            </div>
-                            <i class="fa-solid fa-house-medical text-amber-600 text-lg opacity-80"></i>
-                        </div>
-                        <!-- Izin Tidak Masuk -->
-                        <div onclick="openWaliRekapDetail('izin')" class="bg-indigo-50/50 p-2.5 rounded-2xl border border-indigo-100 flex items-center justify-between cursor-pointer active:scale-95 transition-transform">
-                            <div>
-                                <span class="text-[10px] text-indigo-800 font-extrabold block uppercase tracking-wider">Izin Tidak Masuk</span>
-                                <span id="rekap-count-izin" class="text-sm font-black text-slate-800">0 siswa</span>
-                            </div>
-                            <i class="fa-solid fa-envelope text-indigo-600 text-lg opacity-80"></i>
-                        </div>
-                        <!-- Izin Dispen -->
-                        <div onclick="openWaliRekapDetail('dispen')" class="bg-teal-50/50 p-2.5 rounded-2xl border border-teal-100 flex items-center justify-between cursor-pointer active:scale-95 transition-transform">
-                            <div>
-                                <span class="text-[10px] text-teal-800 font-extrabold block uppercase tracking-wider">Izin Dispen</span>
-                                <span id="rekap-count-dispen" class="text-sm font-black text-slate-800">0 siswa</span>
-                            </div>
-                            <i class="fa-solid fa-briefcase text-teal-600 text-lg opacity-80"></i>
-                        </div>
-                        <!-- Izin Terlambat -->
-                        <div onclick="openWaliRekapDetail('terlambat')" class="bg-sky-50/50 p-2.5 rounded-2xl border border-sky-100 flex items-center justify-between cursor-pointer active:scale-95 transition-transform">
-                            <div>
-                                <span class="text-[10px] text-sky-800 font-extrabold block uppercase tracking-wider">Izin Terlambat</span>
-                                <span id="rekap-count-terlambat" class="text-sm font-black text-slate-800">0 siswa</span>
-                            </div>
-                            <i class="fa-solid fa-clock-rotate-left text-sky-600 text-lg opacity-80"></i>
-                        </div>
-                        <!-- Izin Pulang Cepat -->
-                        <div onclick="openWaliRekapDetail('pulangcepat')" class="bg-rose-50/40 p-2.5 rounded-2xl border border-rose-100 flex items-center justify-between cursor-pointer active:scale-95 transition-transform">
-                            <div>
-                                <span class="text-[10px] text-rose-800 font-extrabold block uppercase tracking-wider">Izin Pulang Cepat</span>
-                                <span id="rekap-count-pulangcepat" class="text-sm font-black text-slate-800">0 siswa</span>
-                            </div>
-                            <i class="fa-solid fa-person-walking-arrow-right text-rose-600 text-lg opacity-80"></i>
-                        </div>
-                        <!-- Bolos -->
-                        <div onclick="openWaliRekapDetail('bolos')" class="bg-fuchsia-50/50 p-2.5 rounded-2xl border border-fuchsia-100 flex items-center justify-between cursor-pointer active:scale-95 transition-transform">
-                            <div>
-                                <span class="text-[10px] text-fuchsia-800 font-extrabold block uppercase tracking-wider">Bolos</span>
-                                <span id="rekap-count-bolos" class="text-sm font-black text-slate-800">0 siswa</span>
-                            </div>
-                            <i class="fa-solid fa-door-open text-fuchsia-600 text-lg opacity-80"></i>
-                        </div>
-                    </div>
-                </div>
 
                 <!-- Rekap Perizinan -->
                 <div class="bg-white p-4 rounded-3xl border border-slate-100 shadow-sm space-y-3">
@@ -4134,7 +4143,8 @@ function saveJadwalToStorage() {
                 dispen: { title: 'Izin Dispen', icon: 'fa-briefcase', empty: 'Tidak ada siswa izin dispen hari ini.' },
                 terlambat: { title: 'Izin Terlambat', icon: 'fa-clock-rotate-left', empty: 'Tidak ada siswa izin terlambat hari ini.' },
                 pulangcepat: { title: 'Izin Pulang Cepat', icon: 'fa-person-walking-arrow-right', empty: 'Tidak ada siswa izin pulang cepat hari ini.' },
-                bolos: { title: 'Siswa Bolos', icon: 'fa-door-open', empty: 'Tidak ada siswa bolos (presensi masuk tanpa presensi pulang) hari ini.' }
+                bolos: { title: 'Siswa Bolos', icon: 'fa-door-open', empty: 'Tidak ada siswa bolos (presensi masuk tanpa presensi pulang) hari ini.' },
+                alpha: { title: 'Siswa Alpha', icon: 'fa-user-xmark', empty: 'Tidak ada siswa alpha (tanpa presensi & tanpa izin) hari ini.' }
             };
             const c = config[type];
             if (!c) return;
@@ -5594,6 +5604,21 @@ function saveJadwalToStorage() {
             const listBolos = Object.values(bolosGroupedWali).filter(row => row.masuk && !row.pulang);
             const countBolos = listBolos.length;
 
+            // Hitung Alpha: siswa di kelas ini yang SAMA SEKALI TIDAK
+            // melakukan presensi masuk maupun pulang hari ini, dan tidak
+            // sedang mengajukan/disetujui izin (Sakit/Izin/Dispen) pada
+            // tanggal tersebut. Dihitung dari daftar murid kelas dikurangi
+            // siswa yang sudah punya record presensi (masuk/pulang) atau
+            // izin yang disetujui hari ini.
+            const nisSudahPresensiWali = new Set(Object.keys(bolosGroupedWali));
+            const nisSudahIzinWali = new Set(
+                [...listSakit, ...listIzin, ...listDispen].map(i => i.nis)
+            );
+            const listAlpha = muridKelas.filter(m =>
+                !nisSudahPresensiWali.has(m.nis) && !nisSudahIzinWali.has(m.nis)
+            );
+            const countAlpha = listAlpha.length;
+
             waliRekapDetailData = {
                 hadir: listHadir.map(p => toDetail(p.nis, `Masuk ${p.jam || ''}`)),
                 sakit: listSakit.map(i => toDetail(i.nis, i.tanggal)),
@@ -5601,7 +5626,8 @@ function saveJadwalToStorage() {
                 dispen: listDispen.map(i => toDetail(i.nis, i.tanggal)),
                 terlambat: listTerlambat.map(i => toDetail(i.nis, i.tanggal)),
                 pulangcepat: listPulangCepat.map(i => toDetail(i.nis, i.tanggal)),
-                bolos: listBolos.map(row => toDetail(row.nis, `Masuk ${row.masuk.jam || ''} • Tidak presensi pulang`))
+                bolos: listBolos.map(row => toDetail(row.nis, `Masuk ${row.masuk.jam || ''} • Tidak presensi pulang`)),
+                alpha: listAlpha.map(m => toDetail(m.nis, 'Tidak presensi masuk & pulang'))
             };
 
             const elHadir = document.getElementById('rekap-count-hadir');
@@ -5611,6 +5637,7 @@ function saveJadwalToStorage() {
             const elTerlambat = document.getElementById('rekap-count-terlambat');
             const elPulangCepat = document.getElementById('rekap-count-pulangcepat');
             const elBolos = document.getElementById('rekap-count-bolos');
+            const elAlpha = document.getElementById('rekap-count-alpha');
             const elTodayStr = document.getElementById('rekap-today-str');
 
             if (elHadir) elHadir.innerText = `${countHadir} siswa`;
@@ -5620,6 +5647,7 @@ function saveJadwalToStorage() {
             if (elTerlambat) elTerlambat.innerText = `${countTerlambat} siswa`;
             if (elPulangCepat) elPulangCepat.innerText = `${countPulangCepat} siswa`;
             if (elBolos) elBolos.innerText = `${countBolos} siswa`;
+            if (elAlpha) elAlpha.innerText = `${countAlpha} siswa`;
 
             if (elTodayStr) {
                 const todayObj = new Date();
