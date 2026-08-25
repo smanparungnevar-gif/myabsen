@@ -377,6 +377,14 @@
                         </div>
                         <i class="fa-solid fa-door-open text-fuchsia-600 text-lg opacity-80"></i>
                     </div>
+                    <!-- [TAMBAHAN] Terlambat: presensi masuk melewati batas waktu yang ditentukan -->
+                    <div onclick="openWaliRekapDetail('telatmasuk')" class="bg-orange-50/50 p-2.5 rounded-2xl border border-orange-100 flex items-center justify-between cursor-pointer active:scale-95 transition-transform">
+                        <div>
+                            <span class="text-[10px] text-orange-800 font-extrabold block uppercase tracking-wider">Terlambat</span>
+                            <span id="rekap-count-telatmasuk" class="text-sm font-black text-slate-800">0 siswa</span>
+                        </div>
+                        <i class="fa-solid fa-user-clock text-orange-600 text-lg opacity-80"></i>
+                    </div>
                     <!-- Alpha -->
                     <div onclick="openWaliRekapDetail('alpha')" class="bg-red-50/50 p-2.5 rounded-2xl border border-red-100 flex items-center justify-between cursor-pointer active:scale-95 transition-transform">
                         <div>
@@ -803,6 +811,14 @@
                             <span id="siswa-rekap-count-pulangcepat" class="text-sm font-black text-slate-800">0 kali</span>
                         </div>
                         <i class="fa-solid fa-person-walking-arrow-right text-rose-600 text-lg opacity-80"></i>
+                    </div>
+                    <!-- [TAMBAHAN] Bolos: presensi masuk tapi tidak presensi pulang -->
+                    <div class="bg-fuchsia-50/50 p-2.5 rounded-2xl border border-fuchsia-100 flex items-center justify-between">
+                        <div>
+                            <span class="text-[10px] text-fuchsia-800 font-extrabold block uppercase tracking-wider">Bolos</span>
+                            <span id="siswa-rekap-count-bolos" class="text-sm font-black text-slate-800">0 kali</span>
+                        </div>
+                        <i class="fa-solid fa-door-open text-fuchsia-600 text-lg opacity-80"></i>
                     </div>
                 </div>
             </div>
@@ -2536,7 +2552,7 @@ function saveJadwalToStorage() {
         let currentSiswa = null;
         let currentAdmin = null;
         let adminRekapDetailData = { hadir: [], terlambat: [], alpha: [] };
-        let waliRekapDetailData = { hadir: [], sakit: [], izin: [], dispen: [], terlambat: [], pulangcepat: [] };
+        let waliRekapDetailData = { hadir: [], sakit: [], izin: [], dispen: [], terlambat: [], pulangcepat: [], telatmasuk: [] };
         let scriptUrl = SCRIPT_URL;
         let currentLatitude = null;
         let currentLongitude = null;
@@ -4186,6 +4202,7 @@ function saveJadwalToStorage() {
                 terlambat: { title: 'Izin Terlambat', icon: 'fa-clock-rotate-left', empty: 'Tidak ada siswa izin terlambat hari ini.' },
                 pulangcepat: { title: 'Izin Pulang Cepat', icon: 'fa-person-walking-arrow-right', empty: 'Tidak ada siswa izin pulang cepat hari ini.' },
                 bolos: { title: 'Siswa Bolos', icon: 'fa-door-open', empty: 'Tidak ada siswa bolos (presensi masuk tanpa presensi pulang) hari ini.' },
+                telatmasuk: { title: 'Siswa Terlambat', icon: 'fa-user-clock', empty: 'Tidak ada siswa yang presensi masuk melewati batas waktu hari ini.' },
                 alpha: { title: 'Siswa Alpha', icon: 'fa-user-xmark', empty: 'Tidak ada siswa alpha (tanpa presensi & tanpa izin) hari ini.' }
             };
             const c = config[type];
@@ -5702,6 +5719,22 @@ function readPresensiTodayCache(nis) {
             const listBolos = Object.values(bolosGroupedWali).filter(row => row.masuk && !row.pulang);
             const countBolos = listBolos.length;
 
+            // [TAMBAHAN] Hitung Terlambat (aktual): siswa yang SUDAH presensi
+            // masuk hari ini, tapi jam presensinya melewati batas waktu yang
+            // ditentukan (memakai getBatasMasukMenit() yang sama dipakai
+            // renderWaliMonitoringPresensi() untuk badge merah "IN"). Berbeda
+            // dari kartu "Izin Terlambat" di atas (listTerlambat) yang berasal
+            // dari pengajuan izin terlambat yang disetujui — ini murni dari
+            // selisih jam presensi masuk terhadap batas jam masuk kelasnya.
+            const batasMasukKelasIniWali = getBatasMasukMenit(targetKelas, 6 * 60 + 30);
+            const listTelatMasuk = listHadir.filter(p => {
+                if (!p.jam) return false;
+                const parts = p.jam.split(':').map(Number);
+                if (parts.length < 2 || isNaN(parts[0]) || isNaN(parts[1])) return false;
+                return (parts[0] * 60 + parts[1]) > batasMasukKelasIniWali;
+            });
+            const countTelatMasuk = listTelatMasuk.length;
+
             // Hitung Alpha: siswa di kelas ini yang SAMA SEKALI TIDAK
             // melakukan presensi masuk maupun pulang hari ini, dan tidak
             // sedang mengajukan/disetujui izin (Sakit/Izin/Dispen) pada
@@ -5735,6 +5768,7 @@ function readPresensiTodayCache(nis) {
                 terlambat: listTerlambat.map(i => toDetail(i.nis, i.tanggal)),
                 pulangcepat: listPulangCepat.map(i => toDetail(i.nis, i.tanggal)),
                 bolos: listBolos.map(row => toDetail(row.nis, `Masuk ${row.masuk.jam || ''} • Tidak presensi pulang`)),
+                telatmasuk: listTelatMasuk.map(p => toDetail(p.nis, `Masuk ${p.jam || ''} (lewat batas)`)),
                 alpha: isHariIniLibur
                     ? muridKelas.map(m => toDetail(m.nis, 'Libur / Sabtu-Minggu'))
                     : listAlpha.map(m => toDetail(m.nis, 'Tidak presensi masuk & pulang'))
@@ -5747,6 +5781,7 @@ function readPresensiTodayCache(nis) {
             const elTerlambat = document.getElementById('rekap-count-terlambat');
             const elPulangCepat = document.getElementById('rekap-count-pulangcepat');
             const elBolos = document.getElementById('rekap-count-bolos');
+            const elTelatMasuk = document.getElementById('rekap-count-telatmasuk');
             const elAlpha = document.getElementById('rekap-count-alpha');
             const elLabelAlpha = document.getElementById('rekap-label-alpha');
             const elTodayStr = document.getElementById('rekap-today-str');
@@ -5758,6 +5793,7 @@ function readPresensiTodayCache(nis) {
             if (elTerlambat) elTerlambat.innerText = `${countTerlambat} siswa`;
             if (elPulangCepat) elPulangCepat.innerText = `${countPulangCepat} siswa`;
             if (elBolos) elBolos.innerText = `${countBolos} siswa`;
+            if (elTelatMasuk) elTelatMasuk.innerText = `${countTelatMasuk} siswa`;
             if (elAlpha) elAlpha.innerText = `${countAlpha} siswa`;
             if (elLabelAlpha) elLabelAlpha.innerText = isHariIniLibur ? 'Off (Libur)' : 'Alpha';
 
@@ -6491,6 +6527,18 @@ function readPresensiTodayCache(nis) {
                 }
             });
 
+            // [TAMBAHAN] Bolos (periode filter): dihitung 1 kali untuk setiap
+            // tanggal siswa melakukan presensi MASUK namun TIDAK melakukan
+            // presensi PULANG pada tanggal yang sama. Memakai ulang
+            // groupedUntukHadir yang sudah dihitung di atas (tidak mengubah
+            // logika/perhitungan yang sudah ada).
+            let countBolosPeriode = 0;
+            Object.keys(groupedUntukHadir).forEach(tglKey => {
+                if (groupedUntukHadir[tglKey].masuk && !groupedUntukHadir[tglKey].pulang) {
+                    countBolosPeriode++;
+                }
+            });
+
             // --- Helper hitung jumlah pengajuan izin (per jenis) yang sudah
             // Disetujui wali kelas, dalam periode filter tahun/bulan/tanggal ---
             function hitungIzinPeriode(jenisTarget) {
@@ -6520,6 +6568,7 @@ function readPresensiTodayCache(nis) {
             const elSiswaDispen = document.getElementById('siswa-rekap-count-dispen');
             const elSiswaTerlambat = document.getElementById('siswa-rekap-count-terlambat');
             const elSiswaPulangCepat = document.getElementById('siswa-rekap-count-pulangcepat');
+            const elSiswaBolos = document.getElementById('siswa-rekap-count-bolos');
 
             if (elSiswaHadir) elSiswaHadir.innerText = `${countHadirPeriode} kali`;
             if (elSiswaSakit) elSiswaSakit.innerText = `${countSakitPeriode} kali`;
@@ -6527,6 +6576,7 @@ function readPresensiTodayCache(nis) {
             if (elSiswaDispen) elSiswaDispen.innerText = `${countDispenPeriode} kali`;
             if (elSiswaTerlambat) elSiswaTerlambat.innerText = `${countTerlambatPeriode} kali`;
             if (elSiswaPulangCepat) elSiswaPulangCepat.innerText = `${countPulangCepatPeriode} kali`;
+            if (elSiswaBolos) elSiswaBolos.innerText = `${countBolosPeriode} kali`;
 
             const logContainer = document.getElementById('log-presensi-list');
             if (!logContainer) return;
