@@ -380,7 +380,7 @@
                     <!-- Alpha -->
                     <div onclick="openWaliRekapDetail('alpha')" class="bg-red-50/50 p-2.5 rounded-2xl border border-red-100 flex items-center justify-between cursor-pointer active:scale-95 transition-transform">
                         <div>
-                            <span class="text-[10px] text-red-800 font-extrabold block uppercase tracking-wider">Alpha</span>
+                            <span id="rekap-label-alpha" class="text-[10px] text-red-800 font-extrabold block uppercase tracking-wider">Alpha</span>
                             <span id="rekap-count-alpha" class="text-sm font-black text-slate-800">0 siswa</span>
                         </div>
                         <i class="fa-solid fa-user-xmark text-red-600 text-lg opacity-80"></i>
@@ -5006,6 +5006,9 @@ function readPresensiTodayCache(nis) {
                     `;
                 } else if (izinToday) {
                     statusHTML = `<span class="bg-indigo-50 text-indigo-700 text-[9px] font-bold px-2 py-0.5 rounded border border-indigo-200">${izinToday.jenis}</span>`;
+                } else if (typeof isHariLibur === 'function' && isHariLibur()) {
+                    // [TAMBAHAN] Sabtu/Minggu atau tanggal merah (libur nasional) -> "Off", bukan Alpha
+                    statusHTML = `<span class="bg-slate-100 text-slate-500 text-[9px] font-bold px-2 py-0.5 rounded border border-slate-200">Off</span>`;
                 } else {
                     statusHTML = `<span class="bg-rose-50 text-rose-700 text-[9px] font-bold px-2 py-0.5 rounded border border-rose-200">Alpha</span>`;
                 }
@@ -5090,6 +5093,9 @@ function readPresensiTodayCache(nis) {
                     `;
                 } else if (izinToday) {
                     statusHTML = `<span class="bg-indigo-50 text-indigo-700 text-[9px] font-bold px-2 py-0.5 rounded border border-indigo-200">${izinToday.jenis}</span>`;
+                } else if (typeof isHariLibur === 'function' && isHariLibur()) {
+                    // [TAMBAHAN] Sabtu/Minggu atau tanggal merah (libur nasional) -> "Off", bukan Alpha
+                    statusHTML = `<span class="bg-slate-100 text-slate-500 text-[9px] font-bold px-2 py-0.5 rounded border border-slate-200">Off</span>`;
                 } else {
                     statusHTML = `<span class="bg-rose-50 text-rose-700 text-[9px] font-bold px-2 py-0.5 rounded border border-rose-200">Alpha</span>`;
                 }
@@ -5706,10 +5712,20 @@ function readPresensiTodayCache(nis) {
             const nisSudahIzinWali = new Set(
                 [...listSakit, ...listIzin, ...listDispen].map(i => i.nis)
             );
-            const listAlpha = muridKelas.filter(m =>
+            let listAlpha = muridKelas.filter(m =>
                 !nisSudahPresensiWali.has(m.nis) && !nisSudahIzinWali.has(m.nis)
             );
-            const countAlpha = listAlpha.length;
+
+            // [TAMBAHAN] Kalau hari ini Sabtu/Minggu atau tanggal merah (libur
+            // nasional yang diatur Admin) dan presensi memang ditutup, siswa
+            // yang tidak presensi/izin TIDAK dihitung sebagai Alpha — kartu
+            // "Alpha" berubah jadi "Off (Libur)" dan menampilkan seluruh
+            // siswa kelas ini sebagai status Off, bukan Alpha.
+            const isHariIniLibur = (typeof isHariLibur === 'function') && isHariLibur();
+            if (isHariIniLibur) {
+                listAlpha = [];
+            }
+            const countAlpha = isHariIniLibur ? muridKelas.length : listAlpha.length;
 
             waliRekapDetailData = {
                 hadir: listHadir.map(p => toDetail(p.nis, `Masuk ${p.jam || ''}`)),
@@ -5719,7 +5735,9 @@ function readPresensiTodayCache(nis) {
                 terlambat: listTerlambat.map(i => toDetail(i.nis, i.tanggal)),
                 pulangcepat: listPulangCepat.map(i => toDetail(i.nis, i.tanggal)),
                 bolos: listBolos.map(row => toDetail(row.nis, `Masuk ${row.masuk.jam || ''} • Tidak presensi pulang`)),
-                alpha: listAlpha.map(m => toDetail(m.nis, 'Tidak presensi masuk & pulang'))
+                alpha: isHariIniLibur
+                    ? muridKelas.map(m => toDetail(m.nis, 'Libur / Sabtu-Minggu'))
+                    : listAlpha.map(m => toDetail(m.nis, 'Tidak presensi masuk & pulang'))
             };
 
             const elHadir = document.getElementById('rekap-count-hadir');
@@ -5730,6 +5748,7 @@ function readPresensiTodayCache(nis) {
             const elPulangCepat = document.getElementById('rekap-count-pulangcepat');
             const elBolos = document.getElementById('rekap-count-bolos');
             const elAlpha = document.getElementById('rekap-count-alpha');
+            const elLabelAlpha = document.getElementById('rekap-label-alpha');
             const elTodayStr = document.getElementById('rekap-today-str');
 
             if (elHadir) elHadir.innerText = `${countHadir} siswa`;
@@ -5740,6 +5759,7 @@ function readPresensiTodayCache(nis) {
             if (elPulangCepat) elPulangCepat.innerText = `${countPulangCepat} siswa`;
             if (elBolos) elBolos.innerText = `${countBolos} siswa`;
             if (elAlpha) elAlpha.innerText = `${countAlpha} siswa`;
+            if (elLabelAlpha) elLabelAlpha.innerText = isHariIniLibur ? 'Off (Libur)' : 'Alpha';
 
             if (elTodayStr) {
                 const todayObj = new Date();
