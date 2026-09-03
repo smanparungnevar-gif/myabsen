@@ -4585,8 +4585,10 @@ function saveJadwalToStorage() {
             const todayStr = getTanggalHariIniLokal(now);
             const currentMinutes = parseInt(hh) * 60 + parseInt(mm);
             const limitMasukMinutes = getBatasMasukMenit(currentSiswa.kelas, 6 * 60 + 30);
+            // [FIX] Sama seperti checkHariIniAbsenStatus() — pakai normalizeIdForMatch()
+            // supaya pencocokan NIS tidak gagal hanya karena beda format teks/angka.
             const hasIzinTerlambat = localDb.izin.some(i => 
-                i.nis === currentSiswa.nis && 
+                normalizeIdForMatch(i.nis) === normalizeIdForMatch(currentSiswa.nis) && 
                 i.jenis === 'Izin Terlambat Masuk' && 
                 i.status === 'Disetujui' && 
                 i.tanggal === todayStr
@@ -4604,7 +4606,7 @@ function saveJadwalToStorage() {
 
             const limitPulangDefaultMinutes = getPulangBukaMenit(currentSiswa.kelas, 15 * 60);
             const izinPulangCepat = localDb.izin.find(i => 
-                i.nis === currentSiswa.nis && 
+                normalizeIdForMatch(i.nis) === normalizeIdForMatch(currentSiswa.nis) && 
                 i.jenis === 'Izin Pulang Cepat' && 
                 i.status === 'Disetujui' && 
                 i.tanggal === todayStr
@@ -4684,7 +4686,7 @@ function saveJadwalToStorage() {
             if (!currentSiswa || currentSiswa.role === 'walikelas') return false;
             const todayStr = getTanggalHariIniLokal(new Date());
             return localDb.izin.some(i => 
-                i.nis === currentSiswa.nis && 
+                normalizeIdForMatch(i.nis) === normalizeIdForMatch(currentSiswa.nis) && 
                 i.jenis === 'Dispen' && 
                 i.status === 'Disetujui' && 
                 isTodayInRange(i.tanggal, todayStr)
@@ -4698,7 +4700,7 @@ function saveJadwalToStorage() {
             if (!currentSiswa || currentSiswa.role === 'walikelas') return false;
             const todayStr = getTanggalHariIniLokal(new Date());
             return localDb.izin.some(i => 
-                i.nis === currentSiswa.nis && 
+                normalizeIdForMatch(i.nis) === normalizeIdForMatch(currentSiswa.nis) && 
                 i.jenis === 'Izin Pulang Cepat' && 
                 i.status === 'Disetujui' && 
                 i.tanggal === todayStr
@@ -4708,8 +4710,19 @@ function saveJadwalToStorage() {
         function checkHariIniAbsenStatus(tanggalStr) {
     if (!currentSiswa) return { masuk: null, pulang: null };
     // Pastikan tanggalStr dalam format YYYY-MM-DD
+    // [FIX - BACA STATUS PRESENSI DARI SPREADSHEET SAAT LOGIN] Sebelumnya
+    // baris ini membandingkan NIS persis (p.nis === currentSiswa.nis). Kalau
+    // NIS di sheet 'siswa' tersimpan sebagai TEKS (mis. "0101295229") tapi
+    // NIS pada baris presensi/hasil sinkronisasi tersimpan/terbaca sebagai
+    // ANGKA (atau sebaliknya), perbandingan persis ini gagal cocok — akibatnya
+    // walau siswa SUDAH presensi (datanya ADA di spreadsheet), begitu login
+    // tombol presensi masuk/pulang tetap tampil "Belum Presensi" dan siswa
+    // diminta presensi lagi. Sekarang memakai normalizeIdForMatch() (fungsi
+    // yang sama yang sudah dipakai di renderLivePresensiKelas() untuk masalah
+    // serupa) supaya "12345", "012345", maupun 12345 (angka) semuanya
+    // dianggap NIS yang sama.
     const list = (localDb.presensi || []).filter(p => 
-        p.nis === currentSiswa.nis && p.tanggal === tanggalStr
+        normalizeIdForMatch(p.nis) === normalizeIdForMatch(currentSiswa.nis) && p.tanggal === tanggalStr
     );
     // [FIX] Bug: presensi yang sudah "Done" bisa tampil kembali "Belum
     // Presensi" setelah refresh — ini terjadi kalau localDb.presensi hasil
@@ -4829,7 +4842,7 @@ function unlockPresensiButtonsSetelahSync() {
                 const todayStr = getTanggalHariIniLokal(now);
                 const hasDispenActive = hasApprovedDispenToday();
                 const izinPulangCepat = localDb.izin.find(i =>
-                    i.nis === currentSiswa.nis &&
+                    normalizeIdForMatch(i.nis) === normalizeIdForMatch(currentSiswa.nis) &&
                     i.jenis === 'Izin Pulang Cepat' &&
                     i.status === 'Disetujui' &&
                     i.tanggal === todayStr
