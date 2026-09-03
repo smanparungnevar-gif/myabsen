@@ -2158,7 +2158,7 @@
 
     <script>
         // URL Google Apps Script (hardcoded — tidak perlu diinput manual oleh siswa/wali kelas)
-        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwEhnZszudeK7AgEG7PVHW5bNUYfWJggke_C1LuqHFaQ3kFFdsIQOy9zdYMM2u_k9tW8g/exec";
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzXq2O5QvdpIX_9f9JXee_oeYXsn7kVbbxqEGbXvZOQBesl29jJtfbCsFn0SPb3gihJeA/exec";
         
         // Konfigurasi Geofencing SMAN 1 Parung
         const SCHOOL_LAT = -6.436954848531352; 
@@ -4778,6 +4778,104 @@ function readPresensiTodayCache(nis) {
     }
 }
 
+// ============================================================================
+// [TAMBAHAN BARU - PERBAIKAN SINKRONISASI ANTAR DEVICE/BROWSER] Antrian
+// sinkronisasi ulang untuk presensi yang GAGAL terkirim ke server.
+// ----------------------------------------------------------------------------
+// AKAR MASALAH yang diperbaiki di sini: prosesAbsensiSelesai() mengirim
+// presensi ke server lewat fetch(). Kalau fetch()-nya GAGAL di level jaringan
+// (mis. WiFi sekolah putus-putus, sinyal HP lemah, request timeout, atau
+// diblokir CORS) — bukan gagal karena server menolak — kode SEBELUMNYA
+// langsung menganggap presensi itu "berhasil" di perangkat tsb (menampilkan
+// centang hijau "Sudah Presensi" & menyimpan ke localDb.presensi LOKAL saja)
+// TANPA PERNAH benar-benar mencoba mengirim ulang ke Spreadsheet. Karena
+// tampilan di perangkat itu sendiri sudah menunjukkan "Sudah Presensi",
+// pengguna tidak sadar bahwa datanya sebenarnya TIDAK PERNAH sampai ke
+// Spreadsheet — sehingga saat login di perangkat/browser LAIN, presensi itu
+// memang benar-benar TIDAK ADA di server (bukan cuma soal cache/refresh),
+// dan otomatis tidak terbaca di sana. Ini persis skenario yang dilaporkan:
+// presensi di device A "terlihat" berhasil, tapi tidak muncul saat login di
+// device B.
+//
+// PERBAIKAN: presensi yang gagal terkirim (network error) sekarang JUGA
+// dimasukkan ke "antrian sinkronisasi tertunda" tersendiri (localStorage,
+// terpisah dari localDb supaya tidak tercampur/ikut ter-timpa oleh proses
+// merge data server). Setiap kali fetchDatabaseState() berjalan — termasuk
+// polling otomatis tiap 2 detik yang sudah ada di startLiveKehadiranKelasPolling()
+// — antrian ini dicoba dikirim ulang ke server. Begitu berhasil (mis. WiFi
+// sudah kembali normal), barulah baris tsb benar-benar tersimpan di
+// Spreadsheet dan otomatis terbaca oleh SEMUA device/browser lain, tanpa
+// perlu presensi ulang. Tidak ada perubahan pada alur/tampilan presensi yang
+// sudah berjalan normal (koneksi lancar) — antrian ini HANYA terpakai saat
+// ada kegagalan jaringan.
+// ============================================================================
+var SIGESIT_PENDING_SYNC_KEY = 'sigesit_pending_presensi_sync';
+
+function readPendingPresensiQueue() {
+    try {
+        const raw = localStorage.getItem(SIGESIT_PENDING_SYNC_KEY);
+        const parsed = raw ? JSON.parse(raw) : [];
+        return Array.isArray(parsed) ? parsed : [];
+    } catch (e) {
+        return [];
+    }
+}
+
+function writePendingPresensiQueue(queue) {
+    try {
+        localStorage.setItem(SIGESIT_PENDING_SYNC_KEY, JSON.stringify(queue));
+    } catch (e) {
+        // localStorage penuh/private mode — abaikan, antrian hanya jaring
+        // pengaman tambahan, tidak menghentikan alur presensi utama.
+    }
+}
+
+// Menambahkan record presensi yang gagal terkirim ke antrian, mencegah
+// duplikat (nis + tanggal + tipe sama) supaya tidak dikirim berkali-kali
+// sebagai baris terpisah.
+function queuePresensiUntukSyncUlang(record) {
+    const queue = readPendingPresensiQueue();
+    const sudahAda = queue.some(r => r.nis === record.nis && r.tanggal === record.tanggal && r.tipe === record.tipe);
+    if (!sudahAda) {
+        queue.push(record);
+        writePendingPresensiQueue(queue);
+    }
+}
+
+// Dipanggil dari fetchDatabaseState() setiap kali sinkronisasi berjalan.
+// Mencoba mengirim ulang seluruh antrian presensi tertunda ke server satu
+// per satu; hanya dihapus dari antrian kalau server benar-benar menjawab
+// success:true. Kalau gagal lagi (masih offline), tetap di antrian untuk
+// dicoba lagi di sinkronisasi berikutnya (polling tiap 2 detik).
+function syncPendingPresensiQueue() {
+    if (isMockUrl()) return;
+    const queue = readPendingPresensiQueue();
+    if (queue.length === 0) return;
+
+    queue.forEach(record => {
+        fetch(`${scriptUrl}?action=addPresensi`, {
+            method: 'POST',
+            body: JSON.stringify(record)
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data && data.success) {
+                const sisaQueue = readPendingPresensiQueue().filter(r =>
+                    !(r.nis === record.nis && r.tanggal === record.tanggal && r.tipe === record.tipe)
+                );
+                writePendingPresensiQueue(sisaQueue);
+                console.log('✓ Presensi tertunda berhasil disinkronkan:', record.nis, record.tanggal, record.tipe);
+            }
+            // Kalau data.success bernilai false, biarkan tetap di antrian —
+            // akan dicoba lagi otomatis di sinkronisasi berikutnya.
+        })
+        .catch(() => {
+            // Masih gagal (masih offline) — biarkan tetap di antrian, tidak
+            // perlu penanganan tambahan, akan dicoba lagi otomatis.
+        });
+    });
+}
+
 // [TAMBAHAN - PENGAMAN SINKRONISASI SETELAH LOGIN] Menutup celah balapan yang
 // sangat sempit (hitungan milidetik) antara saat home ditampilkan (memakai
 // data lokal/cache lama) dengan saat sinkronisasi pertama ke server
@@ -4950,6 +5048,16 @@ function unlockPresensiButtonsSetelahSync() {
                 }
             })
             .catch(() => {
+                // [FIX - SINKRONISASI ANTAR DEVICE] Sebelumnya kegagalan jaringan di
+                // sini langsung dianggap "berhasil" tanpa pernah dikirim ulang ke
+                // server, sehingga presensi terlihat "Done" HANYA di perangkat ini
+                // padahal tidak pernah benar-benar tersimpan di Spreadsheet (lihat
+                // catatan lengkap di queuePresensiUntukSyncUlang() di atas). Sekarang
+                // record ini JUGA dimasukkan ke antrian sinkronisasi tertunda, supaya
+                // otomatis dicoba dikirim ulang begitu koneksi kembali normal — tanpa
+                // mengubah tampilan optimis di perangkat ini (tetap langsung "Done"
+                // seperti sebelumnya, supaya siswa tidak perlu menunggu/presensi ulang).
+                queuePresensiUntukSyncUlang(record);
                 savePresensiToState(record);
                 kirimNotifikasiWhatsApp(type === 'masuk' ? 'presensi_masuk' : 'presensi_pulang', { jam: jam });
             });
@@ -7021,7 +7129,13 @@ function unlockPresensiButtonsSetelahSync() {
 
         function fetchDatabaseState(showFeedback = false) {
             if (!currentSiswa && !currentAdmin) return;
-            
+
+            // [FIX - SINKRONISASI ANTAR DEVICE] Setiap kali data ditarik dari server
+            // (termasuk polling otomatis tiap 2 detik), coba juga kirim ulang presensi
+            // yang sebelumnya gagal tersimpan ke Spreadsheet karena masalah jaringan.
+            // Lihat catatan lengkap di syncPendingPresensiQueue() di atas.
+            syncPendingPresensiQueue();
+
             if (showFeedback) {
                 showToast("Menarik data terbaru dari server...");
             }
