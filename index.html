@@ -2,7 +2,24 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <!-- [TAMBAHAN BARU - KOMPATIBILITAS LINTAS PERANGKAT] Meta tag di bawah ini
+         MURNI TAMBAHAN (tidak mengganti/menghapus meta tag apa pun yang sudah
+         ada di atas). Tujuannya:
+         - viewport-fit=cover (di atas) + safe-area padding di <style> bawah:
+           supaya bottom-nav tidak tertutup "notch"/home-indicator di iPhone
+           X ke atas, terutama kalau nanti web app ini di-"Add to Home
+           Screen" (mode PWA) di iPhone maupun Android.
+         - apple-mobile-web-app-*: supaya saat dibuka di Safari iPhone lalu
+           di-"Add to Home Screen", tampilannya rapi (tanpa address bar) &
+           status bar-nya menyesuaikan warna tema aplikasi.
+         - theme-color: dipakai Chrome Android untuk mewarnai address bar
+           sesuai warna tema aplikasi (tidak berefek apa pun di Safari, aman). -->
+    <meta name="theme-color" content="#f8fafc">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="SiGesit">
     <title>SiGesit - SMAN 1 Parung</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -25,8 +42,22 @@
         }
         .glass-card {
             background: rgba(255, 255, 255, 0.9);
+            -webkit-backdrop-filter: blur(12px); /* [TAMBAHAN] wajib ada utk Safari (iOS/Mac) versi < 15.4, tanpa ini efek blur tidak muncul di Safari, tidak berpengaruh sama sekali di Chrome */
             backdrop-filter: blur(12px);
             border: 1px solid rgba(226, 232, 240, 0.8);
+        }
+        /* [TAMBAHAN BARU - KOMPATIBILITAS LINTAS PERANGKAT] Murni tambahan,
+           tidak mengubah aturan CSS lain yang sudah ada. Menambahkan jarak
+           aman di bawah bottom-nav mengikuti "safe area" perangkat (notch /
+           garis home-indicator di iPhone X ke atas, juga navigation-bar
+           gestur di sebagian HP Android). Di perangkat yang tidak punya
+           safe-area (kebanyakan Android & iPhone lama), env(...) bernilai 0
+           sehingga TIDAK ADA PERUBAHAN TAMPILAN sama sekali. Dipasang lewat
+           selector ID (#bottom-nav / #admin-bottom-nav), jadi tetap berlaku
+           walau class-nya diganti-ganti oleh kode JS yang sudah ada
+           (switchView, dsb.) — tidak perlu mengubah baris JS mana pun. */
+        #bottom-nav, #admin-bottom-nav {
+            padding-bottom: calc(0.75rem + env(safe-area-inset-bottom));
         }
         #map, #dispen-map {
             height: 200px;
@@ -4332,6 +4363,9 @@ function saveJadwalToStorage() {
         }
 
         function doPostLoginActions() {
+            // [TAMBAHAN] Kunci sementara tombol presensi sampai sinkronisasi
+            // pertama setelah login selesai (lihat unlockPresensiButtonsSetelahSync()).
+            lockPresensiButtonsUntukSyncAwal();
             document.getElementById('view-login').classList.add('hidden');
             document.getElementById('app-header').classList.remove('hidden');
             const bottomNav = document.getElementById('bottom-nav');
@@ -4729,6 +4763,29 @@ function readPresensiTodayCache(nis) {
     } catch (e) {
         return null;
     }
+}
+
+// [TAMBAHAN - PENGAMAN SINKRONISASI SETELAH LOGIN] Menutup celah balapan yang
+// sangat sempit (hitungan milidetik) antara saat home ditampilkan (memakai
+// data lokal/cache lama) dengan saat sinkronisasi pertama ke server
+// (fetchDatabaseState()) benar-benar selesai membaca status presensi terbaru
+// (mis. siswa sudah absen di device lain hari ini). Selama jeda ini, tombol
+// presensi dikunci sementara agar tidak bisa ditekan berdasarkan data yang
+// mungkin belum ter-update.
+// TIDAK mengubah logika checkHariIniAbsenStatus() / updateHomePresensiUI()
+// yang sudah ada — hanya menambah kunci sementara di atasnya. Kunci ini
+// otomatis dilepas begitu updateHomePresensiUI() dipanggil ulang (baik lewat
+// sinkronisasi yang berhasil maupun gagal), sehingga status akhir tombol
+// (sudah absen / belum dibuka / dsb) tetap sepenuhnya ditentukan oleh
+// updateHomePresensiUI() seperti biasa, bukan dipaksa aktif begitu saja.
+function lockPresensiButtonsUntukSyncAwal() {
+    const btnMasuk = document.getElementById('btn-presensi-masuk');
+    const btnPulang = document.getElementById('btn-presensi-pulang');
+    if (btnMasuk) btnMasuk.disabled = true;
+    if (btnPulang) btnPulang.disabled = true;
+}
+function unlockPresensiButtonsSetelahSync() {
+    if (typeof updateHomePresensiUI === 'function') updateHomePresensiUI();
 }
 
         let activeAbsenceType = '';
@@ -6994,12 +7051,21 @@ function readPresensiTodayCache(nis) {
                 setTimeout(() => {
                     refreshAllViews();
                     syncIcons.forEach(icon => icon.classList.remove('animate-spin'));
+                    unlockPresensiButtonsSetelahSync();
                     if (showFeedback) showToast("Menggunakan data demo lokal.");
                 }, 800);
                 return;
             }
 
-            fetch(`${scriptUrl}?action=getUserData`)
+            // [PERBAIKAN] Tambahkan parameter anti-cache (_ts) + cache:'no-store'
+            // supaya request ini SELALU menarik data terbaru dari server, bukan
+            // tersaji dari cache browser (beberapa browser/OS — terutama Safari
+            // iOS — bisa meng-cache response fetch() GET yang URL-nya persis
+            // sama berulang kali, sehingga presensi baru dari teman sekelas di
+            // panel "Live Kehadiran Kelas" terasa "belum terbaca" sampai
+            // di-refresh manual). Tidak mengubah endpoint/action/parameter lain
+            // apa pun di sisi server.
+            fetch(`${scriptUrl}?action=getUserData&_ts=${Date.now()}`, { cache: 'no-store' })
                 .then(res => res.json())
                 .then(data => {
                     syncIcons.forEach(icon => icon.classList.remove('animate-spin'));
@@ -7096,6 +7162,7 @@ function readPresensiTodayCache(nis) {
                             showToast("Sinkronisasi database berhasil!");
                         }
                     } else {
+                        unlockPresensiButtonsSetelahSync();
                         if (showFeedback) showToast("Gagal memuat data dari spreadsheet.");
                     }
                 })
@@ -7105,6 +7172,8 @@ function readPresensiTodayCache(nis) {
                     if (backup) {
                         localDb = JSON.parse(backup);
                         refreshAllViews();
+                    } else {
+                        unlockPresensiButtonsSetelahSync();
                     }
                     if (showFeedback) showToast("Koneksi gagal. Menggunakan data offline.");
                 });
