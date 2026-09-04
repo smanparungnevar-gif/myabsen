@@ -2151,6 +2151,27 @@
         </div>
     </div>
 
+    <!-- ============================================================ -->
+    <!-- MODAL: Pop Up "Izin Sudah Terkirim" (Siswa)                   -->
+    <!-- Muncul saat siswa mencoba mengajukan izin dengan jenis & -->
+    <!-- tanggal yang SAMA dengan pengajuan yang sudah ada             -->
+    <!-- (mencegah data perizinan dobel/duplikat).                     -->
+    <!-- ============================================================ -->
+    <div id="modal-izin-sudah-terkirim" class="hidden fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-4 animate-fadeIn" onclick="if(event.target===this) closeIzinSudahTerkirimPopup()">
+        <div class="bg-white rounded-3xl overflow-hidden w-full max-w-sm shadow-2xl transition transform scale-100 max-h-[85vh] flex flex-col">
+            <div class="p-6 space-y-3 text-center">
+                <div class="w-14 h-14 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center mx-auto text-2xl">
+                    <i class="fa-solid fa-circle-check"></i>
+                </div>
+                <h3 class="font-extrabold text-slate-800 text-base">Terima Kasih!</h3>
+                <p class="text-xs text-slate-500">Izin Anda sudah terkirim.</p>
+                <button type="button" onclick="closeIzinSudahTerkirimPopup()" class="w-full mt-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs py-3 rounded-2xl transition-all">
+                    Tutup
+                </button>
+            </div>
+        </div>
+    </div>
+
     <!-- TOAST NOTIFICATION -->
     <div id="toast" class="hidden fixed bottom-6 left-1/2 -translate-x-1/2 z-50 bg-slate-900 text-white px-5 py-3 rounded-full text-xs shadow-xl flex items-center gap-2 max-w-xs text-center transition-all duration-300">
         <span id="toast-message">Notifikasi</span>
@@ -6735,6 +6756,19 @@ function unlockPresensiButtonsSetelahSync() {
             }
         }
 
+        // Menampilkan popup "Terima kasih, izin Anda sudah terkirim" —
+        // dipakai saat siswa mencoba mengajukan izin dobel/duplikat
+        // (jenis & tanggal yang sama dengan pengajuan yang sudah ada).
+        function showIzinSudahTerkirimPopup() {
+            const modal = document.getElementById('modal-izin-sudah-terkirim');
+            if (modal) modal.classList.remove('hidden');
+        }
+
+        function closeIzinSudahTerkirimPopup() {
+            const modal = document.getElementById('modal-izin-sudah-terkirim');
+            if (modal) modal.classList.add('hidden');
+        }
+
         function saveIzinToState(record) {
             // Cegah pengajuan izin dobel/duplikat (semua jenis izin): jika
             // siswa yang sama sudah pernah mengajukan jenis izin yang sama
@@ -6744,7 +6778,7 @@ function unlockPresensiButtonsSetelahSync() {
                 i.nis === record.nis && i.jenis === record.jenis && i.tanggal === record.tanggal
             );
             if (sudahAdaIzin) {
-                showToast("Pengajuan izin ini sudah pernah dikirim sebelumnya.");
+                showIzinSudahTerkirimPopup();
                 document.getElementById('form-izin-tidak-hadir').reset();
                 document.getElementById('form-izin-kondisional').reset();
                 document.getElementById('th-file-label').innerText = "Pilih berkas PDF, JPG, atau PNG";
