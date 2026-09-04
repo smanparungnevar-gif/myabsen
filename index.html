@@ -7323,6 +7323,22 @@ function unlockPresensiButtonsSetelahSync() {
                             showToast("Sinkronisasi database berhasil!");
                         }
                     } else {
+                        // [PERBAIKAN] Sebelumnya kalau server mengembalikan
+                        // success:false (mis. ada error di sisi backend saat
+                        // membaca Spreadsheet), localDb dibiarkan apa adanya
+                        // tanpa fallback apa pun — berbeda dengan kegagalan
+                        // koneksi (.catch() di bawah) yang sudah lebih dulu
+                        // memakai cadangan 'local_offline_db'. Sekarang
+                        // perilaku yang sama diterapkan di sini juga, supaya
+                        // siswa tetap melihat data presensi/izin terakhir yang
+                        // berhasil tersinkron (bukan tampilan kosong/lama tak
+                        // terduga) sambil menunggu masalah di backend
+                        // ditelusuri lewat Logger (lihat catatan di getUserData()).
+                        const backupGagal = localStorage.getItem('local_offline_db');
+                        if (backupGagal) {
+                            localDb = JSON.parse(backupGagal);
+                            refreshAllViews();
+                        }
                         unlockPresensiButtonsSetelahSync();
                         if (showFeedback) showToast("Gagal memuat data dari spreadsheet.");
                     }
