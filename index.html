@@ -5180,10 +5180,52 @@ function unlockPresensiButtonsSetelahSync() {
     if (typeof updateHomePresensiUI === 'function') updateHomePresensiUI();
 }
 
+        // [TAMBAHAN BARU - PERBAIKAN SINKRONISASI WFH] Cek langsung ke server
+        // (bukan hanya variabel WFH_MODE_ACTIVE lokal yang mungkin telat
+        // ter-update di perangkat tsb) apakah Mode WFH sedang aktif SAAT
+        // INI. Dipakai sebagai jaring pengaman terakhir di triggerPresensi()
+        // tepat sebelum menolak presensi karena radius. Sengaja memakai
+        // action ringan tersendiri ('getWfhStatus' di kode.gs) alih-alih
+        // getUserData yang jauh lebih berat, supaya pengecekan ini cepat &
+        // tidak membebani server setiap kali tombol presensi ditekan.
+        // Kalau mock/offline atau request gagal, KEMBALIKAN nilai
+        // WFH_MODE_ACTIVE yang sedang tersimpan lokal apa adanya — tidak
+        // ada perilaku baru dipaksakan saat offline/gagal koneksi. Murni
+        // tambahan: TIDAK mengubah applyWfhTanggalSchedule()/
+        // updateAdminWfhToggleUI()/isMockUrl() yang sudah ada, hanya
+        // MEMANGGIL fungsi-fungsi tsb.
+        async function recheckWfhStatusFromServer() {
+            if (isMockUrl() || !scriptUrl) return WFH_MODE_ACTIVE;
+            try {
+                const res = await fetch(`${scriptUrl}?action=getWfhStatus&_ts=${Date.now()}`, { cache: 'no-store' });
+                const data = await res.json();
+                if (data && data.success) {
+                    if (data.wfh_setting && typeof data.wfh_setting.aktif !== 'undefined') {
+                        WFH_MODE_ACTIVE = !!data.wfh_setting.aktif;
+                        localStorage.setItem('sigesit_wfh_mode_setting', WFH_MODE_ACTIVE.toString());
+                        updateAdminWfhToggleUI();
+                    }
+                    if (data.wfh_tanggal_setting) {
+                        WFH_TANGGAL_MULAI = data.wfh_tanggal_setting.mulai || '';
+                        WFH_TANGGAL_SELESAI = data.wfh_tanggal_setting.selesai || '';
+                        localStorage.setItem('sigesit_wfh_tanggal_setting', JSON.stringify({
+                            mulai: WFH_TANGGAL_MULAI,
+                            selesai: WFH_TANGGAL_SELESAI
+                        }));
+                        updateAdminWfhTanggalUI();
+                        applyWfhTanggalSchedule();
+                    }
+                }
+            } catch (err) {
+                console.log('[WFH DEBUG] Gagal cek ulang status WFH langsung ke server, pakai nilai lokal terakhir.', err);
+            }
+            return WFH_MODE_ACTIVE;
+        }
+
         let activeAbsenceType = '';
         let webcamStream = null;
 
-        function triggerPresensi(type) {
+        async function triggerPresensi(type) {
             if (isHariLibur()) {
                 // [TAMBAHAN] Pesan toast menyesuaikan alasan penutupan: hari
                 // libur nasional/keagamaan (diatur Admin) atau akhir pekan
@@ -5211,8 +5253,26 @@ function unlockPresensiButtonsSetelahSync() {
             // saja setelah penyebab masalah ditemukan.
             console.log('[WFH DEBUG] Saat presensi ' + type + ' ditekan -> WFH_MODE_ACTIVE:', WFH_MODE_ACTIVE, '| currentDistance:', currentDistance, '| ABSENCE_RADIUS_METERS:', ABSENCE_RADIUS_METERS);
             if (!WFH_MODE_ACTIVE && !isDispenApproved && !isPulangCepatApproved && currentDistance > ABSENCE_RADIUS_METERS) {
-                showToast(`Anda di luar jangkauan SMAN 1 Parung (> ${ABSENCE_RADIUS_METERS}m)!`);
-                return;
+                // [TAMBAHAN BARU - PERBAIKAN SINKRONISASI WFH] Sebelum benar-benar
+                // menolak presensi karena radius, cek ULANG status Mode WFH
+                // LANGSUNG ke server lewat recheckWfhStatusFromServer() (lihat
+                // definisinya di atas) — bukan hanya mengandalkan WFH_MODE_ACTIVE
+                // yang sudah ter-cache di perangkat ini, yang pada sebagian
+                // perangkat terbukti bisa telat ter-update meski Admin sudah
+                // mengaktifkan WFH. Kalau server ternyata sedang WFH aktif,
+                // presensi TETAP DIIZINKAN & WFH_MODE_ACTIVE lokal diperbarui.
+                // Kalau server memang menyatakan WFH nonaktif (atau pengecekan
+                // gagal/koneksi bermasalah), presensi tetap ditolak seperti
+                // semula dengan pesan yang sama persis — kondisi dispen/pulang
+                // cepat/currentDistance di atas maupun logika di bawah blok ini
+                // sama sekali tidak diubah.
+                console.log('[WFH DEBUG] Cek ulang status WFH langsung ke server sebelum menolak presensi...');
+                const wfhServerAktif = await recheckWfhStatusFromServer();
+                console.log('[WFH DEBUG] Hasil cek ulang ke server -> wfhServerAktif:', wfhServerAktif);
+                if (!wfhServerAktif) {
+                    showToast(`Anda di luar jangkauan SMAN 1 Parung (> ${ABSENCE_RADIUS_METERS}m)!`);
+                    return;
+                }
             }
             if (type === 'masuk') {
                 const now = new Date();
