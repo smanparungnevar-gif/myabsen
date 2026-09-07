@@ -5052,6 +5052,10 @@ function unlockPresensiButtonsSetelahSync() {
             // dilewati untuk semua siswa (GPS tetap wajib aktif seperti sebelum
             // baris ini, hanya batas jaraknya yang dilepas). Tidak mengubah
             // kondisi isDispenApproved/isPulangCepatApproved yang sudah ada.
+            // [DEBUG SEMENTARA - DIAGNOSA WFH] Log nilai persis yang dipakai
+            // untuk keputusan tolak/izinkan presensi ini. Aman dihapus kapan
+            // saja setelah penyebab masalah ditemukan.
+            console.log('[WFH DEBUG] Saat presensi ' + type + ' ditekan -> WFH_MODE_ACTIVE:', WFH_MODE_ACTIVE, '| currentDistance:', currentDistance, '| ABSENCE_RADIUS_METERS:', ABSENCE_RADIUS_METERS);
             if (!WFH_MODE_ACTIVE && !isDispenApproved && !isPulangCepatApproved && currentDistance > ABSENCE_RADIUS_METERS) {
                 showToast(`Anda di luar jangkauan SMAN 1 Parung (> ${ABSENCE_RADIUS_METERS}m)!`);
                 return;
@@ -7432,11 +7436,19 @@ function unlockPresensiButtonsSetelahSync() {
                         // backend belum punya field ini, blok ini otomatis
                         // dilewati (tidak error) dan WFH_MODE_ACTIVE tetap
                         // memakai nilai localStorage terakhir seperti biasa.
+                        // [DEBUG SEMENTARA - DIAGNOSA WFH] Baris log ini murni
+                        // untuk menelusuri kenapa status WFH tidak sampai ke
+                        // perangkat siswa. Buka DevTools > Console di perangkat
+                        // siswa, lalu cari baris "[WFH DEBUG]" setelah sinkronisasi
+                        // berjalan. Tidak mengubah logika apa pun di bawahnya —
+                        // aman dihapus kapan saja setelah penyebabnya ditemukan.
+                        console.log('[WFH DEBUG] data.wfh_setting diterima dari server:', JSON.stringify(data.wfh_setting), '| WFH_MODE_ACTIVE sebelum update:', WFH_MODE_ACTIVE);
                         if (data.wfh_setting && typeof data.wfh_setting.aktif !== 'undefined') {
                             WFH_MODE_ACTIVE = !!data.wfh_setting.aktif;
                             localStorage.setItem('sigesit_wfh_mode_setting', WFH_MODE_ACTIVE.toString());
                             updateAdminWfhToggleUI();
                         }
+                        console.log('[WFH DEBUG] WFH_MODE_ACTIVE setelah update:', WFH_MODE_ACTIVE);
                         localStorage.setItem('local_offline_db', JSON.stringify(localDb));
                         
                         refreshAllViews();
