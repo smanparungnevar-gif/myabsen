@@ -2962,10 +2962,29 @@ function saveJadwalToStorage() {
         // Polling ringan khusus untuk panel "Live Kehadiran Kelas" di beranda
         // siswa. Berjalan terpisah dari alur presensi yang sudah ada (tidak
         // mengubah triggerPresensi/savePresensiToState sama sekali) — fungsi
-        // ini hanya menarik data terbaru dari server setiap 2 detik supaya
+        // ini menarik data terbaru dari server secara berkala supaya
         // presensi masuk/pulang teman sekelas lain (yang sudah tercentang
         // & DONE di perangkat mereka) langsung muncul realtime, sesuai
         // kelasnya masing-masing, tanpa perlu refresh manual.
+        //
+        // [PATCH - KURANGI BEBAN SPREADSHEET] Sebelumnya interval ini 2 detik.
+        // Dengan BANYAK siswa online bersamaan (terutama pas jam masuk
+        // sekolah), setiap perangkat memanggil getUserData() setiap 2 detik
+        // membuat request yang mengakses Spreadsheet yang sama menjadi sangat
+        // padat, memicu error kuota Google "Too many simultaneous
+        // invocations: Spreadsheets" — yang menyebabkan sebagian request
+        // gagal membaca sheet presensi bulan berjalan, sehingga presensi
+        // yang SUDAH tersimpan sempat tidak terbaca di sebagian perangkat
+        // (tampak "Alpha" walau datanya ada). Diperkuat juga dengan retry
+        // otomatis di backend (withSheetRetry() pada action getUserData),
+        // tapi memperlonggar interval ini di sisi client mengurangi akar
+        // penyebabnya langsung: jumlah request bersamaan ke Spreadsheet.
+        // PERBAIKAN: interval diperlonggar dari 2 detik menjadi 6 detik.
+        // Panel tetap terasa realtime bagi siswa (rata-rata masih update
+        // dalam hitungan detik), tapi beban permintaan ke Spreadsheet turun
+        // sekitar 3x lipat dibanding sebelumnya. Logika kapan polling
+        // berjalan/berhenti (hanya saat view-home terbuka & bukan wali
+        // kelas) SAMA SEKALI TIDAK diubah.
         let liveKehadiranPollingInterval = null;
         function startLiveKehadiranKelasPolling() {
             if (liveKehadiranPollingInterval) return;
@@ -2974,7 +2993,7 @@ function saveJadwalToStorage() {
                 const homeView = document.getElementById('view-home');
                 if (!homeView || homeView.classList.contains('hidden')) return;
                 fetchDatabaseState(false);
-            }, 2000);
+            }, 6000);
         }
 
         function initLocationTracking() {
