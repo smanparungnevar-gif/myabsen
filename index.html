@@ -2199,8 +2199,7 @@
 
     <script>
         // URL Google Apps Script (hardcoded — tidak perlu diinput manual oleh siswa/wali kelas)
-        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbx-vffxYsi8pUAoaN4XeBBUPtBfO9OfPletNXYEx3-Z_5mbCj2QKoCVfgo5ZXNSHLb3Fw/exec";
-        
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbx-vffxYsi8pUAoaN4XeBBUPtBfO9OfPletNXYEx3-Z_5mbCj2QKoCVfgo5ZXNSHLb3Fw/exec"
         // Konfigurasi Geofencing SMAN 1 Parung
         const SCHOOL_LAT = -6.436954848531352; 
         const SCHOOL_LNG = 106.71104025519386;
@@ -4961,7 +4960,26 @@ function syncPendingPresensiQueue() {
     const queue = readPendingPresensiQueue();
     if (queue.length === 0) return;
 
-    queue.forEach(record => {
+    // [PERBAIKAN BARU] Presensi seharusnya HANYA berlaku untuk tanggal HARI
+    // INI. Item antrian yang tanggalnya BUKAN hari ini (mis. gagal terkirim
+    // beberapa hari lalu — WiFi/sinyal putus — dan baru berhasil konek lagi
+    // sekarang, di hari yang sudah berbeda) dibuang dulu dari antrian di
+    // sini, TIDAK ikut dikirim ke server — supaya tidak muncul sebagai
+    // presensi masuk/pulang untuk tanggal yang sudah terlewat di sheet
+    // presensi bulan berjalan. Ini murni penyaringan TAMBAHAN sebelum queue
+    // diproses; logika pengiriman fetch()/then()/catch() untuk item yang
+    // memang masih untuk hari ini di bawah ini TIDAK diubah sama sekali.
+    const todayStrUntukQueue = getTanggalHariIniLokal(new Date());
+    const queueKedaluwarsa = queue.filter(r => r.tanggal !== todayStrUntukQueue);
+    const queueMasihBerlaku = queue.filter(r => r.tanggal === todayStrUntukQueue);
+    if (queueKedaluwarsa.length > 0) {
+        writePendingPresensiQueue(queueMasihBerlaku);
+        queueKedaluwarsa.forEach(r => {
+            console.log('✗ Presensi tertunda dibuang dari antrian (tanggal sudah lewat, tidak dikirim ke server):', r.nis, r.tanggal, r.tipe);
+        });
+    }
+
+    queueMasihBerlaku.forEach(record => {
         fetch(`${scriptUrl}?action=addPresensi`, {
             method: 'POST',
             body: JSON.stringify(record)
