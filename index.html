@@ -152,7 +152,7 @@
 
                     <input type="hidden" id="current-role" value="siswa">
 
-                    <button id="btn-login-masuk" onclick="handleLogin()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-4 rounded-2xl shadow-lg shadow-emerald-600/30 transition duration-300 flex items-center justify-center gap-2 text-sm mt-4 transform active:scale-95 disabled:opacity-70 disabled:cursor-not-allowed">
+                    <button id="btn-login-masuk" onclick="handleLoginInstant()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-4 rounded-2xl shadow-lg shadow-emerald-600/30 transition duration-300 flex items-center justify-center gap-2 text-sm mt-4 transform active:scale-95 disabled:opacity-70 disabled:cursor-not-allowed">
                         <span id="btn-login-masuk-label" class="flex items-center justify-center gap-2">Masuk Sistem <i class="fa-solid fa-arrow-right text-xs"></i></span>
                     </button>
                 </div>
@@ -1498,26 +1498,6 @@
             </div>
 
             <!-- ============================================================ -->
-            <!-- [TAMBAHAN BARU] PENGATURAN MODE WFH (WORK FROM HOME)         -->
-            <!-- Murni tambahan, tidak mengubah blok Radius Geofence di atas. -->
-            <!-- Saat diaktifkan, SEMUA siswa bisa presensi di mana saja      -->
-            <!-- (radius geofence tidak dicek), langsung berlaku begitu       -->
-            <!-- tombol status ditekan (tidak perlu tombol simpan terpisah). -->
-            <!-- ============================================================ -->
-            <div class="bg-white p-4 rounded-3xl border border-slate-100 shadow-sm space-y-3">
-                <h4 class="text-xs font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
-                    <i class="fa-solid fa-house-laptop text-indigo-600"></i> Pengaturan Mode WFH
-                </h4>
-                <p class="text-[11px] text-slate-500">Jika diaktifkan, SEMUA siswa dapat melakukan presensi dari mana saja tanpa terkena batas radius geofence sekolah. Nonaktifkan untuk mengembalikan aturan radius normal.</p>
-                <div class="flex justify-between items-center bg-slate-50 rounded-2xl px-3.5 py-3 border border-slate-100">
-                    <span class="text-xs font-bold text-slate-600">Status Mode WFH</span>
-                    <button type="button" id="admin-setting-wfh-toggle" onclick="toggleAdminWfhSetting()" class="text-[10px] font-extrabold px-3 py-1.5 rounded-full transition-all bg-slate-200 text-slate-500">
-                        Nonaktif
-                    </button>
-                </div>
-            </div>
-
-            <!-- ============================================================ -->
             <!-- TAUTAN LINK 1 UNTUK SISWA -->
             <!-- ============================================================ -->
             <div class="bg-white p-4 rounded-3xl border border-slate-100 shadow-sm space-y-3">
@@ -2199,18 +2179,12 @@
 
     <script>
         // URL Google Apps Script (hardcoded — tidak perlu diinput manual oleh siswa/wali kelas)
-        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbx-vffxYsi8pUAoaN4XeBBUPtBfO9OfPletNXYEx3-Z_5mbCj2QKoCVfgo5ZXNSHLb3Fw/exec"
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbx-vffxYsi8pUAoaN4XeBBUPtBfO9OfPletNXYEx3-Z_5mbCj2QKoCVfgo5ZXNSHLb3Fw/exec";
+        
         // Konfigurasi Geofencing SMAN 1 Parung
         const SCHOOL_LAT = -6.436954848531352; 
         const SCHOOL_LNG = 106.71104025519386;
         let ABSENCE_RADIUS_METERS = 150;
-        // [TAMBAHAN BARU - MODE WFH] Saklar global (diatur Administrator).
-        // Kalau true, SEMUA siswa boleh presensi di mana saja (radius
-        // geofence tidak dicek sama sekali) — dipakai di calculateDistance()
-        // & triggerPresensi() sebagai pengecekan PALING AWAL, murni tambahan,
-        // tidak mengubah/menghapus logika radius/dispen/pulang-cepat yang
-        // sudah ada.
-        let WFH_MODE_ACTIVE = false;
 
         // ================================================================
         // PENGATURAN TAUTAN LINK GLOBAL (dikontrol Administrator)
@@ -2738,12 +2712,6 @@ function saveJadwalToStorage() {
                 ABSENCE_RADIUS_METERS = parseInt(storedRadius) || ABSENCE_RADIUS_METERS;
             }
 
-            // [TAMBAHAN BARU - MODE WFH] Muat status WFH tersimpan (kalau ada).
-            const storedWfhMode = localStorage.getItem('sigesit_wfh_mode_setting');
-            if (storedWfhMode !== null) {
-                WFH_MODE_ACTIVE = storedWfhMode === 'true';
-            }
-
             const storedLinkPengaturan = localStorage.getItem('sigesit_link_pengaturan');
             if (storedLinkPengaturan) {
                 try {
@@ -2946,23 +2914,6 @@ function saveJadwalToStorage() {
             const distanceMeter = document.getElementById('current-distance');
             const divMeter = document.getElementById('distance-meter');
 
-            // [TAMBAHAN BARU - MODE WFH] Kalau Administrator mengaktifkan mode
-            // WFH, radius geofence dilepas untuk SEMUA siswa (tidak menunggu
-            // dispen/izin pulang cepat per-siswa seperti dua blok di bawah).
-            // Ditaruh paling awal, murni tambahan, tidak mengubah urutan/logika
-            // pengecekan dispen & pulang cepat yang sudah ada.
-            if (WFH_MODE_ACTIVE) {
-                if (statusText) {
-                    statusText.innerText = "Mode WFH Aktif - Bebas Presensi Di Mana Saja";
-                    statusText.className = "text-xs text-indigo-600 font-bold mt-0.5";
-                }
-                if (distanceMeter) distanceMeter.innerText = "Radius Dinonaktifkan (WFH)";
-                if (divMeter) {
-                    divMeter.className = "bg-indigo-50 rounded-2xl p-3 flex justify-between items-center text-xs text-indigo-800 border border-indigo-100 font-semibold";
-                }
-                return;
-            }
-
             if (isDispenApproved) {
                 if (statusText) {
                     statusText.innerText = "Bebas Absen Di Mana Saja (Dispensasi Aktif)";
@@ -3047,6 +2998,116 @@ function saveJadwalToStorage() {
             input2.value = "";
         }
 
+        // ============================================================================
+        // [TAMBAHAN BARU - LOGIN INSTAN] TIDAK mengubah satu baris pun proses login
+        // yang sudah ada di bawah (handleLogin, fetch ke getSiswa/loginWali, dst).
+        // Fungsi baru ini hanya "membungkus" di depannya:
+        //   - Login PERTAMA KALI di suatu perangkat: tetap 100% memakai alur lama
+        //     (handleLogin() asli), karena data siswa memang belum pernah ada di
+        //     perangkat itu sehingga wajib divalidasi dulu ke Google Apps Script.
+        //   - Login BERIKUTNYA dengan NIS/NISN (atau NIP/password wali) yang SAMA
+        //     PERSIS di perangkat yang SAMA: langsung masuk seketika memakai data
+        //     hasil login sukses terakhir yang disimpan di perangkat ini, TANPA
+        //     menunggu koneksi ke Google Apps Script sama sekali. Validasi ke
+        //     server tetap dijalankan diam-diam di belakang layar (silent, tidak
+        //     memblokir tampilan) untuk menyegarkan data & memastikan akun masih
+        //     berlaku; kalau ternyata sudah tidak valid, cache akan dihapus
+        //     otomatis agar tidak dipakai lagi di percobaan berikutnya.
+        // ============================================================================
+        const SIGESIT_LOGIN_CACHE_KEY = 'sigesit_login_cache_v1';
+
+        function getLoginCacheMap() {
+            try {
+                return JSON.parse(localStorage.getItem(SIGESIT_LOGIN_CACHE_KEY)) || {};
+            } catch (e) {
+                return {};
+            }
+        }
+
+        function loginCacheKeyOf(role, idInput) {
+            return role + ':' + idInput.toLowerCase();
+        }
+
+        function saveLoginCache(role, idInput, passInput, user) {
+            try {
+                const cache = getLoginCacheMap();
+                cache[loginCacheKeyOf(role, idInput)] = { password: passInput, user: user, cachedAt: Date.now() };
+                localStorage.setItem(SIGESIT_LOGIN_CACHE_KEY, JSON.stringify(cache));
+            } catch (e) { /* localStorage penuh/gagal, abaikan - tidak fatal */ }
+        }
+
+        function getCachedLoginUser(role, idInput, passInput) {
+            const entry = getLoginCacheMap()[loginCacheKeyOf(role, idInput)];
+            return (entry && entry.password === passInput) ? entry.user : null;
+        }
+
+        function clearLoginCacheEntry(role, idInput) {
+            try {
+                const cache = getLoginCacheMap();
+                delete cache[loginCacheKeyOf(role, idInput)];
+                localStorage.setItem(SIGESIT_LOGIN_CACHE_KEY, JSON.stringify(cache));
+            } catch (e) { /* abaikan */ }
+        }
+
+        function handleLoginInstant() {
+            const role = document.getElementById('current-role').value;
+            const idInput = document.getElementById('login-identifier').value.trim();
+            const passInput = document.getElementById('login-password').value.trim();
+
+            if (!idInput || !passInput) {
+                showToast("Identitas dan Password wajib diisi!");
+                return;
+            }
+
+            // Mode demo lokal: biarkan sepenuhnya ditangani alur asli (tidak diubah).
+            if (isMockUrl()) {
+                handleLogin();
+                return;
+            }
+
+            const cachedUser = getCachedLoginUser(role, idInput, passInput);
+            if (!cachedUser) {
+                // Belum ada data tersimpan untuk akun ini di perangkat ini (login
+                // pertama kali) -> pakai proses ASLI persis seperti sebelumnya.
+                handleLogin();
+                return;
+            }
+
+            // --- LANGSUNG MASUK, tanpa jeda menunggu server ---
+            currentSiswa = { ...cachedUser, role: role };
+            localStorage.setItem('sigesit_active_user', JSON.stringify(currentSiswa));
+            doPostLoginActions();
+            showToast("Login berhasil (mode cepat)!");
+
+            // Validasi ulang ke server tetap berjalan diam-diam di belakang layar,
+            // supaya data siswa/wali (kelas, foto, dll.) tetap ter-update dan cache
+            // tetap segar. Ini TIDAK memblokir/menunda tampilan yang sudah masuk di atas.
+            const paramsSilent = (role === 'walikelas')
+                ? `action=loginWali&identifier=${encodeURIComponent(idInput)}&password=${encodeURIComponent(passInput)}`
+                : `action=getSiswa&nis=${encodeURIComponent(idInput)}&nisn=${encodeURIComponent(passInput)}`;
+            fetch(`${scriptUrl}?${paramsSilent}`)
+                .then(res => res.json())
+                .then(data => {
+                    if (data && data.success) {
+                        saveLoginCache(role, idInput, passInput, data.user);
+                        const sessionMasihSama = currentSiswa && (
+                            (data.user.nis && currentSiswa.nis === data.user.nis) ||
+                            (data.user.nip && currentSiswa.nip === data.user.nip) ||
+                            (data.user.username && currentSiswa.username === data.user.username)
+                        );
+                        if (sessionMasihSama) {
+                            currentSiswa = { ...data.user, role: role };
+                            localStorage.setItem('sigesit_active_user', JSON.stringify(currentSiswa));
+                        }
+                    } else {
+                        // Akun sudah tidak valid lagi di server (password diganti admin,
+                        // akun dihapus, dst) -> jangan dipakai instan lagi di lain waktu.
+                        clearLoginCacheEntry(role, idInput);
+                    }
+                })
+                .catch(() => { /* offline / gagal terhubung: cache tetap dipakai apa adanya */ });
+        }
+
         function handleLogin() {
             const role = document.getElementById('current-role').value;
             const idInput = document.getElementById('login-identifier').value.trim();
@@ -3100,6 +3161,7 @@ function saveJadwalToStorage() {
                         currentSiswa = data.user;
                         currentSiswa.role = role;
                         localStorage.setItem('sigesit_active_user', JSON.stringify(currentSiswa));
+                        saveLoginCache(role, idInput, passInput, data.user); // [TAMBAHAN] simpan cache agar login berikutnya instan
                         doPostLoginActions();
                         showToast("Login berhasil terverifikasi!");
                     } else {
@@ -3256,7 +3318,6 @@ function saveJadwalToStorage() {
             } else if (target === 'pengaturan') {
                 const radiusInput = document.getElementById('admin-setting-radius');
                 if (radiusInput) radiusInput.value = ABSENCE_RADIUS_METERS;
-                updateAdminWfhToggleUI();
                 renderAdminLinkSettingUI();
                 renderAdminLiburSettingUI();
                 renderAdminLiburNasionalUI();
@@ -4372,43 +4433,6 @@ function saveJadwalToStorage() {
             }
         }
 
-        // [TAMBAHAN BARU - MODE WFH] Update tampilan tombol status Aktif/Nonaktif
-        // mengikuti pola updateAdminPamplateToggleUI() yang sudah ada.
-        function updateAdminWfhToggleUI() {
-            const toggleBtn = document.getElementById('admin-setting-wfh-toggle');
-            if (!toggleBtn) return;
-            if (WFH_MODE_ACTIVE) {
-                toggleBtn.innerText = "Aktif";
-                toggleBtn.className = "text-[10px] font-extrabold px-3 py-1.5 rounded-full transition-all bg-emerald-100 text-emerald-700";
-            } else {
-                toggleBtn.innerText = "Nonaktif";
-                toggleBtn.className = "text-[10px] font-extrabold px-3 py-1.5 rounded-full transition-all bg-slate-200 text-slate-500";
-            }
-        }
-
-        // [TAMBAHAN BARU - MODE WFH] Ganti status Aktif/Nonaktif dan langsung
-        // sinkron (localStorage + server), mengikuti pola saveAdminRadiusSetting()
-        // di atas. Tidak menyentuh/mengubah saveAdminRadiusSetting() sama sekali.
-        function toggleAdminWfhSetting() {
-            WFH_MODE_ACTIVE = !WFH_MODE_ACTIVE;
-            localStorage.setItem('sigesit_wfh_mode_setting', WFH_MODE_ACTIVE.toString());
-            updateAdminWfhToggleUI();
-            calculateDistance();
-            showToast(WFH_MODE_ACTIVE
-                ? "Mode WFH diaktifkan. Semua siswa bisa presensi di mana saja."
-                : "Mode WFH dinonaktifkan. Radius geofence berlaku kembali.");
-
-            if (!isMockUrl() && scriptUrl) {
-                fetch(`${scriptUrl}`, {
-                    method: 'POST',
-                    body: JSON.stringify({
-                        action: "updateWfhSetting",
-                        aktif: WFH_MODE_ACTIVE
-                    })
-                }).catch(() => console.log("Gagal sync mode WFH ke server."));
-            }
-        }
-
         // Ganti password administrator: kalau server (scriptUrl) aktif, validasi
         // password lama & penyimpanan password baru dilakukan di sheet
         // 'Administrator' lewat action 'updateAdminPassword'. Kalau isMockUrl()
@@ -5029,11 +5053,7 @@ function unlockPresensiButtonsSetelahSync() {
             // Radius dilonggarkan jika: dispen aktif, ATAU siswa melakukan presensi
             // PULANG dan izin pulang cepatnya sudah disetujui wali kelas hari ini.
             const isPulangCepatApproved = type === 'pulang' && hasApprovedIzinPulangCepatToday();
-            // [TAMBAHAN BARU - MODE WFH] Kalau mode WFH aktif, validasi radius
-            // dilewati untuk semua siswa (GPS tetap wajib aktif seperti sebelum
-            // baris ini, hanya batas jaraknya yang dilepas). Tidak mengubah
-            // kondisi isDispenApproved/isPulangCepatApproved yang sudah ada.
-            if (!WFH_MODE_ACTIVE && !isDispenApproved && !isPulangCepatApproved && currentDistance > ABSENCE_RADIUS_METERS) {
+            if (!isDispenApproved && !isPulangCepatApproved && currentDistance > ABSENCE_RADIUS_METERS) {
                 showToast(`Anda di luar jangkauan SMAN 1 Parung (> ${ABSENCE_RADIUS_METERS}m)!`);
                 return;
             }
@@ -7274,7 +7294,6 @@ function unlockPresensiButtonsSetelahSync() {
                 renderJadwalTable();
                 const radiusInputEl = document.getElementById('admin-setting-radius');
             if (radiusInputEl) radiusInputEl.value = ABSENCE_RADIUS_METERS;
-                updateAdminWfhToggleUI();
                 }
                 calculateDistance();
                 updateHomePresensiUI();
@@ -7406,17 +7425,6 @@ function unlockPresensiButtonsSetelahSync() {
                         if (data.radius_setting && data.radius_setting.radius) {
                             ABSENCE_RADIUS_METERS = parseInt(data.radius_setting.radius, 10) || ABSENCE_RADIUS_METERS;
                             localStorage.setItem('sigesit_radius_setting', ABSENCE_RADIUS_METERS.toString());
-                        }
-                        // [TAMBAHAN BARU - MODE WFH] Tarik status WFH dari server
-                        // (kalau backend sudah mengembalikan wfh_setting.aktif),
-                        // supaya status WFH konsisten di semua perangkat. Kalau
-                        // backend belum punya field ini, blok ini otomatis
-                        // dilewati (tidak error) dan WFH_MODE_ACTIVE tetap
-                        // memakai nilai localStorage terakhir seperti biasa.
-                        if (data.wfh_setting && typeof data.wfh_setting.aktif !== 'undefined') {
-                            WFH_MODE_ACTIVE = !!data.wfh_setting.aktif;
-                            localStorage.setItem('sigesit_wfh_mode_setting', WFH_MODE_ACTIVE.toString());
-                            updateAdminWfhToggleUI();
                         }
                         localStorage.setItem('local_offline_db', JSON.stringify(localDb));
                         
