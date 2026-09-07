@@ -3795,8 +3795,18 @@ function saveJadwalToStorage() {
             let alphaHariIni = 0;
             let terlambatHariIni = 0;
 
+            // [PATCH - ALPHA SALAH DI ADMIN DASHBOARD] Ditemukan lewat
+            // diagnostikPresensiSiswa(): siswa yang NIS-nya diawali angka 0
+            // (mis. "0104316677") sudah benar presensi & datanya terkirim
+            // getUserData, tapi tetap terhitung "Alpha" di kartu Admin ini.
+            // Penyebabnya: perbandingan NIS di sini masih memakai (p.nis ===
+            // s.nis) mentah — beda dengan checkHariIniAbsenStatus() &
+            // renderLivePresensiKelas() yang sudah lebih dulu ditambal pakai
+            // normalizeIdForMatch() untuk masalah identik (lihat catatan di
+            // dekat definisi normalizeIdForMatch()). PERBAIKAN: dipakai
+            // fungsi yang sama di sini, tanpa mengubah logika/struktur lain.
             (localDb.siswa || []).forEach(s => {
-                const presensiHariIni = (localDb.presensi || []).filter(p => p.nis === s.nis && p.tanggal === todayStr);
+                const presensiHariIni = (localDb.presensi || []).filter(p => normalizeIdForMatch(p.nis) === normalizeIdForMatch(s.nis) && p.tanggal === todayStr);
                 const masuk = presensiHariIni.find(p => p.tipe === 'masuk');
                 const batasMasuk = getBatasMasukMenit(s.kelas, 6 * 60 + 30);
                 if (masuk) {
@@ -3804,7 +3814,7 @@ function saveJadwalToStorage() {
                     const [h, m] = masuk.jam.split(':').map(Number);
                     if (h * 60 + m > batasMasuk) terlambatHariIni++;
                 } else {
-                    const izinApproved = (localDb.izin || []).some(i => i.nis === s.nis && i.status === 'Disetujui' && isTodayInRange(i.tanggal, todayStr));
+                    const izinApproved = (localDb.izin || []).some(i => normalizeIdForMatch(i.nis) === normalizeIdForMatch(s.nis) && i.status === 'Disetujui' && isTodayInRange(i.tanggal, todayStr));
                     if (!izinApproved) alphaHariIni++;
                 }
             });
@@ -3829,7 +3839,7 @@ function saveJadwalToStorage() {
                         const muridKelas = (localDb.siswa || []).filter(s => s.kelas === kelas);
                         let hadirKelas = 0;
                         muridKelas.forEach(s => {
-                            const masuk = (localDb.presensi || []).find(p => p.nis === s.nis && p.tanggal === todayStr && p.tipe === 'masuk');
+                            const masuk = (localDb.presensi || []).find(p => normalizeIdForMatch(p.nis) === normalizeIdForMatch(s.nis) && p.tanggal === todayStr && p.tipe === 'masuk');
                             if (masuk) hadirKelas++;
                         });
                         const persen = muridKelas.length > 0 ? Math.round((hadirKelas / muridKelas.length) * 100) : 0;
@@ -3893,10 +3903,17 @@ function saveJadwalToStorage() {
             const kelasFilter = document.getElementById('admin-rekap-kelas').value;
 
             const siswaTerfilter = (localDb.siswa || []).filter(s => kelasFilter === 'Semua' || s.kelas === kelasFilter);
-            const nisTerfilter = siswaTerfilter.map(s => s.nis);
+            const nisTerfilter = siswaTerfilter.map(s => normalizeIdForMatch(s.nis));
 
+            // [PATCH - ALPHA SALAH DI REKAP ADMIN] Sama seperti catatan di
+            // renderAdminDashboard(): perbandingan/keanggotaan NIS di seluruh
+            // fungsi renderAdminRekap() ini sebelumnya memakai nilai NIS
+            // mentah, sehingga siswa dengan NIS berawalan 0 bisa salah
+            // terhitung Alpha meski sudah presensi. Ditambal dengan
+            // normalizeIdForMatch() di setiap titik pembandingan NIS pada
+            // fungsi ini, tanpa mengubah logika/urutan perhitungan lain.
             const presensiTerfilter = (localDb.presensi || []).filter(p => {
-                if (!nisTerfilter.includes(p.nis)) return false;
+                if (!nisTerfilter.includes(normalizeIdForMatch(p.nis))) return false;
                 const parts = p.tanggal.split('-');
                 if (parts.length !== 3) return false;
                 return parts[0] === thn && (bln === 'Semua' || parts[1] === bln) && (tgl === 'Semua' || parts[2] === tgl);
@@ -3909,7 +3926,7 @@ function saveJadwalToStorage() {
             presensiTerfilter.forEach(p => {
                 if (p.tipe === 'masuk') {
                     totalHadir++;
-                    const siswaData = siswaTerfilter.find(s => s.nis === p.nis);
+                    const siswaData = siswaTerfilter.find(s => normalizeIdForMatch(s.nis) === normalizeIdForMatch(p.nis));
                     const batasMasuk = getBatasMasukMenit(siswaData ? siswaData.kelas : null, 6 * 60 + 30);
                     const [h, m] = p.jam.split(':').map(Number);
                     const isTerlambat = h * 60 + m > batasMasuk;
@@ -3943,9 +3960,9 @@ function saveJadwalToStorage() {
                         if (dateObj > now) continue;
                         const dow = dateObj.getDay();
                         if (dow === 0 || dow === 6) continue;
-                        const hadir = (localDb.presensi || []).some(p => p.nis === s.nis && p.tanggal === dateStr && p.tipe === 'masuk');
+                        const hadir = (localDb.presensi || []).some(p => normalizeIdForMatch(p.nis) === normalizeIdForMatch(s.nis) && p.tanggal === dateStr && p.tipe === 'masuk');
                         if (!hadir) {
-                            const izinOk = (localDb.izin || []).some(i => i.nis === s.nis && i.status === 'Disetujui' && isTodayInRange(i.tanggal, dateStr));
+                            const izinOk = (localDb.izin || []).some(i => normalizeIdForMatch(i.nis) === normalizeIdForMatch(s.nis) && i.status === 'Disetujui' && isTodayInRange(i.tanggal, dateStr));
                             if (!izinOk) {
                                 totalAlpha++;
                                 detailAlpha.push({ nama: s.nama, kelas: s.kelas, info: dateStr });
@@ -3973,7 +3990,7 @@ function saveJadwalToStorage() {
             Object.values(bolosGrouped).forEach(row => {
                 if (row.masuk && !row.pulang) {
                     totalBolos++;
-                    const siswaData = siswaTerfilter.find(s => s.nis === row.nis);
+                    const siswaData = siswaTerfilter.find(s => normalizeIdForMatch(s.nis) === normalizeIdForMatch(row.nis));
                     detailBolos.push({
                         nama: siswaData ? siswaData.nama : (row.masuk.nama || '-'),
                         kelas: siswaData ? siswaData.kelas : (row.masuk.kelas || '-'),
@@ -3994,7 +4011,7 @@ function saveJadwalToStorage() {
             const izinListEl = document.getElementById('admin-rekap-izin-list');
             if (izinListEl) {
                 const izinTerfilter = (localDb.izin || []).filter(i => {
-                    if (!nisTerfilter.includes(i.nis)) return false;
+                    if (!nisTerfilter.includes(normalizeIdForMatch(i.nis))) return false;
                     const tglSource = i.tanggal.includes(" s/d ") ? i.tanggal.split(" s/d ")[0] : i.tanggal;
                     const parts = tglSource.split('-');
                     if (parts.length !== 3) return false;
@@ -4004,7 +4021,7 @@ function saveJadwalToStorage() {
                     izinListEl.innerHTML = `<div class="p-6 text-center text-xs text-slate-400">Tidak ada data perizinan pada periode ini.</div>`;
                 } else {
                     izinListEl.innerHTML = izinTerfilter.map(item => {
-                        const muridData = siswaTerfilter.find(s => s.nis === item.nis) || (localDb.siswa || []).find(s => s.nis === item.nis);
+                        const muridData = siswaTerfilter.find(s => normalizeIdForMatch(s.nis) === normalizeIdForMatch(item.nis)) || (localDb.siswa || []).find(s => normalizeIdForMatch(s.nis) === normalizeIdForMatch(item.nis));
                         let statusClass = "bg-amber-100 text-amber-800";
                         if (item.status === 'Disetujui') statusClass = "bg-emerald-100 text-emerald-800";
                         if (item.status === 'Ditolak') statusClass = "bg-rose-100 text-rose-800";
@@ -4043,7 +4060,7 @@ function saveJadwalToStorage() {
                     presensiListEl.innerHTML = `<div class="p-6 text-center text-xs text-slate-400">Tidak ada data presensi pada periode ini.</div>`;
                 } else {
                     presensiListEl.innerHTML = groupedPresensiList.slice(0, 100).map(row => {
-                        const muridData = (localDb.siswa || []).find(s => s.nis === row.nis);
+                        const muridData = (localDb.siswa || []).find(s => normalizeIdForMatch(s.nis) === normalizeIdForMatch(row.nis));
                         const batasMasukSiswa = getBatasMasukMenit(muridData ? muridData.kelas : null, 6 * 60 + 30);
 
                         let masukClass = "bg-slate-100 text-slate-400";
@@ -4121,49 +4138,55 @@ function saveJadwalToStorage() {
         function openAdminKelasDetail(kelas) {
             const todayStr = getTanggalHariIniLokal(new Date());
             const muridKelas = (localDb.siswa || []).filter(s => s.kelas === kelas);
-            const muridNisList = muridKelas.map(s => s.nis);
+            // [PATCH - ALPHA SALAH DI MODAL DETAIL KELAS] Sama seperti
+            // renderAdminDashboard()/renderAdminRekap(): daftar NIS di sini
+            // dinormalisasi dengan normalizeIdForMatch() supaya siswa dengan
+            // NIS berawalan 0 tidak salah dianggap "belum presensi/Alpha"
+            // hanya karena beda format NIS antar sheet. Logika pengelompokan
+            // Hadir/Bolos/Izin/Alpha di bawah TIDAK diubah sama sekali.
+            const muridNisList = muridKelas.map(s => normalizeIdForMatch(s.nis));
 
             const namaByNis = (nis) => {
-                const m = muridKelas.find(s => s.nis === nis);
+                const m = muridKelas.find(s => normalizeIdForMatch(s.nis) === normalizeIdForMatch(nis));
                 return m ? m.nama : nis;
             };
 
             const listHadir = (localDb.presensi || []).filter(p =>
-                p.tanggal === todayStr && p.tipe === 'masuk' && muridNisList.includes(p.nis)
+                p.tanggal === todayStr && p.tipe === 'masuk' && muridNisList.includes(normalizeIdForMatch(p.nis))
             );
-            const nisHadirSet = new Set(listHadir.map(p => p.nis));
+            const nisHadirSet = new Set(listHadir.map(p => normalizeIdForMatch(p.nis)));
 
             // Bolos: siswa yang sudah presensi masuk hari ini tapi TIDAK
             // melakukan presensi pulang hari ini.
             const listPulang = (localDb.presensi || []).filter(p =>
-                p.tanggal === todayStr && p.tipe === 'pulang' && muridNisList.includes(p.nis)
+                p.tanggal === todayStr && p.tipe === 'pulang' && muridNisList.includes(normalizeIdForMatch(p.nis))
             );
-            const nisPulangSet = new Set(listPulang.map(p => p.nis));
-            const listBolos = listHadir.filter(p => !nisPulangSet.has(p.nis));
+            const nisPulangSet = new Set(listPulang.map(p => normalizeIdForMatch(p.nis)));
+            const listBolos = listHadir.filter(p => !nisPulangSet.has(normalizeIdForMatch(p.nis)));
 
             const listSakit = (localDb.izin || []).filter(i =>
-                muridNisList.includes(i.nis) && i.jenis === 'Sakit' &&
+                muridNisList.includes(normalizeIdForMatch(i.nis)) && i.jenis === 'Sakit' &&
                 i.status === 'Disetujui' && isTodayInRange(i.tanggal, todayStr)
             );
             const listIzinTidakMasuk = (localDb.izin || []).filter(i =>
-                muridNisList.includes(i.nis) && i.jenis === 'Izin' &&
+                muridNisList.includes(normalizeIdForMatch(i.nis)) && i.jenis === 'Izin' &&
                 i.status === 'Disetujui' && isTodayInRange(i.tanggal, todayStr)
             );
             const listDispen = (localDb.izin || []).filter(i =>
-                muridNisList.includes(i.nis) && i.jenis === 'Dispen' &&
+                muridNisList.includes(normalizeIdForMatch(i.nis)) && i.jenis === 'Dispen' &&
                 i.status === 'Disetujui' && isTodayInRange(i.tanggal, todayStr)
             );
             const listIzinTerlambat = (localDb.izin || []).filter(i =>
-                muridNisList.includes(i.nis) && i.jenis === 'Izin Terlambat Masuk' &&
+                muridNisList.includes(normalizeIdForMatch(i.nis)) && i.jenis === 'Izin Terlambat Masuk' &&
                 i.status === 'Disetujui' && isTodayInRange(i.tanggal, todayStr)
             );
 
             // Alpha: siswa yang tidak presensi masuk hari ini DAN tidak
             // memiliki izin apapun berstatus Disetujui yang mencakup hari ini.
             const listAlpha = muridKelas.filter(s => {
-                if (nisHadirSet.has(s.nis)) return false;
+                if (nisHadirSet.has(normalizeIdForMatch(s.nis))) return false;
                 const izinApproved = (localDb.izin || []).some(i =>
-                    i.nis === s.nis && i.status === 'Disetujui' && isTodayInRange(i.tanggal, todayStr)
+                    normalizeIdForMatch(i.nis) === normalizeIdForMatch(s.nis) && i.status === 'Disetujui' && isTodayInRange(i.tanggal, todayStr)
                 );
                 return !izinApproved;
             });
@@ -6238,20 +6261,25 @@ function unlockPresensiButtonsSetelahSync() {
             const todayStr = getTanggalHariIniLokal(new Date());
 
             const muridKelas = localDb.siswa.filter(s => s.kelas === targetKelas);
-            const muridNisList = muridKelas.map(s => s.nis);
+            // [PATCH - ALPHA SALAH DI BERANDA WALI KELAS] Sama seperti
+            // fungsi-fungsi Admin di atas: daftar NIS di sini dinormalisasi
+            // dengan normalizeIdForMatch() supaya siswa dengan NIS berawalan
+            // 0 tidak salah terhitung Alpha di kartu Wali Kelas ini. Logika
+            // pengelompokan Hadir/Bolos/Izin/Alpha TIDAK diubah sama sekali.
+            const muridNisList = muridKelas.map(s => normalizeIdForMatch(s.nis));
 
             const muridNisMapCounters = {};
-            muridKelas.forEach(m => { muridNisMapCounters[m.nis] = m; });
+            muridKelas.forEach(m => { muridNisMapCounters[normalizeIdForMatch(m.nis)] = m; });
             const toDetail = (nis, extraInfo) => {
-                const m = muridNisMapCounters[nis];
+                const m = muridNisMapCounters[normalizeIdForMatch(nis)];
                 return { nama: m ? m.nama : '-', kelas: m ? m.kelas : targetKelas, info: extraInfo || '' };
             };
 
-            const listHadir = localDb.presensi.filter(p => p.tanggal === todayStr && p.tipe === 'masuk' && muridNisList.includes(p.nis));
+            const listHadir = localDb.presensi.filter(p => p.tanggal === todayStr && p.tipe === 'masuk' && muridNisList.includes(normalizeIdForMatch(p.nis)));
             const countHadir = listHadir.length;
 
             const listSakit = localDb.izin.filter(i => 
-                muridNisList.includes(i.nis) && 
+                muridNisList.includes(normalizeIdForMatch(i.nis)) && 
                 i.jenis === 'Sakit' && 
                 i.status === 'Disetujui' &&
                 isTodayInRange(i.tanggal, todayStr)
@@ -6259,7 +6287,7 @@ function unlockPresensiButtonsSetelahSync() {
             const countSakit = listSakit.length;
 
             const listIzin = localDb.izin.filter(i => 
-                muridNisList.includes(i.nis) && 
+                muridNisList.includes(normalizeIdForMatch(i.nis)) && 
                 i.jenis === 'Izin' && 
                 i.status === 'Disetujui' &&
                 isTodayInRange(i.tanggal, todayStr)
@@ -6267,7 +6295,7 @@ function unlockPresensiButtonsSetelahSync() {
             const countIzin = listIzin.length;
 
             const listDispen = localDb.izin.filter(i => 
-                muridNisList.includes(i.nis) && 
+                muridNisList.includes(normalizeIdForMatch(i.nis)) && 
                 i.jenis === 'Dispen' && 
                 i.status === 'Disetujui' &&
                 isTodayInRange(i.tanggal, todayStr)
@@ -6275,7 +6303,7 @@ function unlockPresensiButtonsSetelahSync() {
             const countDispen = listDispen.length;
 
             const listTerlambat = localDb.izin.filter(i => 
-                muridNisList.includes(i.nis) && 
+                muridNisList.includes(normalizeIdForMatch(i.nis)) && 
                 i.jenis === 'Izin Terlambat Masuk' && 
                 i.status === 'Disetujui' &&
                 isTodayInRange(i.tanggal, todayStr)
@@ -6283,7 +6311,7 @@ function unlockPresensiButtonsSetelahSync() {
             const countTerlambat = listTerlambat.length;
 
             const listPulangCepat = localDb.izin.filter(i => 
-                muridNisList.includes(i.nis) && 
+                muridNisList.includes(normalizeIdForMatch(i.nis)) && 
                 i.jenis === 'Izin Pulang Cepat' && 
                 i.status === 'Disetujui' &&
                 isTodayInRange(i.tanggal, todayStr)
@@ -6296,10 +6324,11 @@ function unlockPresensiButtonsSetelahSync() {
             // satu kali meski ada lebih dari satu record presensi masuk.
             const bolosGroupedWali = {};
             (localDb.presensi || []).forEach(p => {
-                if (p.tanggal !== todayStr || !muridNisList.includes(p.nis)) return;
-                if (!bolosGroupedWali[p.nis]) bolosGroupedWali[p.nis] = { nis: p.nis, masuk: null, pulang: null };
-                if (p.tipe === 'masuk') bolosGroupedWali[p.nis].masuk = p;
-                else if (p.tipe === 'pulang') bolosGroupedWali[p.nis].pulang = p;
+                if (p.tanggal !== todayStr || !muridNisList.includes(normalizeIdForMatch(p.nis))) return;
+                var nisKeyWali = normalizeIdForMatch(p.nis);
+                if (!bolosGroupedWali[nisKeyWali]) bolosGroupedWali[nisKeyWali] = { nis: p.nis, masuk: null, pulang: null };
+                if (p.tipe === 'masuk') bolosGroupedWali[nisKeyWali].masuk = p;
+                else if (p.tipe === 'pulang') bolosGroupedWali[nisKeyWali].pulang = p;
             });
             const listBolos = Object.values(bolosGroupedWali).filter(row => row.masuk && !row.pulang);
             const countBolos = listBolos.length;
@@ -6328,10 +6357,10 @@ function unlockPresensiButtonsSetelahSync() {
             // izin yang disetujui hari ini.
             const nisSudahPresensiWali = new Set(Object.keys(bolosGroupedWali));
             const nisSudahIzinWali = new Set(
-                [...listSakit, ...listIzin, ...listDispen].map(i => i.nis)
+                [...listSakit, ...listIzin, ...listDispen].map(i => normalizeIdForMatch(i.nis))
             );
             let listAlpha = muridKelas.filter(m =>
-                !nisSudahPresensiWali.has(m.nis) && !nisSudahIzinWali.has(m.nis)
+                !nisSudahPresensiWali.has(normalizeIdForMatch(m.nis)) && !nisSudahIzinWali.has(normalizeIdForMatch(m.nis))
             );
 
             // [TAMBAHAN] Kalau hari ini Sabtu/Minggu atau tanggal merah (libur
