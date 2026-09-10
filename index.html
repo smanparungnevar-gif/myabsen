@@ -7669,7 +7669,28 @@ function unlockPresensiButtonsSetelahSync() {
                             return true;
                         });
                         localDb.poin = data.poin || [];
-                        localDb.nilai = data.nilai || []; 
+                        // [FIX] Sebelumnya baris ini SELALU menimpa localDb.nilai
+                        // dengan hasil terbaru dari server, walau hasilnya kosong
+                        // ([]). Backend membaca sheet 'Nilai' lewat try/catch (lihat
+                        // getUserData()) supaya kalau pembacaan sheet itu gagal
+                        // sesaat (server sibuk/timeout), sinkronisasi TETAP dikirim
+                        // dengan success:true — tapi bagian 'nilai' dikembalikan
+                        // kosong untuk giliran sinkron itu saja. Karena baris ini
+                        // menimpa tanpa syarat, nilai yang SUDAH tampil normal ikut
+                        // hilang total (semua mapel & kategori) setiap kali sinkron
+                        // otomatis (tiap beberapa detik) kebetulan kena giliran
+                        // gagal-diam-diam itu — persis gejala "nilai sempat muncul
+                        // lalu hilang lagi". Perbaikan: kalau respons kali ini kosong
+                        // TAPI kita sudah pernah punya data nilai sebelumnya,
+                        // pertahankan dulu data lama itu (jangan ditimpa kosong)
+                        // sampai ada sinkron berikutnya yang benar-benar berhasil
+                        // membawa data. Login pertama (belum ada data sama sekali)
+                        // tetap berperilaku sama seperti sebelumnya.
+                        if (data.nilai && data.nilai.length > 0) {
+                            localDb.nilai = data.nilai;
+                        } else if (!localDb.nilai || localDb.nilai.length === 0) {
+                            localDb.nilai = data.nilai || [];
+                        }
                         if (data.link_pengaturan_list) {
                             linkPengaturanList = normalizeLinkPengaturanList(data.link_pengaturan_list);
                             localStorage.setItem('sigesit_link_pengaturan', JSON.stringify(linkPengaturanList));
