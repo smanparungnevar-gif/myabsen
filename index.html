@@ -8020,12 +8020,30 @@ function unlockPresensiButtonsSetelahSync() {
  * Mirip dengan renderSiswaNilai() tapi untuk semua siswa di kelas
  */
 function renderWaliNilaiAkademis() {
+    // [FIX] Sebelumnya fungsi ini tetap berjalan untuk SEMUA akun yang sedang
+    // login, termasuk siswa biasa — karena elemen DOM 'wali-nilai-...' tetap
+    // ADA di halaman untuk siswa (cuma disembunyikan lewat class 'hidden',
+    // tidak dihapus), sehingga guard di bawah ini (sebelum ditambah cek role)
+    // tidak pernah menghentikannya. Akibatnya: setiap kali sinkronisasi
+    // otomatis berjalan, refreshAllViews() memanggil renderSiswaNilai() lalu
+    // renderWaliNilaiAkademis() berurutan. Untuk siswa, dropdown "Pilih
+    // Siswa" pada tampilan wali (yang disembunyikan) tidak pernah ada
+    // pilihannya, sehingga fungsi ini masuk ke cabang "!siswaTerpilih" dan
+    // menjalankan "siswaNilaiKategoriData = {};" — MENGOSONGKAN variabel
+    // siswaNilaiKategoriData yang SAMA PERSIS dipakai renderSiswaNilai()
+    // untuk menyimpan rincian nilai siswa yang baru saja dirender sesaat
+    // sebelumnya. Tabel nilai yang terlihat tetap menampilkan angka (karena
+    // HTML tabelnya sudah kadung digambar oleh renderSiswaNilai()), tapi
+    // begitu diketuk untuk lihat rincian, siswaNilaiKategoriData sudah
+    // kadung kosong -> muncul "Tidak ada data". Perbaikan: fungsi ini
+    // sekarang hanya berjalan untuk akun wali kelas (role === 'walikelas'),
+    // sesuai tujuan aslinya, sehingga tidak lagi menimpa data nilai siswa.
     const listContainer = document.getElementById('wali-nilai-mata-pelajaran-list');
     const avgRaporEl = document.getElementById('wali-nilai-rata-rapor');
     const statusAkademisEl = document.getElementById('wali-nilai-status-akademis');
     const pilihSiswaEl = document.getElementById('wali-nilai-pilih-siswa');
 
-    if (!listContainer || !currentSiswa || !pilihSiswaEl) return;
+    if (!listContainer || !currentSiswa || !pilihSiswaEl || currentSiswa.role !== 'walikelas') return;
 
     // 1. Siapkan/refresh daftar siswa di kelas wali kelas ini pada dropdown,
     //    sambil mempertahankan siswa yang sedang dipilih (jika masih ada).
