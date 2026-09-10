@@ -5809,8 +5809,17 @@ function unlockPresensiButtonsSetelahSync() {
   if (!listContainer || !currentSiswa) return;
 
   const userNilai = localDb.nilai ? localDb.nilai.filter(n => {
-    if (n.nis && currentSiswa.nis && String(n.nis).trim() === String(currentSiswa.nis).trim()) return true;
-    if (n.nis && currentSiswa.nis) return false;
+    // [FIX] Sebelumnya NIS dibandingkan persis (String === String), sehingga
+    // NIS yang tersimpan sebagai ANGKA di salah satu sheet (angka 0 di depan
+    // hilang, mis. "0101295229" jadi "101295229" — persis kasus yang sudah
+    // diperbaiki normalizeIdForMatch() untuk Live Kehadiran Kelas) membuat
+    // baris "if (n.nis && currentSiswa.nis) return false;" langsung menolak
+    // data walau namanya sama persis. Akibatnya nilai sebagian siswa tidak
+    // muncul. Memakai normalizeIdForMatch() (fungsi yang sudah ada, dipakai
+    // di bagian lain) menyamakan format sebelum dibandingkan, dan tetap beri
+    // kesempatan cocok lewat nama jika NIS ternyata masih tidak sama —
+    // tanpa mengubah data asli maupun logika lain yang sudah berjalan.
+    if (n.nis && currentSiswa.nis && normalizeIdForMatch(n.nis) === normalizeIdForMatch(currentSiswa.nis)) return true;
     return normalizeNamaForMatch(n.nama) === normalizeNamaForMatch(currentSiswa.nama);
   }) : [];
   if (userNilai.length === 0) {
@@ -8006,8 +8015,11 @@ function renderWaliNilaiAkademis() {
 
     // 2. Ambil nilai milik siswa terpilih saja (persis logika renderSiswaNilai)
     const userNilai = localDb.nilai ? localDb.nilai.filter(n => {
-        if (n.nis && siswaTerpilih.nis && String(n.nis).trim() === String(siswaTerpilih.nis).trim()) return true;
-        if (n.nis && siswaTerpilih.nis) return false;
+        // [FIX] Sama seperti renderSiswaNilai(): pakai normalizeIdForMatch()
+        // (fungsi yang sudah ada) supaya NIS berformat angka (leading zero
+        // hilang) tetap dikenali cocok, dan tetap fallback ke nama jika NIS
+        // ternyata berbeda — tanpa mengubah logika lain yang sudah berjalan.
+        if (n.nis && siswaTerpilih.nis && normalizeIdForMatch(n.nis) === normalizeIdForMatch(siswaTerpilih.nis)) return true;
         return normalizeNamaForMatch(n.nama) === normalizeNamaForMatch(siswaTerpilih.nama);
     }) : [];
 
