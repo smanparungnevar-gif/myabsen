@@ -5832,12 +5832,30 @@ function unlockPresensiButtonsSetelahSync() {
 
   // Kelompokkan per mata pelajaran, lalu per kategori penilaian
   const groupedMapel = {};
+  // [FIX] Menyimpan nama tampilan asli (apa adanya) untuk tiap mapel, dikunci
+  // oleh versi mapel yang sudah dirapikan (lihat mapelKey di bawah) — supaya
+  // baris tabel tetap menampilkan nama mapel persis seperti di Spreadsheet.
+  const mapelDisplayNames = {};
   userNilai.forEach(n => {
-    const mapel = n.mapel || "Mata Pelajaran";
+    const mapelAsli = (n.mapel || "Mata Pelajaran").toString().trim();
+    // [FIX] Sebelumnya pengelompokan memakai teks mapel APA ADANYA (case-
+    // sensitive, spasi tidak dirapikan). Kalau guru berbeda menuliskan nama
+    // mapel yang sama dengan kapitalisasi/spasi berbeda (mis. "Bahasa
+    // Indonesia" vs "bahasa indonesia " vs "BAHASA INDONESIA"), nilai untuk
+    // mapel yang SAMA terpecah jadi BARIS TERPISAH di tabel — masing-masing
+    // baris cuma berisi kategori (Tugas/UH/UTS/US/Poin) yang kebetulan
+    // ditulis dengan ejaan itu, sedangkan kategori lain tampak "hilang"
+    // (padahal datanya ada, cuma nyasar ke baris lain). Sama seperti
+    // normalizeKelasForMatch() yang sudah dipakai untuk masalah serupa pada
+    // kolom 'kelas', mapelKey di bawah menyamakan ejaan HANYA untuk kunci
+    // pengelompokan — nama mapel yang ditampilkan & dikirim ke fungsi lain
+    // tetap dari data asli (mapelAsli), tidak ada data yang diubah.
+    const mapelKey = mapelAsli.toLowerCase().replace(/\s+/g, ' ');
+    if (!mapelDisplayNames[mapelKey]) mapelDisplayNames[mapelKey] = mapelAsli;
     const kategori = classifyKategoriNilai(n);
-    if (!groupedMapel[mapel]) groupedMapel[mapel] = {};
-    if (!groupedMapel[mapel][kategori]) groupedMapel[mapel][kategori] = [];
-    groupedMapel[mapel][kategori].push(n);
+    if (!groupedMapel[mapelKey]) groupedMapel[mapelKey] = {};
+    if (!groupedMapel[mapelKey][kategori]) groupedMapel[mapelKey][kategori] = [];
+    groupedMapel[mapelKey][kategori].push(n);
   });
 
   siswaNilaiKategoriData = {};
@@ -5845,8 +5863,9 @@ function unlockPresensiButtonsSetelahSync() {
   let jumlahNilaiKeseluruhan = 0;
   let listHTML = "";
 
-  Object.keys(groupedMapel).sort().forEach(mapel => {
-    const kategoriMap = groupedMapel[mapel];
+  Object.keys(groupedMapel).sort().forEach(mapelKey => {
+    const mapel = mapelDisplayNames[mapelKey];
+    const kategoriMap = groupedMapel[mapelKey];
 
     const kolomHTML = KATEGORI_NILAI_LIST.map(kategori => {
       const items = kategoriMap[kategori];
