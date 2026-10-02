@@ -7589,6 +7589,29 @@ function unlockPresensiButtonsSetelahSync() {
             if (radiusInputEl) radiusInputEl.value = ABSENCE_RADIUS_METERS;
                 updateAdminWfhToggleUI();
                 }
+
+                // [PERBAIKAN - DASHBOARD & REKAP ADMIN KOSONG] Untuk role
+                // Administrator, currentSiswa bernilai null. Fungsi-fungsi
+                // tampilan siswa di bawah (mis. renderRekapPresensi(),
+                // renderRekapPoin(), renderPoinKarakter()) langsung membaca
+                // currentSiswa.nis / currentSiswa.kelas tanpa pengecekan,
+                // sehingga melempar TypeError di tengah refreshAllViews()
+                // dan blok render admin di bagian paling bawah TIDAK PERNAH
+                // tercapai: "Rekap Kehadiran per Kelas", "Log Presensi
+                // Seluruh Sekolah", dan pilihan kelas pada "Filter Rekap
+                // Seluruh Sekolah" tetap kosong walau data sudah ditarik
+                // dari server. PERBAIKAN: untuk admin, render tampilan admin
+                // lebih dulu (dibungkus try/catch) lalu keluar dari fungsi,
+                // karena tampilan siswa/wali kelas memang tidak dipakai di
+                // panel admin. Alur untuk role siswa & wali kelas SAMA
+                // SEKALI TIDAK berubah (blok ini hanya jalan jika currentAdmin).
+                if (currentAdmin) {
+                    try { populateAdminKelasFilter(); } catch (e) { console.error('populateAdminKelasFilter:', e); }
+                    try { renderAdminDashboard(); } catch (e) { console.error('renderAdminDashboard:', e); }
+                    try { renderAdminRekap(); } catch (e) { console.error('renderAdminRekap:', e); }
+                    return;
+                }
+
                 calculateDistance();
                 updateHomePresensiUI();
                 updateWeekendPresensiUI();
