@@ -3328,12 +3328,20 @@ function saveJadwalToStorage() {
             const targetNav = document.getElementById(`admin-nav-${target}`);
             if (targetNav) targetNav.className = "flex flex-col items-center gap-1 text-indigo-600";
 
-            if (target === 'dashboard') {
-                renderAdminDashboard();
-            } else if (target === 'rekap') {
+            // [PERBAIKAN - MENU ADMIN TIDAK LANGSUNG TERBUKA] Menu dibuka & nav
+            // di-highlight DULU (sudah di atas), baru render data yang berat
+            // dijalankan setelah browser sempat menggambar layar. Isi render
+            // di bawah tidak diubah sama sekali.
+            const _tokenAdminView = (window._adminViewToken = (window._adminViewToken || 0) + 1);
+            const _renderAdminViewIsi = () => {
+                if (_tokenAdminView !== window._adminViewToken) return; // user sudah pindah menu lagi
+                if (!currentAdmin) return;
+                if (target === 'dashboard') {
+                    renderAdminDashboard();
+                } else if (target === 'rekap') {
                 populateAdminTanggalOptions();  // Populate tanggal sesuai bulan yang dipilih
                 renderAdminRekap();
-            } else if (target === 'pengaturan') {
+                } else if (target === 'pengaturan') {
                 const radiusInput = document.getElementById('admin-setting-radius');
                 if (radiusInput) radiusInput.value = ABSENCE_RADIUS_METERS;
                 updateAdminWfhToggleUI();
@@ -3345,7 +3353,9 @@ function saveJadwalToStorage() {
                 updateIntegrationStatus();
                 renderJadwalTable();
                 switchJadwalJenjang(currentJadwalJenjang);
-            }
+                }
+            };
+            requestAnimationFrame(() => setTimeout(_renderAdminViewIsi, 0));
         }
 
         // Merender ulang tampilan form 4 slot Tautan Link di panel Pengaturan
@@ -3805,16 +3815,33 @@ function saveJadwalToStorage() {
             // normalizeIdForMatch() untuk masalah identik (lihat catatan di
             // dekat definisi normalizeIdForMatch()). PERBAIKAN: dipakai
             // fungsi yang sama di sini, tanpa mengubah logika/struktur lain.
+            // [PERBAIKAN PERFORMA - MENU ADMIN LAMBAT] Indeks sekali jalan supaya
+            // pencarian per siswa tidak memindai seluruh presensi/izin berulang kali
+            // (penyebab browser membeku saat pindah menu). Hasil hitungan SAMA.
+            const _masukHariIniMap = new Map();
+            (localDb.presensi || []).forEach(p => {
+                if (p.tanggal === todayStr && p.tipe === 'masuk') {
+                    const k = normalizeIdForMatch(p.nis);
+                    if (!_masukHariIniMap.has(k)) _masukHariIniMap.set(k, p);
+                }
+            });
+            const _izinDisetujuiMap = new Map();
+            (localDb.izin || []).forEach(i => {
+                if (i.status === 'Disetujui') {
+                    const k = normalizeIdForMatch(i.nis);
+                    if (!_izinDisetujuiMap.has(k)) _izinDisetujuiMap.set(k, []);
+                    _izinDisetujuiMap.get(k).push(i);
+                }
+            });
             (localDb.siswa || []).forEach(s => {
-                const presensiHariIni = (localDb.presensi || []).filter(p => normalizeIdForMatch(p.nis) === normalizeIdForMatch(s.nis) && p.tanggal === todayStr);
-                const masuk = presensiHariIni.find(p => p.tipe === 'masuk');
+                const masuk = _masukHariIniMap.get(normalizeIdForMatch(s.nis));
                 const batasMasuk = getBatasMasukMenit(s.kelas, 6 * 60 + 30);
                 if (masuk) {
                     hadirHariIni++;
                     const [h, m] = masuk.jam.split(':').map(Number);
                     if (h * 60 + m > batasMasuk) terlambatHariIni++;
                 } else {
-                    const izinApproved = (localDb.izin || []).some(i => normalizeIdForMatch(i.nis) === normalizeIdForMatch(s.nis) && i.status === 'Disetujui' && isTodayInRange(i.tanggal, todayStr));
+                    const izinApproved = (_izinDisetujuiMap.get(normalizeIdForMatch(s.nis)) || []).some(i => isTodayInRange(i.tanggal, todayStr));
                     if (!izinApproved) alphaHariIni++;
                 }
             });
@@ -3839,7 +3866,7 @@ function saveJadwalToStorage() {
                         const muridKelas = (localDb.siswa || []).filter(s => s.kelas === kelas);
                         let hadirKelas = 0;
                         muridKelas.forEach(s => {
-                            const masuk = (localDb.presensi || []).find(p => normalizeIdForMatch(p.nis) === normalizeIdForMatch(s.nis) && p.tanggal === todayStr && p.tipe === 'masuk');
+                            const masuk = _masukHariIniMap.get(normalizeIdForMatch(s.nis));
                             if (masuk) hadirKelas++;
                         });
                         const persen = muridKelas.length > 0 ? Math.round((hadirKelas / muridKelas.length) * 100) : 0;
@@ -3949,7 +3976,22 @@ function saveJadwalToStorage() {
             const now = new Date();
             const yearNum = parseInt(thn);
             const monthsToCheck = bln === 'Semua' ? Array.from({length: 12}, (_, i) => (i + 1).toString().padStart(2, '0')) : [bln];
+            // [PERBAIKAN PERFORMA - MENU ADMIN LAMBAT] Indeks untuk loop Alpha di bawah.
+            const _hadirSet = new Set();
+            (localDb.presensi || []).forEach(p => {
+                if (p.tipe === 'masuk') _hadirSet.add(normalizeIdForMatch(p.nis) + '|' + p.tanggal);
+            });
+            const _izinOkMap = new Map();
+            (localDb.izin || []).forEach(i => {
+                if (i.status === 'Disetujui') {
+                    const k = normalizeIdForMatch(i.nis);
+                    if (!_izinOkMap.has(k)) _izinOkMap.set(k, []);
+                    _izinOkMap.get(k).push(i);
+                }
+            });
             siswaTerfilter.forEach(s => {
+                const _nisNorm = normalizeIdForMatch(s.nis);
+                const _izinSiswa = _izinOkMap.get(_nisNorm) || [];
                 monthsToCheck.forEach(monthStr => {
                     const lastDay = new Date(yearNum, parseInt(monthStr), 0).getDate();
                     for (let day = 1; day <= lastDay; day++) {
@@ -3960,9 +4002,9 @@ function saveJadwalToStorage() {
                         if (dateObj > now) continue;
                         const dow = dateObj.getDay();
                         if (dow === 0 || dow === 6) continue;
-                        const hadir = (localDb.presensi || []).some(p => normalizeIdForMatch(p.nis) === normalizeIdForMatch(s.nis) && p.tanggal === dateStr && p.tipe === 'masuk');
+                        const hadir = _hadirSet.has(_nisNorm + '|' + dateStr);
                         if (!hadir) {
-                            const izinOk = (localDb.izin || []).some(i => normalizeIdForMatch(i.nis) === normalizeIdForMatch(s.nis) && i.status === 'Disetujui' && isTodayInRange(i.tanggal, dateStr));
+                            const izinOk = _izinSiswa.some(i => isTodayInRange(i.tanggal, dateStr));
                             if (!izinOk) {
                                 totalAlpha++;
                                 detailAlpha.push({ nama: s.nama, kelas: s.kelas, info: dateStr });
