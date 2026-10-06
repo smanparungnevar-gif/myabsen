@@ -3790,6 +3790,60 @@ function saveJadwalToStorage() {
             if (uniqueKelas.includes(currentVal)) select.value = currentVal;
         }
 
+        // [PATCH - REKAP KEHADIRAN PER KELAS ADMIN] Helper BARU, hanya dipakai oleh
+        // renderAdminDashboard() & openAdminKelasDetail() (khusus role Administrator).
+        // Tidak dipakai/mengubah logika role siswa & wali kelas.
+        // - Kelas dibandingkan lewat normalizeKelasForMatch() (spasi/huruf besar-kecil
+        //   tidak lagi membuat siswa "hilang" dari kelasnya).
+        // - NIS dibandingkan lewat normalizeIdForMatch(); bila NIS tidak cocok, dicoba
+        //   cocokkan lewat nama + kelas sebagai cadangan.
+        function escapeHtmlAdminRekap(str) {
+            return (str === null || str === undefined ? '' : str).toString()
+                .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+        }
+
+        function buildIndeksPresensiHariIniAdmin(todayStr) {
+            const idx = { masukNis: new Map(), pulangNis: new Map(), masukNama: new Map(), pulangNama: new Map() };
+            (localDb.presensi || []).forEach(p => {
+                if (!p || p.tanggal !== todayStr) return;
+                const tipe = (p.tipe || '').toString().trim().toLowerCase();
+                if (tipe !== 'masuk' && tipe !== 'pulang') return;
+                const mapNis = tipe === 'masuk' ? idx.masukNis : idx.pulangNis;
+                const mapNama = tipe === 'masuk' ? idx.masukNama : idx.pulangNama;
+                const kNis = normalizeIdForMatch(p.nis);
+                if (kNis && !mapNis.has(kNis)) mapNis.set(kNis, p);
+                const nm = normalizeNamaForMatch(p.nama);
+                if (nm) {
+                    const kNm = nm + '|' + normalizeKelasForMatch(p.kelas);
+                    if (!mapNama.has(kNm)) mapNama.set(kNm, p);
+                }
+            });
+            return idx;
+        }
+
+        function hitungKehadiranKelasHariIniAdmin(kelas, todayStr, indeks) {
+            const idx = indeks || buildIndeksPresensiHariIniAdmin(todayStr);
+            const kelasKey = normalizeKelasForMatch(kelas);
+            const murid = (localDb.siswa || []).filter(s => normalizeKelasForMatch(s.kelas) === kelasKey);
+            const sudah = [];
+            const belum = [];
+            murid.forEach(s => {
+                const kNis = normalizeIdForMatch(s.nis);
+                const kNm = normalizeNamaForMatch(s.nama) + '|' + normalizeKelasForMatch(s.kelas);
+                const masuk = idx.masukNis.get(kNis) || idx.masukNama.get(kNm) || null;
+                const pulang = idx.pulangNis.get(kNis) || idx.pulangNama.get(kNm) || null;
+                if (masuk) {
+                    sudah.push({ siswa: s, masuk: masuk, pulang: pulang });
+                } else {
+                    const izin = (localDb.izin || []).find(i =>
+                        normalizeIdForMatch(i.nis) === kNis && i.status === 'Disetujui' && isTodayInRange(i.tanggal, todayStr)
+                    ) || null;
+                    belum.push({ siswa: s, izin: izin });
+                }
+            });
+            return { murid: murid, sudah: sudah, belum: belum };
+        }
+
         function renderAdminDashboard() {
             if (!currentAdmin) return;
             const todayStr = getTanggalHariIniLokal(new Date());
@@ -3858,34 +3912,48 @@ function saveJadwalToStorage() {
 
             const kelasListContainer = document.getElementById('admin-kelas-rekap-list');
             if (kelasListContainer) {
-                const uniqueKelas = [...new Set((localDb.siswa || []).map(s => s.kelas).filter(Boolean))].sort();
-                if (uniqueKelas.length === 0) {
-                    kelasListContainer.innerHTML = `<div class="p-6 text-center text-xs text-slate-400">Belum ada data kelas.</div>`;
-                } else {
-                    kelasListContainer.innerHTML = uniqueKelas.map(kelas => {
-                        const muridKelas = (localDb.siswa || []).filter(s => s.kelas === kelas);
-                        let hadirKelas = 0;
-                        muridKelas.forEach(s => {
-                            const masuk = _masukHariIniMap.get(normalizeIdForMatch(s.nis));
-                            if (masuk) hadirKelas++;
-                        });
-                        const persen = muridKelas.length > 0 ? Math.round((hadirKelas / muridKelas.length) * 100) : 0;
-                        return `
-                            <div onclick="openAdminKelasDetail('${kelas.replace(/'/g, "\\'")}')" class="px-4 py-3 flex items-center justify-between text-xs cursor-pointer active:scale-95 transition-transform hover:bg-slate-50">
+                try {
+                    // [PATCH] Kelas dikelompokkan lewat nama yang sudah dinormalisasi.
+                    const kelasMap = new Map();
+                    (localDb.siswa || []).forEach(s => {
+                        const label = (s.kelas || '').toString().trim();
+                        if (!label) return;
+                        const key = normalizeKelasForMatch(label);
+                        if (!kelasMap.has(key)) kelasMap.set(key, label);
+                    });
+                    const uniqueKelas = [...kelasMap.values()].sort();
+                    if (uniqueKelas.length === 0) {
+                        kelasListContainer.innerHTML = `<div class="p-6 text-center text-xs text-slate-400">Belum ada data kelas.</div>`;
+                    } else {
+                        const indeksHariIni = buildIndeksPresensiHariIniAdmin(todayStr);
+                        kelasListContainer.innerHTML = uniqueKelas.map(kelas => {
+                            const rekap = hitungKehadiranKelasHariIniAdmin(kelas, todayStr, indeksHariIni);
+                            const total = rekap.murid.length;
+                            const sudahKelas = rekap.sudah.length;
+                            const belumKelas = rekap.belum.length;
+                            const persen = total > 0 ? Math.round((sudahKelas / total) * 100) : 0;
+                            const kelasAttr = kelas.replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/"/g, '&quot;');
+                            return `
+                            <div onclick="openAdminKelasDetail('${kelasAttr}')" class="px-4 py-3 flex items-center justify-between text-xs cursor-pointer active:scale-95 transition-transform hover:bg-slate-50">
                                 <div>
-                                    <p class="font-bold text-slate-800">${kelas}</p>
-                                    <p class="text-[9px] text-slate-400">${muridKelas.length} siswa terdaftar</p>
+                                    <p class="font-bold text-slate-800">${escapeHtmlAdminRekap(kelas)}</p>
+                                    <p class="text-[9px] text-slate-400">${total} siswa terdaftar</p>
+                                    <p class="text-[9px] font-semibold mt-0.5"><span class="text-emerald-600">${sudahKelas} sudah presensi</span> <span class="text-slate-300">•</span> <span class="text-rose-500">${belumKelas} belum presensi</span></p>
                                 </div>
                                 <div class="text-right flex items-center gap-2">
                                     <div>
-                                        <span class="font-black text-slate-800">${hadirKelas}/${muridKelas.length}</span>
+                                        <span class="font-black text-slate-800">${sudahKelas}/${total}</span>
                                         <span class="block text-[9px] font-bold ${persen >= 80 ? 'text-emerald-600' : persen >= 50 ? 'text-amber-600' : 'text-rose-600'}">${persen}% hadir</span>
                                     </div>
                                     <i class="fa-solid fa-chevron-right text-slate-300 text-[10px]"></i>
                                 </div>
                             </div>
                         `;
-                    }).join('');
+                        }).join('');
+                    }
+                } catch (errKelas) {
+                    console.error('renderAdminDashboard (daftar kelas):', errKelas);
+                    kelasListContainer.innerHTML = `<div class="p-6 text-center text-xs text-rose-500">Gagal menampilkan rekap kelas. Coba sinkronisasi ulang.</div>`;
                 }
             }
         }
@@ -4179,7 +4247,9 @@ function saveJadwalToStorage() {
         // Izin Sakit, Izin Tidak Masuk, dan Izin Dispen — untuk hari ini.
         function openAdminKelasDetail(kelas) {
             const todayStr = getTanggalHariIniLokal(new Date());
-            const muridKelas = (localDb.siswa || []).filter(s => s.kelas === kelas);
+            const muridKelas = (localDb.siswa || []).filter(s => normalizeKelasForMatch(s.kelas) === normalizeKelasForMatch(kelas));
+            // [PATCH] Rekap Sudah/Belum Presensi (dengan jam) untuk kelas ini.
+            const rekapKelasAdmin = hitungKehadiranKelasHariIniAdmin(kelas, todayStr);
             // [PATCH - ALPHA SALAH DI MODAL DETAIL KELAS] Sama seperti
             // renderAdminDashboard()/renderAdminRekap(): daftar NIS di sini
             // dinormalisasi dengan normalizeIdForMatch() supaya siswa dengan
@@ -4227,6 +4297,8 @@ function saveJadwalToStorage() {
             // memiliki izin apapun berstatus Disetujui yang mencakup hari ini.
             const listAlpha = muridKelas.filter(s => {
                 if (nisHadirSet.has(normalizeIdForMatch(s.nis))) return false;
+                // [PATCH] Sudah terdeteksi presensi lewat pencocokan cadangan (nama+kelas) → bukan Alpha.
+                if (rekapKelasAdmin.sudah.some(r => r.siswa === s)) return false;
                 const izinApproved = (localDb.izin || []).some(i =>
                     normalizeIdForMatch(i.nis) === normalizeIdForMatch(s.nis) && i.status === 'Disetujui' && isTodayInRange(i.tanggal, todayStr)
                 );
@@ -4238,10 +4310,21 @@ function saveJadwalToStorage() {
             if (titleEl) titleEl.innerHTML = `<i class="fa-solid fa-chalkboard text-emerald-600"></i> Kelas ${kelas}`;
             if (subtitleEl) {
                 const todayLabel = new Date().toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
-                subtitleEl.innerText = `Rekap kehadiran • ${todayLabel}`;
+                subtitleEl.innerText = `Rekap kehadiran • ${todayLabel} • ${rekapKelasAdmin.sudah.length} sudah • ${rekapKelasAdmin.belum.length} belum presensi`;
             }
 
             const kategori = [
+                { key: 'sudah-presensi', label: 'Sudah Presensi', icon: 'fa-circle-check', color: 'emerald',
+                  names: rekapKelasAdmin.sudah.map(r => {
+                      const jamMasuk = r.masuk && r.masuk.jam ? r.masuk.jam : '-';
+                      const jamPulang = r.pulang && r.pulang.jam ? ` • pulang ${r.pulang.jam}` : '';
+                      return `${escapeHtmlAdminRekap(r.siswa.nama)} <span class="text-slate-400 font-medium">(masuk ${escapeHtmlAdminRekap(jamMasuk)}${escapeHtmlAdminRekap(jamPulang)})</span>`;
+                  }) },
+                { key: 'belum-presensi', label: 'Belum Presensi', icon: 'fa-circle-xmark', color: 'rose',
+                  names: rekapKelasAdmin.belum.map(r => {
+                      const ket = r.izin ? ` <span class="text-slate-400 font-medium">(${escapeHtmlAdminRekap(r.izin.jenis || 'Izin')})</span>` : '';
+                      return `${escapeHtmlAdminRekap(r.siswa.nama)}${ket}`;
+                  }) },
                 { key: 'hadir', label: 'Hadir', icon: 'fa-user-check', color: 'emerald', names: listHadir.map(p => namaByNis(p.nis)) },
                 { key: 'terlambat', label: 'Izin Terlambat', icon: 'fa-clock-rotate-left', color: 'amber', names: listIzinTerlambat.map(i => namaByNis(i.nis)) },
                 { key: 'alpha', label: 'Alpha', icon: 'fa-user-xmark', color: 'rose', names: listAlpha.map(s => s.nama) },
